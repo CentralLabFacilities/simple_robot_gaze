@@ -32,6 +32,7 @@ Authors: Florian Lier, Simon Schulz
 
 # STD IMPORTS
 import time
+import signal
 import threading
 
 
@@ -44,15 +45,21 @@ class GazeController():
     """
     def __init__(self, _robot_controller, _mw):
         print(">>> Initializing Gaze Controller")
+        self.run      = True
         self.mw       = _mw
         self.rc       = _robot_controller
+        signal.signal(signal.SIGINT, self.signal_handler)
         t = threading.Thread(target=self.run)
         t.start()
 
+    def signal_handler(self, signal, frame):
+            print ">>> Gaze Controller is about to exit (signal %s)..." % str(signal)
+            self.run = False
+
     def run(self):
-        while True:
+        while self.run:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze
                 self.rc.robot_controller.set_gaze_target(current_target, True)
-            # Running at 100 Hz maximum.
-            time.sleep(1)
+            # Running at 100 Hz Maximum!
+            time.sleep(0.01)

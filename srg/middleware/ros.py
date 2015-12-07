@@ -62,12 +62,12 @@ class RosConnector():
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
         self.current_robot_gaze = None
+        signal.signal(signal.SIGINT, self.signal_handler)
         t = threading.Thread(target=self.run_subscriber)
         t.start()
-        signal.signal(signal.SIGINT, self.signal_handler)
 
     def signal_handler(self, signal, frame):
-            print ">>> ROS is about to exit (signal %s)..." % str(signal)
+            print ">>> ROS Connector is about to exit (signal %s)..." % str(signal)
             self.run = False
 
     def people_callback(self, ros_data):
@@ -99,7 +99,6 @@ class RosConnector():
             g.tilt = angles[1]
             self.current_robot_gaze = g
             print ">> Current Gaze: ", self.current_robot_gaze
-
 
     def run_subscriber(self):
         print">>> Initializing ROS Subscriber to: %s" % self.inscope
