@@ -55,4 +55,4 @@ class GazeController():
                 current_target = self.mw.current_robot_gaze
                 self.rc.robot_controller.set_gaze_target(current_target, True)
             # Running at 100 Hz maximum.
-            time.sleep(0.01)
+            time.sleep(1)
