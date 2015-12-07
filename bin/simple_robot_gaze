@@ -63,14 +63,14 @@ def runner(arguments):
     gc = g.GazeController(rd, ro)
 
     def signal_handler(sig, frame):
-            print ">>> Exiting (signal %s)..." % str(sig)
-            ro.run = False
-            gc.run = False
+        print ">>> Exiting (signal %s)..." % str(sig)
+        ro.run = False
+        gc.run = False
+        sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
 
     while True:
-        print "Sleeping..."
         time.sleep(0.2)
 
 if __name__ == '__main__':

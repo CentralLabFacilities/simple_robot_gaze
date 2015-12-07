@@ -57,3 +57,4 @@ class GazeController():
                 self.rc.robot_controller.set_gaze_target(current_target, True)
             # Running at 100 Hz Maximum!
             time.sleep(0.01)
+        print(">>> Exiting Gaze Controller")
