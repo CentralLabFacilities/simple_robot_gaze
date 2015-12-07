@@ -57,7 +57,7 @@ class GazeController():
             self.run = False
 
     def run(self):
-        while self.run:
+        while self.run is True:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze
                 self.rc.robot_controller.set_gaze_target(current_target, True)

@@ -103,7 +103,7 @@ class RosConnector():
     def run_subscriber(self):
         print">>> Initializing ROS Subscriber to: %s" % self.inscope
         person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
-        while self.run:
+        while self.run is True:
             rospy.spin()
         person_subscriber.unregister()
         print ">>> Deactivating ROS Subscriber to: %s" % self.inscope
