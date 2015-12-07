@@ -71,7 +71,7 @@ def runner(arguments):
     signal.signal(signal.SIGINT, signal_handler)
 
     while True:
-        time.sleep(0.2)
+        time.sleep(1)
 
 if __name__ == '__main__':
     runner(sys.argv)
