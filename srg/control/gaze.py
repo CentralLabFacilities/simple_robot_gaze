@@ -50,7 +50,7 @@ class GazeController():
         t.start()
 
     def runner(self):
-        print(">>> Initializing Gaze Controller")
+        print ">>> Initializing Gaze Controller to: %s" % self.rc.outscope
         while self.run is True:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze
