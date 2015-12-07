@@ -45,7 +45,7 @@ from people_msgs.msg import Person
 from people_msgs.msg import People
 
 # HLRC IMPORTS
-from hlrc_client import RobotGaze as rg
+from hlrc_client import RobotGaze
 
 
 class RosConnector():
@@ -92,8 +92,8 @@ class RosConnector():
         angles = self.trans.derive_mapping_coords(point)
         print "----------------"
         if angles is not None:
-            g = rg.RobotGaze()
-            g.gaze_type = rg.RobotGaze.GAZETARGET_RELATIVE
+            g = RobotGaze()
+            g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
             g.timestamp = send_time.to_sec()
             g.pan = angles[0]
             g.tilt = angles[1]
