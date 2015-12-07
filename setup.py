@@ -53,7 +53,7 @@ setup(name="simplegazecontrol",
 
       download_url="hhttps://projects.cit-ec.uni-bielefeld.de/git/flobi.demo.git",
 
-      scripts=["bin/simple_robot_gaze.py"],
+      scripts=["bin/simple_robot_gaze"],
 
       packages=find_packages(exclude=["*.tests",
                                       "*.tests.*",
