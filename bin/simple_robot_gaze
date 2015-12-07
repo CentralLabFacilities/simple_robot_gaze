@@ -70,6 +70,7 @@ def runner(arguments):
     signal.signal(signal.SIGINT, signal_handler)
 
     while True:
+        print "Sleeping..."
         time.sleep(0.2)
 
 if __name__ == '__main__':

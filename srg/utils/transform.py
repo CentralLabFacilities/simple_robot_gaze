@@ -184,7 +184,7 @@ class AffineTransform:
             y = ((self.Dn * point[0]) + (self.En * point[1]) + self.Fn) / self.divider
             result = [x, y]
             # print ">> Current Coordinate (Face):", point
-            print ">> x-pixels were mapped to angle: %s \n>> y-pixels were mapped to angle: %s" % (str(x), str(y))
+            # print ">> x-pixels were mapped to angle: %s \n>> y-pixels were mapped to angle: %s" % (str(x), str(y))
             return result
         else:
             return None
