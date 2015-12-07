@@ -56,7 +56,7 @@ class GazeController():
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze.timestamp:
                 current_target = self.mw.current_robot_gaze
                 self.lastdatum = self.mw.current_robot_gaze.timestamp
-                self.rc.robot_controller.set_gaze_target(current_target, True)
+                self.rc.robot_controller.set_gaze_target(current_target, False)
             else:
                 time.sleep(0.05)
         print">>> Deactivating Gaze Controller to: %s" % self.rc.outscope
