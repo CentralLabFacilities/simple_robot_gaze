@@ -48,6 +48,7 @@ class GazeController():
         self.rc       = _robot_controller
         t = threading.Thread(target=self.runner)
         t.start()
+        t.join()
 
     def runner(self):
         print(">>> Initializing Gaze Controller")

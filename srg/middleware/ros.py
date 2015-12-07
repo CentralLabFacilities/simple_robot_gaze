@@ -64,6 +64,7 @@ class RosConnector():
         self.current_robot_gaze = None
         t = threading.Thread(target=self.runner)
         t.start()
+        t.join()
 
     def people_callback(self, ros_data):
         # Determine the nearest person
@@ -72,16 +73,16 @@ class RosConnector():
         for person in ros_data.people:
             idx += 1
             max_distance[str(idx)] = person.position.z
-        print ">> Persons found {idx, distance}: ", max_distance
+        # print ">> Persons found {idx, distance}: ", max_distance
         sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
-        print ">> Nearest Face: ", sort
-        print ">> Index: ", sort[0][0]
-        print ">> Distance in pixels: ", sort[0][1]
+        # print ">> Nearest Face: ", sort
+        # print ">> Index: ", sort[0][0]
+        # print ">> Distance in pixels: ", sort[0][1]
         self.nearest_person_x = ros_data.people[int(sort[0][0])].position.x
         self.nearest_person_y = ros_data.people[int(sort[0][0])].position.y
         send_time = ros_data.header.stamp
-        print ">> Position in pixels x:", self.nearest_person_x
-        print ">> Position in pixels y:", self.nearest_person_y
+        # print ">> Position in pixels x:", self.nearest_person_x
+        # print ">> Position in pixels y:", self.nearest_person_y
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
@@ -93,7 +94,7 @@ class RosConnector():
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
-            print ">> Current Gaze: ", self.current_robot_gaze
+            # print ">> Current Gaze: ", self.current_robot_gaze
 
     def runner(self):
         print">>> Initializing ROS Subscriber to: %s" % self.inscope

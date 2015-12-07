@@ -62,8 +62,8 @@ def runner(arguments):
     # Gaze Control
     gc = g.GazeController(rd, ro)
 
-    def signal_handler(self, signal, frame):
-            print ">>> Exiting (signal %s)..." % str(signal)
+    def signal_handler(sig, frame):
+            print ">>> Exiting (signal %s)..." % str(sig)
             ro.run = False
             gc.run = False
 
