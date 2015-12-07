@@ -34,6 +34,8 @@ Authors: Florian Lier, Simon Schulz
 
 # STD IMPORTS
 import sys
+import time
+import signal
 
 # SELF IMPORTS
 from srg.robot import driver as d
@@ -59,6 +61,16 @@ def runner(arguments):
 
     # Gaze Control
     gc = g.GazeController(rd, ro)
+
+    def signal_handler(self, signal, frame):
+            print ">>> Exiting (signal %s)..." % str(signal)
+            ro.run = False
+            gc.run = False
+
+    signal.signal(signal.SIGINT, signal_handler)
+
+    while True:
+        time.sleep(0.2)
 
 if __name__ == '__main__':
     runner(sys.argv)

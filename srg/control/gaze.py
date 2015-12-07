@@ -32,7 +32,6 @@ Authors: Florian Lier, Simon Schulz
 
 # STD IMPORTS
 import time
-import signal
 import threading
 
 
@@ -44,21 +43,14 @@ class GazeController():
     class below
     """
     def __init__(self, _robot_controller, _mw):
-        print(">>> Initializing Gaze Controller")
         self.mw       = _mw
         self.run      = True
         self.rc       = _robot_controller
-        signal.signal(signal.SIGINT, self.signal_handler)
         t = threading.Thread(target=self.runner)
         t.start()
-        t.join()
-
-    def signal_handler(self, signal, frame):
-            print ">>> ROS Connector is about to exit (signal %s)..." % str(signal)
-            self.mw.run = False
-            self.run = False
 
     def runner(self):
+        print(">>> Initializing Gaze Controller")
         while self.run is True:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze

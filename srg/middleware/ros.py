@@ -62,9 +62,8 @@ class RosConnector():
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
         self.current_robot_gaze = None
-        t = threading.Thread(target=self.run_subscriber)
+        t = threading.Thread(target=self.runner)
         t.start()
-        t.join()
 
     def people_callback(self, ros_data):
         # Determine the nearest person
@@ -96,7 +95,7 @@ class RosConnector():
             self.current_robot_gaze = g
             print ">> Current Gaze: ", self.current_robot_gaze
 
-    def run_subscriber(self):
+    def runner(self):
         print">>> Initializing ROS Subscriber to: %s" % self.inscope
         person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
         while self.run is True:
