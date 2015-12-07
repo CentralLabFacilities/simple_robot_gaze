@@ -54,7 +54,7 @@ class GazeController():
         while self.run is True:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze
-                self.rc.robot_controller.set_gaze_target(current_target, True)
+                self.rc.robot_controller.set_gaze_target(current_target, False)
             # Running at 100 Hz Maximum!
             time.sleep(0.01)
         print">>> Deactivating Gaze Controller to: %s" % self.rc.outscope
