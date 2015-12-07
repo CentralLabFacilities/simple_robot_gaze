@@ -62,13 +62,9 @@ class RosConnector():
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
         self.current_robot_gaze = None
-        signal.signal(signal.SIGINT, self.signal_handler)
         t = threading.Thread(target=self.run_subscriber)
         t.start()
-
-    def signal_handler(self, signal, frame):
-            print ">>> ROS Connector is about to exit (signal %s)..." % str(signal)
-            self.run = False
+        t.join()
 
     def people_callback(self, ros_data):
         # Determine the nearest person

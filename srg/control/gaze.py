@@ -46,12 +46,20 @@ class GazeController():
     def __init__(self, _robot_controller, _mw):
         print(">>> Initializing Gaze Controller")
         self.mw       = _mw
+        self.run      = True
         self.rc       = _robot_controller
+        signal.signal(signal.SIGINT, self.signal_handler)
         t = threading.Thread(target=self.runner)
         t.start()
+        t.join()
+
+    def signal_handler(self, signal, frame):
+            print ">>> ROS Connector is about to exit (signal %s)..." % str(signal)
+            self.mw.run = False
+            self.run = False
 
     def runner(self):
-        while self.mw.run is True:
+        while self.run is True:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze
                 self.rc.robot_controller.set_gaze_target(current_target, True)
