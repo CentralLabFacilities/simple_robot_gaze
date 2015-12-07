@@ -49,7 +49,7 @@ def runner(arguments):
         print(">>> Usage: simplerobotgaze.py <inscope 'persons_scope'> <outscope 'gaze_target_scope'>\n\n")
         sys.exit(1)
     # Robot Control
-    rd = d.RobotDriver("ROS", sys.argv[2])
+    rd = d.RobotDriver("ROS", str(sys.argv[2]).strip())
 
     # Transformation
     at = t.AffineTransform()
@@ -57,7 +57,7 @@ def runner(arguments):
     at.calculate_divider()
 
     # Middleware
-    ro = r.RosConnector(sys.argv[1], at)
+    ro = r.RosConnector(str(sys.argv[1]).strip(), at)
 
     # Gaze Control
     gc = g.GazeController(rd, ro)
