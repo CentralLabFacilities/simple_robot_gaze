@@ -53,6 +53,6 @@ class GazeController():
         while True:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze
-                print ">> Sending Gaze Type:", current_target
                 self.rc.robot_controller.set_gaze_target(current_target, False)
-            time.sleep(0.001)
+            # Running at 50 Hz fixed.
+            time.sleep(0.020)

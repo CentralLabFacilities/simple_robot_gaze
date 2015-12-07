@@ -98,6 +98,8 @@ class RosConnector():
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
+            print ">> Current Gaze: ", self.current_robot_gaze
+
 
     def run_subscriber(self):
         print">>> Initializing ROS Subscriber to: %s" % self.inscope
