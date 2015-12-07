@@ -35,21 +35,28 @@ import sys
 
 # SELF IMPORTS
 from srg.robot import driver as d
-from srg.utils import transform as t
 from srg.control import gaze as g
+from srg.middleware import ros as r
+from srg.utils import transform as t
 
 
 def runner(arguments):
     if len(arguments) != 3:
         print(">>> Usage: simplerobotgaze.py <inscope 'persons_scope'> <outscope 'gaze_target_scope'>\n\n")
         sys.exit(1)
-
+    # Robot Control
     rd = d.RobotDriver("ROS", sys.argv[2])
+
+    # Transformation
     at = t.AffineTransform()
     at.set_coords()
     at.calculate_divider()
-    gc = g.GazeController(rd, at, sys.argv[1])
-    gc.run_subscriber()
+
+    # Middleware
+    ro = r.RosConnector(sys.argv[1], at)
+
+    # Gaze Control
+    gc = g.GazeController(rd, ro)
 
 if __name__ == '__main__':
     runner(sys.argv)

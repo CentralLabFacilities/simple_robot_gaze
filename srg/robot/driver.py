@@ -34,7 +34,7 @@ Authors: Florian Lier, Simon Schulz
 import logging
 
 # HLRC
-from hlrc_client import *
+from hlrc_client import RobotController
 
 
 class RobotDriver():
