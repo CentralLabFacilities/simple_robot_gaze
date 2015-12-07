@@ -64,7 +64,6 @@ class RosConnector():
         self.current_robot_gaze = None
         t = threading.Thread(target=self.runner)
         t.start()
-        t.join()
 
     def people_callback(self, ros_data):
         # Determine the nearest person
@@ -86,7 +85,7 @@ class RosConnector():
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
-        print "----------------"
+        # print "----------------"
         if angles is not None:
             g = RobotGaze()
             g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
