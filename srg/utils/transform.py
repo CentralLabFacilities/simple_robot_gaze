@@ -30,6 +30,7 @@ Authors: Florian Lier, Simon Schulz
 
 """
 
+import sys
 
 class AffineTransform:
     """
@@ -122,7 +123,7 @@ class AffineTransform:
             sys.exit(1)
         else:
             self.divider = result
-            print(">> Divider " + str(self.divider))
+            # print(">> Divider " + str(self.divider))
             self.calculateAn()
             self.calculateBn()
             self.calculateCn()
@@ -136,14 +137,14 @@ class AffineTransform:
         result = ((self.target0[0] - self.target2[0]) * (self.origin1[1] - self.origin2[1])) - \
                  ((self.target1[0] - self.target2[0]) * (self.origin0[1] - self.origin2[1]))
         self.An = result
-        print(">> An " + str(self.An))
+        # print(">> An " + str(self.An))
         return result
 
     def calculateBn(self):
         result = ((self.origin0[0] - self.origin2[0]) * (self.target1[0] - self.target2[0])) - \
                  ((self.target0[0] - self.target2[0]) * (self.origin1[0] - self.origin2[0]))
         self.Bn = result
-        print(">> Bn " + str(self.Bn))
+        # print(">> Bn " + str(self.Bn))
         return result
 
     def calculateCn(self):
@@ -151,21 +152,21 @@ class AffineTransform:
                  (self.origin0[0] * self.target2[0] - self.origin2[0] * self.target0[0]) * self.origin1[1] + \
                  (self.origin1[0] * self.target0[0] - self.origin0[0] * self.target1[0]) * self.origin2[1]
         self.Cn = result
-        print(">> Cn " + str(self.Cn))
+        # print(">> Cn " + str(self.Cn))
         return result
 
     def calculateDn(self):
         result = ((self.target0[1] - self.target2[1]) * (self.origin1[1] - self.origin2[1])) - \
                  ((self.target1[1] - self.target2[1]) * (self.origin0[1] - self.origin2[1]))
         self.Dn = result
-        print(">> Dn " + str(self.Dn))
+        # print(">> Dn " + str(self.Dn))
         return result
 
     def calculateEn(self):
         result = ((self.origin0[0] - self.origin2[0]) * (self.target1[1] - self.target2[1])) - \
                  ((self.target0[1] - self.target2[1]) * (self.origin1[0] - self.origin2[0]))
         self.En = result
-        print(">> En " + str(self.En))
+        # print(">> En " + str(self.En))
         return result
 
     def calculateFn(self):
@@ -173,7 +174,7 @@ class AffineTransform:
                  (self.origin0[0] * self.target2[1] - self.origin2[0] * self.target0[1]) * self.origin1[1] + \
                  (self.origin1[0] * self.target0[1] - self.origin0[0] * self.target1[1]) * self.origin2[1]
         self.Fn = result
-        print(">> Fn " + str(self.Fn))
+        # print(">> Fn " + str(self.Fn))
         return result
 
     def derive_mapping_coords(self, point):
