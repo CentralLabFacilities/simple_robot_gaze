@@ -47,10 +47,10 @@ class GazeController():
         print(">>> Initializing Gaze Controller")
         self.mw       = _mw
         self.rc       = _robot_controller
-        t = threading.Thread(target=self.run)
+        t = threading.Thread(target=self.runner)
         t.start()
 
-    def run(self):
+    def runner(self):
         while self.mw.run is True:
             if self.mw.current_robot_gaze is not None:
                 current_target = self.mw.current_robot_gaze
