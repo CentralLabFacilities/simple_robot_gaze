@@ -33,39 +33,24 @@ Authors: Florian Lier, Simon Schulz
 """
 
 # STD IMPORTS
+import os
 import sys
 import time
 import signal
+from optparse import OptionParser
 
 # SELF IMPORTS
-from srg.robot import driver as d
-from srg.control import gaze as g
-from srg.middleware import ros as r
-from srg.utils import transform as t
+from srg.behavior import arbitration as a
 
 
-def runner(arguments):
-    if len(arguments) != 3:
-        print(">>> Usage: simplerobotgaze.py <inscope 'persons_scope'> <outscope 'gaze_target_scope'>\n\n")
-        sys.exit(1)
-    # Robot Control
-    rd = d.RobotDriver("ROS", str(sys.argv[2]).strip())
+def runner(_options):
 
-    # Transformation
-    at = t.AffineTransform()
-    at.set_coords()
-    at.calculate_divider()
-
-    # Middleware
-    ro = r.RosConnector(str(sys.argv[1]).strip(), at)
-
-    # Gaze Control
-    gc = g.GazeController(rd, ro)
+    # Arbitration
+    ar = a.Arbitration(_options.config, options.outscope)
 
     def signal_handler(sig, frame):
         print ">>> Exiting (signal %s)..." % str(sig)
-        ro.run = False
-        gc.run = False
+        ar.request_stop()
         sys.exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -74,4 +59,25 @@ def runner(arguments):
         time.sleep(1)
 
 if __name__ == '__main__':
-    runner(sys.argv)
+
+    parser = OptionParser(usage="Usage: %prog [options]")
+    parser.add_option("-o", "--outscope",
+                      action="store",
+                      dest="outscope",
+                      default="/meka",
+                      help=
+                      "Set the HLRC target topic. This is the robot you need to control. [Default: /meka]")
+    parser.add_option("-c", "--config",
+                      action="store",
+                      dest="config",
+                      default=os.environ['HOME'] + "/.config/simplerobotgaze.yaml",
+                      help="Location of the Simple Robot Gaze config file. [Default: ~/.config/simplerobotgaze.yaml]")
+    parser.add_option("-l", "--loglevel",
+                      action="store",
+                      dest="loglevel",
+                      default="info",
+                      help="Set the logging level for console output. Available are info and debug. [Default: info]")
+
+    (options, args) = parser.parse_args()
+
+    runner(options)

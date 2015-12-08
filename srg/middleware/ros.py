@@ -58,7 +58,7 @@ class RosConnector():
     def __init__(self, _inscope, _transform):
         self.run      = True
         self.trans    = _transform
-        self.inscope  = _inscope
+        self.inscope  = _inscope.strip()
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
         self.current_robot_gaze = None
@@ -93,10 +93,10 @@ class RosConnector():
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
-            # print ">> Current Gaze: ", self.current_robot_gaze
 
     def runner(self):
-        print">>> Initializing ROS Subscriber to: %s" % self.inscope
+        print ">>> Initializing ROS Subscriber to: %s" % self.inscope
+        print "---"
         person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
         while self.run is True:
             time.sleep(1)

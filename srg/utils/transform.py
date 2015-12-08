@@ -37,8 +37,8 @@ class AffineTransform:
     Derives the transformation between screen
     coordinates in pixels and joint axis angles in degree.
     """
-    def __init__(self):
-        print(">>> Initializing Affine Transform")
+    def __init__(self, _name):
+        print">>> Initializing Affine Transform for: %s" % _name
         # Target ---> The ones you want to map to
         self.target0 = [1.0, 1.0]
         self.target1 = [1.0, 1.0]
@@ -68,14 +68,12 @@ class AffineTransform:
         # Test coord
         self.test = [1.0, 1.0]
 
-    def set_coords(self):
+    def set_coords(self, _x, _y, _fov_h, _fov_v):
 
-        # This is the target coordinate system
-        # Based on Xtion PRO:
-        # https://www.asus.com/3D-Sensor/Xtion_PRO/specifications/
+        print">>> Deriving mapping: %.fx%.f (pixels) to %.fx%.f (fov)" % (_x, _y, _fov_h, _fov_v)
 
-        fov_h = 58.0
-        fov_v = 45.0
+        fov_h = _fov_h
+        fov_v = _fov_v
 
         # Upper left corner
         self.target0[0] = -fov_h/2.0
@@ -100,15 +98,15 @@ class AffineTransform:
 
         # Lower left corner
         self.origin1[0] = 0.0
-        self.origin1[1] = 240.0
+        self.origin1[1] = _y
 
          # Upper right corner
-        self.origin2[0] = 320.0
+        self.origin2[0] = _x
         self.origin2[1] = 0.0
 
          # Lower right corner
-        self.origin3[0] = 320.0
-        self.origin3[1] = 240.0
+        self.origin3[0] = _x
+        self.origin3[1] = _y
 
         # And finally the test coordinate
         self.test[0] = 512.0

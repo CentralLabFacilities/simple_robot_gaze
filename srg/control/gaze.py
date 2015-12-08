@@ -43,10 +43,11 @@ class GazeController():
     class below
     """
     def __init__(self, _robot_controller, _mw):
-        self.mw        = _mw
-        self.run       = True
-        self.lastdatum = time.time()
-        self.rc        = _robot_controller
+        self.mw           = _mw
+        self.run          = True
+        self.lastdatum    = time.time()
+        self.rc           = _robot_controller
+        self.acquire_prio = False
         t = threading.Thread(target=self.runner)
         t.start()
 
@@ -56,7 +57,8 @@ class GazeController():
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze.timestamp:
                 current_target = self.mw.current_robot_gaze
                 self.lastdatum = self.mw.current_robot_gaze.timestamp
-                self.rc.robot_controller.set_gaze_target(current_target, True)
+                if self.acquire_prio:
+                    self.rc.robot_controller.set_gaze_target(current_target, True)
             else:
                 time.sleep(0.005)
         print">>> Deactivating Gaze Controller to: %s" % self.rc.outscope

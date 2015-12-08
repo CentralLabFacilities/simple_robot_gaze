@@ -1,0 +1,39 @@
+# ---- Simple Robot Gaze Config File ----
+
+# The Simple Robot Gaze component coordinates a Robot's gaze direction.
+# This can be done by a) providing (multiple) input sources and by b) prioritizing them.
+# For now, the component accepts ROS people messages [1] and derives the
+# corresponding robot joint angle configuration using the HLRC [2] library
+# based on mapping a from the region of interest (faces, saliency...) to the
+# camera's field of view.
+
+# TODO: Implement support for ROS TF targets.
+
+# This file must reside in ~/.config/simplerobotgaze.yaml
+---
+
+# The priority of input data streams (ROS people msg), the first entry has the highest priority
+priorities:
+  - /ocvfacerec/ros/people
+  - /dlibfacerec/ros/people
+  - /movement/people
+
+# Resolution of the source camera image, corresponds to the priorities
+resolution:
+  - 320x240
+  - 320x240
+  - 320x240
+
+# Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
+fov:
+  - 58.0x45.0
+  - 58.0x45.0
+  - 58.0x45.0
+
+############################
+# TODO ROS TF Integration
+# tf:
+#  - base
+#  - head
+#  - hand
+############################
