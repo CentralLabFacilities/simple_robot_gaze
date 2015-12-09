@@ -116,12 +116,16 @@ class RosConnector():
     def runner(self):
         print ">>> Initializing ROS Subscriber to: %s" % self.inscope
         print "---"
-        if self.datatype == "people":
-            person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
-        elif self.datatype == "regionofinterest":
-            person_subscriber = rospy.Subscriber(self.inscope, RegionOfInterest, self.roi_callback, queue_size=1)
-        else:
-            print ">>> ROS Subscriber DataType not supported %s" % self.datatype
+        try:
+            if self.datatype == "people":
+                person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
+            elif self.datatype == "regionofinterest":
+                person_subscriber = rospy.Subscriber(self.inscope, RegionOfInterest, self.roi_callback, queue_size=1)
+            else:
+                print ">>> ROS Subscriber DataType not supported %s" % self.datatype
+                return
+        except Exception, e:
+            print ">>> ERROR %s" % str(e)
             return
         while self.run is True:
             time.sleep(1)
