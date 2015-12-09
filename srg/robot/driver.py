@@ -46,5 +46,5 @@ class RobotDriver():
     def __init__(self, _mw, _outscope):
         print(">>> Initializing Robot Controller")
         self.mw               = _mw
-        self.outscope         = _outscope
+        self.outscope         = _outscope.strip()
         self.robot_controller = RobotController(self.mw, self.outscope, logging.INFO)

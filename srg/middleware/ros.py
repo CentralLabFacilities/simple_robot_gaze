@@ -115,7 +115,6 @@ class RosConnector():
 
     def runner(self):
         print ">>> Initializing ROS Subscriber to: %s" % self.inscope
-        print "---"
         try:
             if self.datatype == "people":
                 person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)

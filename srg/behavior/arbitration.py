@@ -47,14 +47,14 @@ class Arbitration:
 
     def __init__(self, _configfile, _outscope):
         self.run             = True
-        self.cfgfile         = _configfile
+        self.cfgfile         = _configfile.strip()
         self.config          = None
         self.transforms      = []
         self.input_sources   = []
         self.gaze_controller = []
         self.boring          = 2.0
         # Robot Control
-        self.rd = d.RobotDriver("ROS", _outscope)
+        self.rd = d.RobotDriver("ROS", _outscope.strip())
         time.sleep(0.3)
         self.read_yaml_config()
         self.configure_middleware()
