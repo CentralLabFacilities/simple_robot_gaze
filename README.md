@@ -7,6 +7,7 @@ then derives the corresponding robot joint angle configuration using the HLRC [3
 This is accomplished by mapping the region of interest (faces, saliency...) to the camera's
 field of view and the robot's joint angles respectively.
 
+
 # Gaze Strategy
 
 This _simple_ approach first of all respects the provided priorities in the configuration file. If a stimulus, a ROI
@@ -16,19 +17,23 @@ the robot. If the current stimulus is older than 2 seconds, the next higher prio
 new input. If there is no input at all, or all input is decayed (older than 2 seconds) the highest priority input stream
 (last provided value) will always granted access.
 
+
 ## Recommended Installation Method:
 
 Please use the CITK to install this component, there is already a project file for this: hlrc-simple-robot-gaze.project
 
+
 ## Manual Install
 
-python setup.py
+    python setup.py
+
 
 ## Usage
 
-simple_robot_gaze -c config_file -o /hlrc_control_scope
+    simple_robot_gaze -c config_file -o /hlrc_control_scope
 
-Example: simple_robot_gaze -c ${HOME}/.config/simplerobotgaze.yaml -o /flobi
+    Example: simple_robot_gaze -c ${HOME}/.config/simplerobotgaze.yaml -o /flobi
+
 
 ## Config File Explained
 
@@ -52,17 +57,18 @@ datatypes:
   - ros:RegionOfInterest
   - ros:RegionOfInterest
 
-# Resolution of the source camera image, corresponds to the priorities
+Resolution of the source camera image, corresponds to the priorities
 resolution:
   - 320x240
   - 320x240
   - 320x240
 
-# Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
+Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
 fov:
   - 58.0x45.0
   - 58.0x45.0
   - 58.0x45.0
+
 
 # TODO
 
