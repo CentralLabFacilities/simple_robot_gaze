@@ -90,15 +90,26 @@ class Arbitration:
     def configure_middleware(self):
         idx = 0
         for item in self.config["priorities"]:
-            res = self.config["resolution"][idx].split("x")
-            fov = self.config["fov"][idx].split("x")
+            # Read config file an extract values
+            res        = self.config["resolution"][idx].split("x")
+            fov        = self.config["fov"][idx].split("x")
+            datatypes  = self.config["dataytypes"][idx].split(":")
             # Transformations
             at = t.AffineTransform(str(item))
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
             at.calculate_divider()
             self.transforms.append(at)
             # Middleware
-            mw = r.RosConnector(str(item), at)
+            if datatypes[1].lower() == "ros":
+                mw = r.RosConnector(str(item), at, datatypes[1])
+            elif datatypes[1].lower() == "rsb":
+                print ">>> RSB is currrenly not supported :("
+                self.run = False
+                sys.exit(1)
+            else:
+                print ">>> Unknown middleware %s" % datatypes[1]
+                self.run = False
+                sys.exit(1)
             self.input_sources.append(mw)
             time.sleep(0.1)
             # Gaze Control
@@ -123,9 +134,6 @@ class Arbitration:
 
     def derive_order(self, _updates):
         idx = -1
-        # First, stop all running gaze_controllers
-        for gz in self.gaze_controller:
-            gz.acquire_prio = False
         # Now honor priority and latest input
         now = time.time()
         # Default winner is always highest prio
@@ -135,12 +143,19 @@ class Arbitration:
                 if now - stamp <= self.boring:
                     idx += 1
                     winner = idx
-                    print ">>> Winning input is %s" % self.input_sources[winner].inscope
                     break
                 else:
                     # Too boring advance in prios
                     idx += 1
             else:
-                # Next prio, because we dont have any values yet.
+                # Next prio, because we don't have any values yet.
                 idx += 1
-        self.gaze_controller[winner].acquire_prio = True
+        # Now enable the correct gaze controller
+        idx = 0
+        for gz in self.gaze_controller:
+            if idx == winner:
+                gz.acquire_prio = True
+                print ">>> Winning input is %s" % self.input_sources[winner].inscope
+            else:
+                gz.acquire_prio = False
+            idx += 1

@@ -18,6 +18,11 @@ priorities:
   - /dlibfacerec/ros/people
   - /movement/people
 
+datatypes:
+  - ros:People
+  - ros:RegionOfInterest
+  - ros:RegionOfInterest
+
 # Resolution of the source camera image, corresponds to the priorities
 resolution:
   - 320x240

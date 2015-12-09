@@ -38,6 +38,7 @@ class AffineTransform:
     coordinates in pixels and joint axis angles in degree.
     """
     def __init__(self, _name):
+
         print">>> Initializing Affine Transform for: %s" % _name
         # Target ---> The ones you want to map to
         self.target0 = [1.0, 1.0]

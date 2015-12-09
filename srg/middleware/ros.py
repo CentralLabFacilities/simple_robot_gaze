@@ -32,7 +32,6 @@ Authors: Florian Lier, Simon Schulz
 
 # STD IMPORTS
 import time
-import signal
 import operator
 import threading
 
@@ -43,6 +42,7 @@ from std_msgs.msg import Header
 from std_msgs.msg import String
 from people_msgs.msg import Person
 from people_msgs.msg import People
+from sensor_msgs.msg import RegionOfInterest
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
@@ -55,12 +55,15 @@ class RosConnector():
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self, _inscope, _transform):
+    def __init__(self, _inscope, _transform, _datatype):
         self.run      = True
         self.trans    = _transform
-        self.inscope  = _inscope.strip()
+        self.inscope  = str(_inscope).strip()
+        self.datatype = str(_datatype).lower().strip()
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
+        self.roi_x            = 0.0
+        self.roi_y            = 0.0
         self.current_robot_gaze = None
         t = threading.Thread(target=self.runner)
         t.start()
@@ -94,10 +97,32 @@ class RosConnector():
             g.tilt = angles[1]
             self.current_robot_gaze = g
 
+    def roi_callback(self, ros_data):
+        send_time = ros_data.header.stamp
+        self.roi_x = ros_data.regionofinterest.x_offset
+        self.roi_y = ros_data.regionofinterest.y_offset
+        point = [self.roi_x, self.roi_y]
+        # Derive coordinate mapping
+        angles = self.trans.derive_mapping_coords(point)
+        # print "----------------"
+        if angles is not None:
+            g = RobotGaze()
+            g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            g.timestamp = send_time.to_sec()
+            g.pan = angles[0]
+            g.tilt = angles[1]
+            self.current_robot_gaze = g
+
     def runner(self):
         print ">>> Initializing ROS Subscriber to: %s" % self.inscope
         print "---"
-        person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
+        if self.datatype == "people":
+            person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
+        elif self.datatype == "regionofinterest":
+            person_subscriber = rospy.Subscriber(self.inscope, RegionOfInterest, self.callback, queue_size=1)
+        else:
+            print ">>> ROS Subscriber DataType not supported %s" % self.datatype
+            return
         while self.run is True:
             time.sleep(1)
         person_subscriber.unregister()
