@@ -51,7 +51,7 @@ setup(name="simplegazecontrol",
 
       url="https://projects.cit-ec.uni-bielefeld.de/git/flobi.demo.git",
 
-      download_url="hhttps://projects.cit-ec.uni-bielefeld.de/git/flobi.demo.git",
+      download_url="https://projects.cit-ec.uni-bielefeld.de/git/flobi.demo.git",
 
       scripts=["bin/simple_robot_gaze"],
 
