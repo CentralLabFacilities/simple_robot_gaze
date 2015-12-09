@@ -93,7 +93,7 @@ class Arbitration:
             # Read config file an extract values
             res        = self.config["resolution"][idx].split("x")
             fov        = self.config["fov"][idx].split("x")
-            datatypes  = self.config["dataytypes"][idx].split(":")
+            datatypes  = self.config["datatypes"][idx].split(":")
             # Transformations
             at = t.AffineTransform(str(item))
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
