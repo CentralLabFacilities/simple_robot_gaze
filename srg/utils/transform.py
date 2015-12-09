@@ -39,7 +39,7 @@ class AffineTransform:
     """
     def __init__(self, _name):
 
-        print">>> Initializing Affine Transform for: %s" % _name
+        print ">>> Initializing Affine Transform for: %s" % _name.strip()
         # Target ---> The ones you want to map to
         self.target0 = [1.0, 1.0]
         self.target1 = [1.0, 1.0]
@@ -71,7 +71,7 @@ class AffineTransform:
 
     def set_coords(self, _x, _y, _fov_h, _fov_v):
 
-        print">>> Deriving mapping: %.fx%.f (pixels) to %.fx%.f (fov)" % (_x, _y, _fov_h, _fov_v)
+        print ">>> Deriving mapping: %.fx%.f (pixels) to %.fx%.f (fov)" % (_x, _y, _fov_h, _fov_v)
 
         fov_h = _fov_h
         fov_v = _fov_v
@@ -118,7 +118,7 @@ class AffineTransform:
                  ((self.origin1[0] - self.origin2[0]) * (self.origin0[1] - self.origin2[1]))
 
         if result == 0.0:
-            print(">> Divider is ZERO - Check your Coordinates?")
+            print ">> Divider is ZERO - Check your Coordinates?"
             sys.exit(1)
         else:
             self.divider = result

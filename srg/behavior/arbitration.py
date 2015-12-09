@@ -55,7 +55,7 @@ class Arbitration:
         self.boring          = 2.0
         # Robot Control
         self.rd = d.RobotDriver("ROS", _outscope.strip())
-        time.sleep(0.3)
+        time.sleep(0.5)
         self.read_yaml_config()
         self.configure_middleware()
         # Start Arbitration
@@ -99,6 +99,7 @@ class Arbitration:
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
             at.calculate_divider()
             self.transforms.append(at)
+            time.sleep(0.1)
             # Middleware
             if datatypes[0].lower() == "ros":
                 mw = r.RosConnector(str(item), at, datatypes[1])
@@ -116,6 +117,7 @@ class Arbitration:
             gc = g.GazeController(self.rd, mw)
             self.gaze_controller.append(gc)
             idx += 1
+            time.sleep(0.1)
 
     def arbitrate(self):
         while self.run:
