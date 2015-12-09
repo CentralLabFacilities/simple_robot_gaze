@@ -18,6 +18,12 @@ priorities:
   - /dlibfacerec/ros/people
   - /movement/people
 
+# Gaze strategy: relative for moving cameras, absolute for fixed setups, corresponds to the priorities
+modes:
+  - relative
+  - relative
+  - absolute
+
 datatypes:
   - ros:People
   - ros:RegionOfInterest

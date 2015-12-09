@@ -95,6 +95,7 @@ class Arbitration:
             res        = self.config["resolution"][idx].split("x")
             fov        = self.config["fov"][idx].split("x")
             datatypes  = self.config["datatypes"][idx].split(":")
+            modes      = self.config["modes"][idx]
             # Transformations
             at = t.AffineTransform(str(item))
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
@@ -103,9 +104,9 @@ class Arbitration:
             time.sleep(0.1)
             # Middleware
             if datatypes[0].lower() == "ros":
-                mw = r.RosConnector(str(item), at, datatypes[1])
+                mw = r.RosConnector(str(item), at, datatypes[1], modes)
             elif datatypes[0].lower() == "rsb":
-                print ">>> RSB is currrenly not supported :("
+                print ">>> RSB is currrenly not supported :( "
                 self.run = False
                 sys.exit(1)
             else:

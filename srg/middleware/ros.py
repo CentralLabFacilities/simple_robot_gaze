@@ -55,11 +55,12 @@ class RosConnector():
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self, _inscope, _transform, _datatype):
+    def __init__(self, _inscope, _transform, _datatype, _mode):
         self.run      = True
         self.trans    = _transform
-        self.inscope  = str(_inscope).strip()
+        self.inscope  = str(_inscope).lower().strip()
         self.datatype = str(_datatype).lower().strip()
+        self.mode     = str(_mode).lower().strip()
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
         self.roi_x            = 0.0
@@ -91,7 +92,10 @@ class RosConnector():
         # print "----------------"
         if angles is not None:
             g = RobotGaze()
-            g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            if self.mode == 'relative':
+                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            else:
+                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             g.timestamp = send_time.to_sec()
             g.pan = angles[0]
             g.tilt = angles[1]
@@ -107,7 +111,10 @@ class RosConnector():
         # print "----------------"
         if angles is not None:
             g = RobotGaze()
-            g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            if self.mode == 'absolute':
+                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+            else:
+                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
             g.timestamp = send_time.to_sec()
             g.pan = angles[0]
             g.tilt = angles[1]
