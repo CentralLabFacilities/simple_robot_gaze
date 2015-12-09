@@ -159,7 +159,7 @@ class Arbitration:
             if idx == winner:
                 gz.acquire_prio = True
                 now = time.time()
-                if now - self.last_info <= 2.0:
+                if now - self.last_info >= 2.0:
                     print ">>> Winning input is %s" % self.input_sources[winner].inscope
                     self.last_info = time.time()
             else:
