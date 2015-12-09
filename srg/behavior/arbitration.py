@@ -100,14 +100,14 @@ class Arbitration:
             at.calculate_divider()
             self.transforms.append(at)
             # Middleware
-            if datatypes[1].lower() == "ros":
-                mw = r.RosConnector(str(item), at, datatypes[1])
-            elif datatypes[1].lower() == "rsb":
+            if datatypes[0].lower() == "ros":
+                mw = r.RosConnector(str(item), at, datatypes[0])
+            elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :("
                 self.run = False
                 sys.exit(1)
             else:
-                print ">>> Unknown middleware %s" % datatypes[1]
+                print ">>> Unknown middleware %s" % datatypes[0]
                 self.run = False
                 sys.exit(1)
             self.input_sources.append(mw)
