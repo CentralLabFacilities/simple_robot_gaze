@@ -39,31 +39,36 @@ Please use the CITK to install this component, there is already a project file f
 
 The file must reside in ~/.config/simplerobotgaze.yaml
 
-The priority of input data streams, the first entry has the highest priority, the last the lowest
+The priority of input data streams, the first entry has the highest priority, the last the lowest.
+
 priorities:
   - /ocvfacerec/ros/people
   - /dlibfacerec/ros/people
   - /movement/roi
 
-Gaze strategy: relative for moving cameras, absolute for fixed setups, corresponds to the priorities
+Gaze strategy: relative for moving cameras, absolute for fixed setups, corresponds to the priorities.
+
 modes:
   - relative
   - relative
   - absolute
 
-What kind of data are you sending in your input stream, corresponds to priorities
+What kind of data are you sending in your input stream, corresponds to priorities.
+
 datatypes:
   - ros:People
   - ros:RegionOfInterest
   - ros:RegionOfInterest
 
-Resolution of the source camera image, corresponds to the priorities
+Resolution of the source camera image, corresponds to the priorities.
+
 resolution:
   - 320x240
   - 320x240
   - 320x240
 
 Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
+
 fov:
   - 58.0x45.0
   - 58.0x45.0
@@ -72,4 +77,4 @@ fov:
 
 # TODO
 
-Implement RSB support for input scopes and remote control
+Implement RSB support for input scopes and remote control.
