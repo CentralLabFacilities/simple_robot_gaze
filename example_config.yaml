@@ -4,7 +4,7 @@
 # This can be done by a) providing (multiple) input sources and by b) prioritizing them.
 # For now, the component accepts ROS People messages [1] and ROS RegionOfInterest messsages [2]
 # then derives the corresponding robot joint angle configuration using the HLRC [3] library.
-# This is accomplished by mapping from the region of interest (faces, saliency...) to the camera's
+# This is accomplished by mapping from the region of interest (faces, ittikoch...) to the camera's
 # field of view, robot joint angles respectively.
 
 # TODO: Implement support for ROS TF targets.
