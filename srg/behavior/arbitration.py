@@ -53,6 +53,7 @@ class Arbitration:
         self.input_sources   = []
         self.gaze_controller = []
         self.boring          = 2.0
+        self.last_info       = time.time()
         # Robot Control
         self.rd = d.RobotDriver("ROS", _outscope.strip())
         time.sleep(0.5)
@@ -157,7 +158,10 @@ class Arbitration:
         for gz in self.gaze_controller:
             if idx == winner:
                 gz.acquire_prio = True
-                print ">>> Winning input is %s" % self.input_sources[winner].inscope
+                now = time.time()
+                if now - self.last_info <= 2.0:
+                    print ">>> Winning input is %s" % self.input_sources[winner].inscope
+                    self.last_info = time.time()
             else:
                 gz.acquire_prio = False
             idx += 1
