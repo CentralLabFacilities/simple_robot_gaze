@@ -91,7 +91,7 @@ class RosConnector():
         # print "----------------"
         if angles is not None:
             g = RobotGaze()
-            g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             g.timestamp = send_time.to_sec()
             g.pan = angles[0]
             g.tilt = angles[1]
@@ -107,7 +107,7 @@ class RosConnector():
         # print "----------------"
         if angles is not None:
             g = RobotGaze()
-            g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             g.timestamp = send_time.to_sec()
             g.pan = angles[0]
             g.tilt = angles[1]
