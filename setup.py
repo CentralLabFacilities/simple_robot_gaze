@@ -45,7 +45,7 @@ setup(name="simplegazecontrol",
       long_description="A Simple script that takes ROS person messages as input and steers a "
                        "humanoid robot head using the HLRC client",
 
-      author="Florian Lier, Simon Schulz and Sebastian Meyer zu Borgsen",
+      author="Florian Lier, Simon Schulz",
 
       author_email="flier[at]techfak.uni-bielefeld.de and sschulz[at]techfak.uni-bielefeld.de",
 
