@@ -73,7 +73,7 @@ class Arbitration:
     def read_yaml_config(self):
         try:
             print ">>> Using config: %s" % self.cfgfile
-            print "----"
+            print "---"
             f = open(self.cfgfile)
             config_vals = yaml.load(f)
             self.config = config_vals
@@ -101,7 +101,7 @@ class Arbitration:
             self.transforms.append(at)
             # Middleware
             if datatypes[0].lower() == "ros":
-                mw = r.RosConnector(str(item), at, datatypes[0])
+                mw = r.RosConnector(str(item), at, datatypes[1])
             elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :("
                 self.run = False
