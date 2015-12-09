@@ -117,7 +117,7 @@ class Arbitration:
             gc = g.GazeController(self.rd, mw)
             self.gaze_controller.append(gc)
             idx += 1
-            time.sleep(0.1)
+            time.sleep(0.3)
 
     def arbitrate(self):
         while self.run:
