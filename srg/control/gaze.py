@@ -61,5 +61,6 @@ class GazeController():
                 if self.acquire_prio:
                     self.rc.robot_controller.set_gaze_target(current_target, True)
             else:
-                time.sleep(0.005)
+                # Running with maximum frequency of 100 Hz
+                time.sleep(0.01)
         print ">>> Deactivating Gaze Controller to: %s" % self.rc.outscope.strip()

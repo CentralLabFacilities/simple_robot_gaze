@@ -24,6 +24,12 @@ modes:
   - relative
   - absolute
 
+# Skip stimulus input for n seconds, e.g., only react every three seconds to a stimulus: 3.0 | no timeout: 0.0
+stimulus_timeout:
+  - 0.0
+  - 0.0
+  - 0.0
+
 # What kind of data are you sending in your input stream, corresponds to priorities
 datatypes:
   - ros:People

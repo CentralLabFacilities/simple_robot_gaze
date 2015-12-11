@@ -48,6 +48,28 @@ from sensor_msgs.msg import RegionOfInterest
 from hlrc_client import RobotGaze
 
 
+class RosControlConnector():
+
+    def __init__(self):
+        self.inscope = "/srg/arbitrate/toggle"
+        self.stop_auto_arbitrate = False
+        self.run = True
+
+    def control_callback(self, ros_data):
+        if ros_data.data.lower() == "stop":
+            self.stop_auto_arbitrate = True
+        else:
+            self.stop_auto_arbitrate = False
+
+    def runner(self):
+        print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope
+        toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
+        while self.run is True:
+            time.sleep(0.5)
+        toggle_subscriber.unregister()
+        print ">>> Deactivating Toggle Subscriber to: %s" % self.inscope
+
+
 class RosConnector():
     """
     The GazeController receives person messages (ROS) and derives
@@ -55,12 +77,14 @@ class RosConnector():
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self, _inscope, _transform, _datatype, _mode):
+    def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout):
         self.run      = True
         self.trans    = _transform
+        self.last_stimulus    = 0.0
         self.inscope  = str(_inscope).lower().strip()
         self.datatype = str(_datatype).lower().strip()
         self.mode     = str(_mode).lower().strip()
+        self.stimulus_timeout = float(_stimulus_timeout)
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
         self.roi_x            = 0.0
@@ -90,16 +114,18 @@ class RosConnector():
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
         # print "----------------"
-        if angles is not None:
-            g = RobotGaze()
-            if self.mode == 'relative':
-                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            else:
-                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-            g.timestamp = send_time.to_sec()
-            g.pan = angles[0]
-            g.tilt = angles[1]
-            self.current_robot_gaze = g
+        if self.derive_stimulus_timeout is True:
+            if angles is not None:
+                g = RobotGaze()
+                if self.mode == 'relative':
+                    g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+                else:
+                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+                g.timestamp = send_time.to_sec()
+                g.pan = angles[0]
+                g.tilt = angles[1]
+                self.current_robot_gaze = g
+        self.last_stimulus = time.time()
 
     def roi_callback(self, ros_data):
         send_time = ros_data.header.stamp
@@ -120,6 +146,12 @@ class RosConnector():
             g.tilt = angles[1]
             self.current_robot_gaze = g
 
+    def derive_stimulus_timeout(self):
+        if time.time() - self.last_stimulus >= self.stimulus_timeout:
+            return True
+        else:
+            return False
+
     def runner(self):
         print ">>> Initializing ROS Subscriber to: %s" % self.inscope
         try:
@@ -134,6 +166,6 @@ class RosConnector():
             print ">>> ERROR %s" % str(e)
             return
         while self.run is True:
-            time.sleep(1)
+            time.sleep(0.5)
         person_subscriber.unregister()
         print ">>> Deactivating ROS Subscriber to: %s" % self.inscope

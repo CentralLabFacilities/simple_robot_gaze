@@ -56,6 +56,7 @@ class Arbitration:
         self.last_info       = time.time()
         # Robot Control
         self.rd = d.RobotDriver("ROS", _outscope.strip())
+        self.arbitrate_toggle = None
         time.sleep(0.5)
         self.read_yaml_config()
         self.configure_middleware()
@@ -90,21 +91,24 @@ class Arbitration:
 
     def configure_middleware(self):
         idx = 0
+        self.arbitrate_toggle = r.RosControlConnector()
+        time.sleep(0.2)
         for item in self.config["priorities"]:
             # Read config file an extract values
             res        = self.config["resolution"][idx].split("x")
             fov        = self.config["fov"][idx].split("x")
             datatypes  = self.config["datatypes"][idx].split(":")
             modes      = self.config["modes"][idx]
+            stimulus_timeout = self.config["stimulus_timeout"][idx]
             # Transformations
             at = t.AffineTransform(str(item))
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
             at.calculate_divider()
             self.transforms.append(at)
-            time.sleep(0.1)
+            time.sleep(0.2)
             # Middleware
             if datatypes[0].lower() == "ros":
-                mw = r.RosConnector(str(item), at, datatypes[1], modes)
+                mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout)
             elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :( "
                 self.run = False
@@ -114,17 +118,22 @@ class Arbitration:
                 self.run = False
                 sys.exit(1)
             self.input_sources.append(mw)
-            time.sleep(0.1)
+            time.sleep(0.2)
             # Gaze Control
             gc = g.GazeController(self.rd, mw)
             self.gaze_controller.append(gc)
             idx += 1
-            time.sleep(0.3)
+            time.sleep(0.2)
 
     def arbitrate(self):
         while self.run:
-            self.get_latest_targets()
-            time.sleep(0.05)
+            if self.arbitrate_toggle.self.stop_auto_arbitrate is False:
+                self.get_latest_targets()
+            else:
+                for gz in self.gaze_controller:
+                    gz.acquire_prio = False
+            # Running with maximum frequency of 100 Hz
+            time.sleep(0.01)
         print ">>> Stopping Arbitration"
 
     def get_latest_targets(self):
