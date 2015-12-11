@@ -67,6 +67,7 @@ class RosControlConnector():
 
     def runner(self):
         print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope
+        print "---"
         toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
         while self.run is True:
             time.sleep(0.5)
