@@ -70,7 +70,7 @@ class RosControlConnector():
         print "---"
         toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
         while self.run is True:
-            time.sleep(1)
+            time.sleep(1.0)
         toggle_subscriber.unregister()
         print ">>> Deactivating Toggle Subscriber to: %s" % self.inscope
 
@@ -93,7 +93,6 @@ class RosConnector():
         self.nearest_person_y = 0.0
         self.roi_x            = 0.0
         self.roi_y            = 0.0
-        self.last_stimulus    = 0.0
         self.current_robot_gaze = None
         self.current_robot_gaze_timestamp = None
         t = threading.Thread(target=self.runner)
@@ -118,19 +117,18 @@ class RosConnector():
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
-        if self.derive_stimulus_timeout() is True:
-            if angles is not None:
-                g = RobotGaze()
-                if self.mode == 'relative':
-                    g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-                else:
-                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-                g.timestamp = send_time.to_sec()
-                self.current_robot_gaze_timestamp = g.timestamp
-                g.pan = angles[0]
-                g.tilt = angles[1]
-                self.current_robot_gaze = g
-        self.last_stimulus = time.time()
+        if angles is not None:
+            g = RobotGaze()
+            if self.mode == 'relative':
+                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            else:
+                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+            g.timestamp = send_time.to_sec()
+            self.current_robot_gaze_timestamp = g.timestamp
+            g.pan = angles[0]
+            g.tilt = angles[1]
+            self.current_robot_gaze = g
+        self.honor_stimulus_timeout()
 
     def roi_callback(self, ros_data):
         send_time = ros_data.header.stamp
@@ -139,25 +137,21 @@ class RosConnector():
         point = [self.roi_x, self.roi_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
-        if self.derive_stimulus_timeout() is True:
-            if angles is not None:
-                g = RobotGaze()
-                if self.mode == 'absolute':
-                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-                else:
-                    g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-                g.timestamp = send_time.to_sec()
-                self.current_robot_gaze_timestamp = g.timestamp
-                g.pan = angles[0]
-                g.tilt = angles[1]
-                self.current_robot_gaze = g
-        self.last_stimulus = time.time()
+        if angles is not None:
+            g = RobotGaze()
+            if self.mode == 'absolute':
+                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+            else:
+                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            g.timestamp = send_time.to_sec()
+            self.current_robot_gaze_timestamp = g.timestamp
+            g.pan = angles[0]
+            g.tilt = angles[1]
+            self.current_robot_gaze = g
+        self.honor_stimulus_timeout()
 
-    def derive_stimulus_timeout(self):
-        if time.time() - self.last_stimulus >= self.stimulus_timeout:
-            return True
-        else:
-            return False
+    def honor_stimulus_timeout(self):
+        time.sleep(self.stimulus_timeout)
 
     def runner(self):
         print ">>> Initializing ROS Subscriber to: %s" % self.inscope
@@ -173,6 +167,6 @@ class RosConnector():
             print ">>> ERROR %s" % str(e)
             return
         while self.run is True:
-            time.sleep(1)
+            time.sleep(1.0)
         person_subscriber.unregister()
         print ">>> Deactivating ROS Subscriber to: %s" % self.inscope
