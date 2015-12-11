@@ -54,6 +54,8 @@ class RosControlConnector():
         self.inscope = "/srg/arbitrate/toggle"
         self.stop_auto_arbitrate = False
         self.run = True
+        t = threading.Thread(target=self.runner)
+        t.start()
 
     def control_callback(self, ros_data):
         if ros_data.data.lower() == "pause":
