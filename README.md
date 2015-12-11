@@ -40,9 +40,10 @@ Please use the CITK to install this component, there is already a project file f
 The file must reside in ~/.config/simplerobotgaze.yaml
 
 In order to stop simple robot gaze from controlling the robot simple send "pause" (string msg) to:
+
     /srg/arbitrate/toggle
 
-If you send something other than "stop", simple robot gaze will resume operation.
+If you send something other than "pause", simple robot gaze will resume operation.
 
 The priority of input data streams, the first entry has the highest priority, the last the lowest.
 
