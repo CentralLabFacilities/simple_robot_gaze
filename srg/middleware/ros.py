@@ -70,7 +70,7 @@ class RosControlConnector():
         print "---"
         toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
         while self.run is True:
-            time.sleep(0.5)
+            time.sleep(1)
         toggle_subscriber.unregister()
         print ">>> Deactivating Toggle Subscriber to: %s" % self.inscope
 
@@ -85,7 +85,6 @@ class RosConnector():
     def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout):
         self.run      = True
         self.trans    = _transform
-        self.last_stimulus    = time.time()
         self.inscope  = str(_inscope).lower().strip()
         self.datatype = str(_datatype).lower().strip()
         self.mode     = str(_mode).lower().strip()
@@ -94,12 +93,14 @@ class RosConnector():
         self.nearest_person_y = 0.0
         self.roi_x            = 0.0
         self.roi_y            = 0.0
+        self.last_stimulus    = 0.0
         self.current_robot_gaze = None
+        self.current_robot_gaze_timestamp = None
         t = threading.Thread(target=self.runner)
         t.start()
 
     def people_callback(self, ros_data):
-        # Determine the nearest person
+        send_time = ros_data.header.stamp
         idx = -1
         max_distance = {}
         for person in ros_data.people:
@@ -112,14 +113,12 @@ class RosConnector():
         # print ">> Distance in pixels: ", sort[0][1]
         self.nearest_person_x = ros_data.people[int(sort[0][0])].position.x
         self.nearest_person_y = ros_data.people[int(sort[0][0])].position.y
-        send_time = ros_data.header.stamp
         # print ">> Position in pixels x:", self.nearest_person_x
         # print ">> Position in pixels y:", self.nearest_person_y
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
-        # print "----------------"
-        if self.derive_stimulus_timeout is True:
+        if self.derive_stimulus_timeout() is True:
             if angles is not None:
                 g = RobotGaze()
                 if self.mode == 'relative':
@@ -127,6 +126,7 @@ class RosConnector():
                 else:
                     g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
                 g.timestamp = send_time.to_sec()
+                self.current_robot_gaze_timestamp = g.timestamp
                 g.pan = angles[0]
                 g.tilt = angles[1]
                 self.current_robot_gaze = g
@@ -139,17 +139,19 @@ class RosConnector():
         point = [self.roi_x, self.roi_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
-        # print "----------------"
-        if angles is not None:
-            g = RobotGaze()
-            if self.mode == 'absolute':
-                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-            else:
-                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            g.timestamp = send_time.to_sec()
-            g.pan = angles[0]
-            g.tilt = angles[1]
-            self.current_robot_gaze = g
+        if self.derive_stimulus_timeout() is True:
+            if angles is not None:
+                g = RobotGaze()
+                if self.mode == 'absolute':
+                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+                else:
+                    g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+                g.timestamp = send_time.to_sec()
+                self.current_robot_gaze_timestamp = g.timestamp
+                g.pan = angles[0]
+                g.tilt = angles[1]
+                self.current_robot_gaze = g
+        self.last_stimulus = time.time()
 
     def derive_stimulus_timeout(self):
         if time.time() - self.last_stimulus >= self.stimulus_timeout:
@@ -171,6 +173,6 @@ class RosConnector():
             print ">>> ERROR %s" % str(e)
             return
         while self.run is True:
-            time.sleep(0.5)
+            time.sleep(1)
         person_subscriber.unregister()
         print ">>> Deactivating ROS Subscriber to: %s" % self.inscope

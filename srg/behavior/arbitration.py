@@ -57,8 +57,8 @@ class Arbitration:
         # Robot Control
         self.rd = d.RobotDriver("ROS", _outscope.strip())
         self.arbitrate_toggle = None
-        time.sleep(0.5)
         self.read_yaml_config()
+        time.sleep(0.1)
         self.configure_middleware()
         # Start Arbitration
         t = threading.Thread(target=self.arbitrate)
@@ -66,7 +66,7 @@ class Arbitration:
 
     def request_stop(self):
         self.run = False
-        time.sleep(0.2)
+        time.sleep(0.1)
         self.arbitrate_toggle.run = False
         for connection in self.input_sources:
             connection.run = False
@@ -93,7 +93,7 @@ class Arbitration:
     def configure_middleware(self):
         idx = 0
         self.arbitrate_toggle = r.RosControlConnector()
-        time.sleep(0.2)
+        time.sleep(0.1)
         for item in self.config["priorities"]:
             # Read config file an extract values
             res        = self.config["resolution"][idx].split("x")
@@ -106,7 +106,7 @@ class Arbitration:
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
             at.calculate_divider()
             self.transforms.append(at)
-            time.sleep(0.2)
+            time.sleep(0.1)
             # Middleware
             if datatypes[0].lower() == "ros":
                 mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout)
@@ -119,12 +119,12 @@ class Arbitration:
                 self.run = False
                 sys.exit(1)
             self.input_sources.append(mw)
-            time.sleep(0.2)
+            time.sleep(0.1)
             # Gaze Control
             gc = g.GazeController(self.rd, mw)
             self.gaze_controller.append(gc)
             idx += 1
-            time.sleep(0.2)
+            time.sleep(0.1)
 
     def arbitrate(self):
         while self.run:
@@ -133,8 +133,8 @@ class Arbitration:
             else:
                 for gz in self.gaze_controller:
                     gz.acquire_prio = False
-            # Running with maximum frequency of 100 Hz
-            time.sleep(0.01)
+            # Running with maximum frequency of 50 Hz
+            time.sleep(0.05)
         print ">>> Stopping Arbitration"
 
     def get_latest_targets(self):
