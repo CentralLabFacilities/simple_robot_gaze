@@ -128,7 +128,7 @@ class Arbitration:
 
     def arbitrate(self):
         while self.run:
-            if self.arbitrate_toggle.self.stop_auto_arbitrate is False:
+            if self.arbitrate_toggle.stop_auto_arbitrate is False:
                 self.get_latest_targets()
             else:
                 for gz in self.gaze_controller:
