@@ -13,7 +13,7 @@
 
 # In order to stop simple robot gaze from controlling the robot simple send "pause" (string msg) to:
 # /srg/arbitrate/toggle
-# If you send something other than "stop", simple robot gaze will resume operation.
+# If you send something other than "pause", simple robot gaze will resume operation.
 
 ---
 
