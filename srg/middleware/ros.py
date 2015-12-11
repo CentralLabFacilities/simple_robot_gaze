@@ -56,7 +56,7 @@ class RosControlConnector():
         self.run = True
 
     def control_callback(self, ros_data):
-        if ros_data.data.lower() == "stop":
+        if ros_data.data.lower() == "pause":
             self.stop_auto_arbitrate = True
         else:
             self.stop_auto_arbitrate = False

@@ -10,6 +10,11 @@
 # TODO: Implement support for ROS TF targets.
 
 # This file must reside in ~/.config/simplerobotgaze.yaml
+
+# In order to stop simple robot gaze from controlling the robot simple send "pause" (string msg) to:
+# /srg/arbitrate/toggle
+# If you send something other than "stop", simple robot gaze will resume operation.
+
 ---
 
 # The priority of input data streams (ROS people msg), the first entry has the highest priority

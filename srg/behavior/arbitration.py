@@ -67,6 +67,7 @@ class Arbitration:
     def request_stop(self):
         self.run = False
         time.sleep(0.2)
+        self.arbitrate_toggle.run = False
         for connection in self.input_sources:
             connection.run = False
         for gazecontrol in self.gaze_controller:
