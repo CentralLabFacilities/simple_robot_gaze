@@ -85,7 +85,7 @@ class RosConnector():
     def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout):
         self.run      = True
         self.trans    = _transform
-        self.last_stimulus    = 0.0
+        self.last_stimulus    = time.time()
         self.inscope  = str(_inscope).lower().strip()
         self.datatype = str(_datatype).lower().strip()
         self.mode     = str(_mode).lower().strip()
