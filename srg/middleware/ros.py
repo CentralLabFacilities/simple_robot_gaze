@@ -58,8 +58,10 @@ class RosControlConnector():
     def control_callback(self, ros_data):
         if ros_data.data.lower() == "pause":
             self.stop_auto_arbitrate = True
+            print ">>> Auto Arbitrate is PAUSED"
         else:
             self.stop_auto_arbitrate = False
+            print ">>> Auto Arbitrate is RESUMED"
 
     def runner(self):
         print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope
