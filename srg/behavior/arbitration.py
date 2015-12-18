@@ -140,22 +140,26 @@ class Arbitration:
 
     def get_latest_targets(self):
         updates = []
+        stimulus_timeouts = []
         for target in self.input_sources:
             if target.current_robot_gaze is not None:
-                updates.append(target.current_robot_gaze.timestamp)
+                updates.append(target.current_robot_gaze_timestamp)
+                stimulus_timeouts.append(target.current_robot_gaze.stimulus_timeout)
             else:
                 updates.append(None)
-        self.derive_order(updates)
+        self.derive_order(updates, stimulus_timeouts)
 
-    def derive_order(self, _updates):
+    def derive_order(self, _updates, _stimulus_timeouts):
         idx = -1
+        n = 0
         # Now honor priority and latest input
         now = time.time()
         # Default winner is always highest prio
         winner = 0
         for stamp in _updates:
             if stamp is not None:
-                if now - stamp <= self.boring:
+                n += 1
+                if now - stamp <= _stimulus_timeouts[n] + self.boring:
                     idx += 1
                     winner = idx
                     break
