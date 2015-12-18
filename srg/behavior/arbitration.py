@@ -133,8 +133,8 @@ class Arbitration:
             else:
                 for gz in self.gaze_controller:
                     gz.acquire_prio = False
-            hz = 0.05
-            # Running with maximum frequency of 50 Hz
+            hz = 0.01
+            # Running with maximum frequency of 100 Hz
             time.sleep(hz)
         print ">>> Stopping Arbitration"
 
