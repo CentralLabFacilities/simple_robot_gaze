@@ -155,7 +155,7 @@ class Arbitration:
         winner = 0
         for stamp in _updates:
             if stamp is not None:
-                if now - stamp <= self.boring:
+                if float(now - stamp) <= self.boring:
                     idx += 1
                     winner = idx
                     break
