@@ -43,6 +43,7 @@ from std_msgs.msg import String
 from people_msgs.msg import Person
 from people_msgs.msg import People
 from sensor_msgs.msg import RegionOfInterest
+from geometry_msgs.msg import Point
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
@@ -93,6 +94,9 @@ class RosConnector():
         self.nearest_person_y = 0.0
         self.roi_x            = 0.0
         self.roi_y            = 0.0
+        self.point_x          = 0.0
+        self.point_y          = 0.0
+        self.point_z          = 0.0
         self.current_robot_gaze = None
         self.current_robot_gaze_timestamp = None
         t = threading.Thread(target=self.runner)
@@ -131,7 +135,9 @@ class RosConnector():
         self.honor_stimulus_timeout()
 
     def roi_callback(self, ros_data):
-        send_time = ros_data.header.stamp
+        # ROI MSGS don't feature a header, so we need to set
+        # the timestamp here.
+        send_time = time.time()
         self.roi_x = ros_data.regionofinterest.x_offset
         self.roi_y = ros_data.regionofinterest.y_offset
         point = [self.roi_x, self.roi_y]
@@ -143,7 +149,28 @@ class RosConnector():
                 g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             else:
                 g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            g.timestamp = send_time.to_sec()
+            g.timestamp = send_time
+            self.current_robot_gaze_timestamp = g.timestamp
+            g.pan = angles[0]
+            g.tilt = angles[1]
+            self.current_robot_gaze = g
+        self.honor_stimulus_timeout()
+
+    def point_callback(self, ros_data):
+        send_time = ros_data.header.stamp
+        self.point_x = ros_data.x
+        self.point_y = ros_data.y
+        self.point_z = ros_data.z
+        point = [self.point_x, self.point_y]
+        # Derive coordinate mapping
+        angles = self.trans.derive_mapping_coords(point)
+        if angles is not None:
+            g = RobotGaze()
+            if self.mode == 'absolute':
+                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+            else:
+                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            g.timestamp = send_time
             self.current_robot_gaze_timestamp = g.timestamp
             g.pan = angles[0]
             g.tilt = angles[1]
@@ -160,6 +187,8 @@ class RosConnector():
                 person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
             elif self.datatype == "regionofinterest":
                 person_subscriber = rospy.Subscriber(self.inscope, RegionOfInterest, self.roi_callback, queue_size=1)
+            elif self.datatype == "point":
+                person_subscriber = rospy.Subscriber(self.inscope, Point, self.point_callback, queue_size=1)
             else:
                 print ">>> ROS Subscriber DataType not supported %s" % self.datatype
                 return
