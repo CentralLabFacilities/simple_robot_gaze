@@ -151,7 +151,7 @@ class RosConnector():
                 g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             else:
                 g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            g.timestamp = send_time
+            g.timestamp = send_time.to_sec()
             self.current_robot_gaze_timestamp = g.timestamp
             g.pan = angles[0]
             g.tilt = angles[1]
@@ -172,7 +172,7 @@ class RosConnector():
                 g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             else:
                 g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            g.timestamp = send_time
+            g.timestamp = send_time.to_sec()
             self.current_robot_gaze_timestamp = g.timestamp
             g.pan = angles[0]
             g.tilt = angles[1]
