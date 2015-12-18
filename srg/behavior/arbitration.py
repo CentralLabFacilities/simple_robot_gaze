@@ -144,7 +144,7 @@ class Arbitration:
         for target in self.input_sources:
             if target.current_robot_gaze is not None:
                 updates.append(target.current_robot_gaze_timestamp)
-                stimulus_timeouts.append(target.current_robot_gaze.stimulus_timeout)
+                stimulus_timeouts.append(target.stimulus_timeout)
             else:
                 updates.append(None)
         self.derive_order(updates, stimulus_timeouts)
