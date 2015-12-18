@@ -38,7 +38,7 @@ stimulus_timeout:
 # What kind of data are you sending in your input stream, corresponds to priorities
 datatypes:
   - ros:People
-  - ros:Point
+  - ros:PointStamped
   - ros:RegionOfInterest
 
 # Resolution of the source camera image, corresponds to the priorities
