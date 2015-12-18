@@ -155,6 +155,8 @@ class Arbitration:
         winner = 0
         for stamp in _updates:
             if stamp is not None:
+                print now
+                print stamp
                 if now - stamp <= self.boring:
                     idx += 1
                     winner = idx
