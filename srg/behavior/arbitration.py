@@ -52,7 +52,7 @@ class Arbitration:
         self.transforms      = []
         self.input_sources   = []
         self.gaze_controller = []
-        self.boring          = 2.0
+        self.boring          = 2
         self.last_info       = time.time()
         # Robot Control
         self.rd = d.RobotDriver("ROS", _outscope.strip())
@@ -155,7 +155,7 @@ class Arbitration:
         winner = 0
         for stamp in _updates:
             if stamp is not None:
-                if float(now) - stamp <= self.boring:
+                if now - stamp <= self.boring:
                     idx += 1
                     winner = idx
                     break
