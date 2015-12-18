@@ -151,14 +151,14 @@ class Arbitration:
 
     def derive_order(self, _updates, _stimulus_timeouts):
         idx = -1
-        n = 0
+        n = -1
         # Now honor priority and latest input
         now = time.time()
         # Default winner is always highest prio
         winner = 0
         for stamp in _updates:
+            n += 1
             if stamp is not None:
-                n += 1
                 if now - stamp <= _stimulus_timeouts[n] + self.boring:
                     idx += 1
                     winner = idx
