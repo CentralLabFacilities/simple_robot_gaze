@@ -43,7 +43,9 @@ from std_msgs.msg import String
 from people_msgs.msg import Person
 from people_msgs.msg import People
 from sensor_msgs.msg import RegionOfInterest
+from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import Point
+
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
@@ -158,9 +160,9 @@ class RosConnector():
 
     def point_callback(self, ros_data):
         send_time = ros_data.header.stamp
-        self.point_x = ros_data.x
-        self.point_y = ros_data.y
-        self.point_z = ros_data.z
+        self.point_x = ros_data.point.x
+        self.point_y = ros_data.point.y
+        self.point_z = ros_data.point.z
         point = [self.point_x, self.point_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
@@ -187,8 +189,8 @@ class RosConnector():
                 person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
             elif self.datatype == "regionofinterest":
                 person_subscriber = rospy.Subscriber(self.inscope, RegionOfInterest, self.roi_callback, queue_size=1)
-            elif self.datatype == "point":
-                person_subscriber = rospy.Subscriber(self.inscope, Point, self.point_callback, queue_size=1)
+            elif self.datatype == "pointstamped":
+                person_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
             else:
                 print ">>> ROS Subscriber DataType not supported %s" % self.datatype
                 return
