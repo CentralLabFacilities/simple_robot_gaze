@@ -76,30 +76,6 @@ class RosControlConnector:
         toggle_subscriber.unregister()
         print ">>> Deactivating Toggle Subscriber to: %s" % self.inscope
 
-    def __init__(self):
-        self.inscope = "/srg/arbitrate/toggle"
-        self.stop_auto_arbitrate = False
-        self.run = True
-        t = threading.Thread(target=self.runner)
-        t.start()
-
-    def control_callback(self, ros_data):
-        if ros_data.data.lower() == "pause":
-            self.stop_auto_arbitrate = True
-            print ">>> Auto Arbitrate is PAUSED"
-        else:
-            self.stop_auto_arbitrate = False
-            print ">>> Auto Arbitrate is RESUMED"
-
-    def runner(self):
-        print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope
-        print "---"
-        toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
-        while self.run is True:
-            time.sleep(1.0)
-        toggle_subscriber.unregister()
-        print ">>> Deactivating Toggle Subscriber to: %s" % self.inscope
-
 
 class RosConnector():
     """
