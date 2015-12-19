@@ -35,34 +35,47 @@ import sys
 import time
 import yaml
 import threading
+from PyQt4 import QtGui
+from PyQt4.QtGui import QApplication
 
 # SELF IMPORTS
 from srg.robot import driver as d
 from srg.control import gaze as g
 from srg.middleware import ros as r
 from srg.utils import transform as t
+from srg.gui import viz as v
 
 
 class Arbitration:
 
     def __init__(self, _configfile, _outscope):
-        self.run             = True
-        self.cfgfile         = _configfile.strip()
-        self.config          = None
-        self.transforms      = []
-        self.input_sources   = []
-        self.gaze_controller = []
-        self.boring          = 2
-        self.last_info       = time.time()
+        self.run              = True
+        self.cfgfile          = _configfile.strip()
+        self.config           = None
+        self.transforms       = []
+        self.input_sources    = []
+        self.gaze_controller  = []
+        self.boring           = 2
+        self.last_info        = time.time()
+        self.gui              = None
+        self.app              = None
+        self.winner           = None
+        self.middleware_ready = False
         # Robot Control
         self.rd = d.RobotDriver("ROS", _outscope.strip())
         self.arbitrate_toggle = None
         self.read_yaml_config()
-        time.sleep(0.1)
         self.configure_middleware()
         # Start Arbitration
         t = threading.Thread(target=self.arbitrate)
         t.start()
+        u = threading.Thread(target=self.init_viz)
+        u.start()
+
+    def init_viz(self):
+        self.app = QtGui.QApplication(sys.argv)
+        self.gui = v.Viz(self.input_sources, self.gaze_controller, self)
+        sys.exit(self.app.exec_())
 
     def read_yaml_config(self):
         try:
@@ -84,7 +97,8 @@ class Arbitration:
     def configure_middleware(self):
         idx = 0
         self.arbitrate_toggle = r.RosControlConnector()
-        time.sleep(0.1)
+        while self.arbitrate_toggle.ready is False:
+            time.sleep(0.05)
         for item in self.config["priorities"]:
             # Read config file an extract values
             res        = self.config["resolution"][idx].split("x")
@@ -97,7 +111,6 @@ class Arbitration:
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
             at.calculate_divider()
             self.transforms.append(at)
-            time.sleep(0.1)
             # Middleware
             if datatypes[0].lower() == "ros":
                 mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout)
@@ -109,13 +122,28 @@ class Arbitration:
                 print ">>> Unknown middleware %s" % datatypes[0]
                 self.run = False
                 sys.exit(1)
+            while mw.ready is False:
+                time.sleep(0.05)
             self.input_sources.append(mw)
-            time.sleep(0.1)
             # Gaze Control
             gc = g.GazeController(self.rd, mw)
             self.gaze_controller.append(gc)
             idx += 1
-            time.sleep(0.1)
+        self.middleware_ready = True
+
+    def request_stop(self):
+        for connection in self.input_sources:
+            connection.run = False
+        for gazecontrol in self.gaze_controller:
+            gazecontrol.run = False
+        time.sleep(0.1)
+        self.arbitrate_toggle.run = False
+        time.sleep(0.1)
+        self.gui.run = False
+        time.sleep(0.1)
+        QApplication.quit()
+        time.sleep(0.1)
+        self.run = False
 
     def arbitrate(self):
         while self.run:
@@ -166,6 +194,7 @@ class Arbitration:
             if idx == winner:
                 gz.acquire_prio = True
                 now = time.time()
+                self.winner = winner
                 if now - self.last_info >= 2.0:
                     print ">>> Winning input is %s" % self.input_sources[winner].inscope
                     self.last_info = time.time()

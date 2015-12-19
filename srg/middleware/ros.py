@@ -56,6 +56,7 @@ class RosControlConnector:
         self.inscope = "/robotgazetools/toggle"
         self.pause_auto_arbitrate = False
         self.run = True
+        self.ready = True
         t = threading.Thread(target=self.runner)
         t.start()
 
@@ -71,13 +72,14 @@ class RosControlConnector:
         print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope
         print "---"
         toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
+        self.ready = True
         while self.run is True:
             time.sleep(1.0)
         toggle_subscriber.unregister()
-        print ">>> Deactivating Toggle Subscriber to: %s" % self.inscope
+        print ">>> Deactivating ROS Toggle Subscriber to: %s" % self.inscope
 
 
-class RosConnector():
+class RosConnector:
     """
     The GazeController receives person messages (ROS) and derives
     the nearest person identified. Based on this, the robot's
@@ -86,6 +88,7 @@ class RosConnector():
     """
     def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout):
         self.run      = True
+        self.ready    = False
         self.trans    = _transform
         self.inscope  = str(_inscope).lower().strip()
         self.datatype = str(_datatype).lower().strip()
@@ -196,6 +199,7 @@ class RosConnector():
         except Exception, e:
             print ">>> ERROR %s" % str(e)
             return
+        self.ready = True
         while self.run is True:
             time.sleep(1.0)
         person_subscriber.unregister()
