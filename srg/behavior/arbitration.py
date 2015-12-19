@@ -64,15 +64,6 @@ class Arbitration:
         t = threading.Thread(target=self.arbitrate)
         t.start()
 
-    def request_stop(self):
-        self.run = False
-        time.sleep(0.1)
-        self.arbitrate_toggle.run = False
-        for connection in self.input_sources:
-            connection.run = False
-        for gazecontrol in self.gaze_controller:
-            gazecontrol.run = False
-
     def read_yaml_config(self):
         try:
             print ">>> Using config: %s" % self.cfgfile
@@ -128,7 +119,7 @@ class Arbitration:
 
     def arbitrate(self):
         while self.run:
-            if self.arbitrate_toggle.stop_auto_arbitrate is False:
+            if self.arbitrate_toggle.pause_auto_arbitrate is False:
                 self.get_latest_targets()
             else:
                 for gz in self.gaze_controller:

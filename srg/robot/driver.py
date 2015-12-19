@@ -37,11 +37,10 @@ import logging
 from hlrc_client import RobotController
 
 
-class RobotDriver():
+class RobotDriver:
     """
     This class holds the robot controller.
     Provides better encapsulation though...
-    no, it does NOT.
     """
     def __init__(self, _mw, _outscope):
         print(">>> Initializing Robot Controller")

@@ -35,7 +35,7 @@ import time
 import threading
 
 
-class GazeController():
+class GazeController:
     """
     The GazeController receives person messages (ROS) and derives
     the nearest person identified. Based on this, the robot's
