@@ -153,11 +153,8 @@ class Arbitration:
             gazecontrol.run = False
             time.sleep(0.01)
         self.arbitrate_toggle.run = False
-        time.sleep(0.1)
         self.gui.run = False
-        time.sleep(0.1)
         QApplication.quit()
-        time.sleep(0.1)
         self.run = False
 
     def arbitrate(self):
