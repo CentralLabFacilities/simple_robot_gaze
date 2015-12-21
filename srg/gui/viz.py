@@ -32,6 +32,7 @@ Authors: Florian Lier, Simon Schulz
 
 # STD
 import time
+import random
 import threading
 
 # PyQT
@@ -42,51 +43,82 @@ from PyQt4.QtCore import pyqtSlot
 # SELF
 from srg.middleware import ros as r
 
+
 class Viz(QtGui.QWidget):
     def __init__(self, _input_source, _gaze_controller, _arbitration):
         super(Viz, self).__init__()
-        self.tc = r.ToggleConnector()
-        self.ispaused = False
-        self.run = True
-        self.layout = QtGui.QHBoxLayout(self)
-        self.label = QtGui.QLabel("Current Stimulus #1 :")
-        self.layout.addWidget(self.label)
-        self.textbox = QLineEdit(self)
-        self.textbox.move(20, 20)
-        self.textbox.resize(250, 40)
-        self.layout.addWidget(self.textbox)
-        self.button = QPushButton('Pause Auto Gaze', self)
-        self.button.move(20, 80)
-        self.layout.addWidget(self.button)
+
         self.arbitration  = _arbitration
         self.input_sources   = _input_source
         self.gaze_controller = _gaze_controller
+
+        self.tc = r.ToggleConnector()
+        self.ispaused = False
+        self.run = True
+
+        self.font = QtGui.QFont()
+        self.font.setPointSize(10)
+        self.font.setBold(True)
+        self.font.setWeight(75)
+
+        self.layout = QtGui.QVBoxLayout(self)
+        self.ccs_label = QtGui.QLabel("Current Control Stimulus :")
+        self.ccs_label.setFont(self.font)
+        self.layout.addWidget(self.ccs_label)
+
+        self.current_targets = {}
+        self.current_activity = {}
+        self.info_labels = {}
+        for gc in self.gaze_controller:
+            name = gc.mw.inscope
+            self.info_labels[name] = QtGui.QLabel(name)
+            self.current_activity[name] = QtGui.QProgressBar()
+            self.current_activity[name].setMaximum(100)
+            self.current_activity[name].setMinimum(1)
+            self.current_activity[name].setValue(random.randint(1, 100))
+        for label in self.info_labels:
+            self.layout.addWidget(self.info_labels[label])
+            self.layout.addWidget(self.current_activity[label])
+
+        self.pause_button = QPushButton('Pause Auto Gaze', self)
+        self.pause_button.clicked.connect(self.pause)
+        self.layout.addWidget(self.pause_button)
+
+        # self.quit_button = QPushButton('Close Simple Robot Gaze', self)
+        # self.quit_button.clicked.connect(self.exit_srg)
+        # self.layout.addWidget(self.quit_button)
+
         self.init_ui()
 
     def start_viz(self):
-        gt = threading.Thread(target=self.get_winning_stimulus)
+        gt = threading.Thread(target=self.get_control_data)
         gt.start()
 
-    def get_winning_stimulus(self):
+    def get_control_data(self):
         while self.run:
             if self.arbitration.winner is not None:
-                self.textbox.setText(self.input_sources[self.arbitration.winner].inscope)
+                self.ccs_label.setText("Current Controlling Stimulus: "+self.input_sources[self.arbitration.winner].inscope)
+                for gc in self.gaze_controller:
+                    self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
+                for data in self.current_targets.keys():
+                    self.info_labels[data].setText("Current Targets @ "+data+" >>> "+str(self.current_targets[data]))
             # Update GUI every 100ms
             time.sleep(0.1)
 
-    @pyqtSlot()
-    def on_click(self):
+    def pause(self):
             if self.ispaused is False:
                 self.tc.pause()
                 self.ispaused = True
-                self.button.setText("Resume Auto Gaze")
+                self.pause_button.setText("Resume Auto Gaze")
             else:
                 self.tc.resume()
                 self.ispaused = False
-                self.button.setText("Pause Auto Gaze")
+                self.pause_button.setText("Pause Auto Gaze")
+
+    def exit_srg(self):
+        self.arbitration.request_stop()
 
     def init_ui(self):
-        self.setGeometry(100, 100, 640, 300)
-        self.setWindowTitle(":: Florian's Simple Robot Gaze ::")
-        self.button.clicked.connect(self.on_click)
+        self.setGeometry(100, 100, 640, 100)
+        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [10 Hz GUI Update Rate]")
         self.show()
