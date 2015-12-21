@@ -139,14 +139,16 @@ class Arbitration:
             gc = g.GazeController(self.rd, mw)
             self.gaze_controller.append(gc)
             idx += 1
+        # Wait for the middleware to catch up
+        time.sleep(0.2)
         self.middleware_ready = True
 
     def request_stop(self):
         for connection in self.input_sources:
             connection.run = False
+        time.sleep(0.1)
         for gazecontrol in self.gaze_controller:
             gazecontrol.run = False
-        time.sleep(0.1)
         self.arbitrate_toggle.run = False
         time.sleep(0.1)
         self.gui.run = False
