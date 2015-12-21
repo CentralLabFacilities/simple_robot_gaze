@@ -89,6 +89,7 @@ class Arbitration:
 
     def read_yaml_config(self):
         try:
+            print "---"
             print ">>> Using config: %s" % self.cfgfile
             print "---"
             f = open(self.cfgfile)
