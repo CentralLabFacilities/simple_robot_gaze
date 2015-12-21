@@ -45,7 +45,7 @@ from srg.middleware import ros as r
 class Viz(QtGui.QWidget):
     def __init__(self, _input_source, _gaze_controller, _arbitration):
         super(Viz, self).__init__()
-        self.tc = r.ToggleConnector
+        self.tc = r.ToggleConnector()
         self.ispaused = False
         self.run = True
         self.layout = QtGui.QHBoxLayout(self)
@@ -79,11 +79,11 @@ class Viz(QtGui.QWidget):
             if self.ispaused is False:
                 self.tc.pause()
                 self.ispaused = True
-                self.button.setText("Resume")
+                self.button.setText("Resume Auto Gaze")
             else:
                 self.tc.resume()
                 self.ispaused = False
-                self.button.setText("Pause")
+                self.button.setText("Pause Auto Gaze")
 
     def init_ui(self):
         self.setGeometry(100, 100, 640, 480)
