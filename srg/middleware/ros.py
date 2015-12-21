@@ -53,10 +53,10 @@ from hlrc_client import RobotGaze
 
 class RosControlConnector:
     def __init__(self):
-        self.inscope = "/robotgazetools/toggle"
-        self.pause_auto_arbitrate = False
         self.run = True
-        self.ready = True
+        self.ready = False
+        self.pause_auto_arbitrate = False
+        self.inscope = "/robotgazetools/toggle"
 
     def start_mw(self):
         mt = threading.Thread(target=self.runner)

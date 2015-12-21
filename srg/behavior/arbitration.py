@@ -63,7 +63,6 @@ class Arbitration:
         self.winner           = None
         self.arbitrate_toggle = None
         self.rd               = None
-        self.middleware_ready = False
 
     def start_robot_driver(self):
         self.rd = d.RobotDriver("ROS", self.outscope.strip())
@@ -107,24 +106,27 @@ class Arbitration:
     def configure_middleware(self):
         idx = 0
         self.arbitrate_toggle = r.RosControlConnector()
+        self.arbitrate_toggle.start_mw()
         while self.arbitrate_toggle.ready is False:
             time.sleep(0.001)
         for item in self.config["priorities"]:
+
             # Read config file an extract values
             res        = self.config["resolution"][idx].split("x")
             fov        = self.config["fov"][idx].split("x")
             datatypes  = self.config["datatypes"][idx].split(":")
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
+
             # Transformations
             at = t.AffineTransform(str(item))
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
             at.calculate_divider()
             self.transforms.append(at)
+
             # Middleware
             if datatypes[0].lower() == "ros":
                 mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout)
-                mw.start_mw()
             elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :( "
                 self.run = False
@@ -133,15 +135,17 @@ class Arbitration:
                 print ">>> Unknown middleware %s" % datatypes[0]
                 self.run = False
                 sys.exit(1)
-            while mw.ready is False:
-                time.sleep(0.001)
             self.input_sources.append(mw)
+
             # Gaze Control
             gc = g.GazeController(self.rd, mw)
-            gc.start_gaze()
             self.gaze_controller.append(gc)
             idx += 1
-        self.middleware_ready = True
+        # RUN!
+        for i_s in self.input_sources:
+            i_s.start_mw()
+        for g_c in self.gaze_controller:
+            g_c.start_gaze()
 
     def request_stop(self):
         for connection in self.input_sources:
