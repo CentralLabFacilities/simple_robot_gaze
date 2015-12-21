@@ -48,11 +48,13 @@ class GazeController:
         self.lastdatum    = time.time()
         self.rc           = _robot_controller
         self.acquire_prio = False
-        t = threading.Thread(target=self.runner)
-        t.start()
+
+    def start_gaze(self):
+        gt = threading.Thread(target=self.runner)
+        gt.start()
 
     def runner(self):
-        print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope, self.rc.outscope.strip())
+        print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope.strip(), self.rc.outscope.strip())
         while self.run is True:
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze_timestamp:
                 self.lastdatum = self.mw.current_robot_gaze_timestamp

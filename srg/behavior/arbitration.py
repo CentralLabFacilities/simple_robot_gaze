@@ -124,7 +124,7 @@ class Arbitration:
             # Middleware
             if datatypes[0].lower() == "ros":
                 mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout)
-                time.sleep(0.05)
+                mw.start_mw()
             elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :( "
                 self.run = False
@@ -138,6 +138,7 @@ class Arbitration:
             self.input_sources.append(mw)
             # Gaze Control
             gc = g.GazeController(self.rd, mw)
+            gc.start_gaze()
             self.gaze_controller.append(gc)
             idx += 1
         # Wait for the middleware to catch up
