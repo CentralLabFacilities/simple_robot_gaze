@@ -73,7 +73,6 @@ class Arbitration:
         self.configure_middleware()
 
     def start_arbitrate_thread(self):
-        # Start Arbitration
         at = threading.Thread(target=self.arbitrate)
         at.start()
 
@@ -186,6 +185,8 @@ class Arbitration:
         now = time.time()
         # Default winner is always highest prio
         winner = 0
+        if len(_updates) != len(_stimulus_timeouts):
+            return
         for stamp in _updates:
             n += 1
             if stamp is not None:
