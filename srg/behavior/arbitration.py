@@ -141,8 +141,6 @@ class Arbitration:
             gc.start_gaze()
             self.gaze_controller.append(gc)
             idx += 1
-        # Wait for the middleware to catch up
-        time.sleep(0.2)
         self.middleware_ready = True
 
     def request_stop(self):
