@@ -124,6 +124,7 @@ class Arbitration:
             # Middleware
             if datatypes[0].lower() == "ros":
                 mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout)
+                time.sleep(0.05)
             elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :( "
                 self.run = False
