@@ -45,9 +45,9 @@ class GazeController:
     def __init__(self, _robot_controller, _mw):
         self.mw           = _mw
         self.run          = True
+        self.acquire_prio = False
         self.lastdatum    = time.time()
         self.rc           = _robot_controller
-        self.acquire_prio = False
 
     def start_gaze(self):
         gt = threading.Thread(target=self.runner)

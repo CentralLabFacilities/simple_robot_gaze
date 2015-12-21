@@ -46,7 +46,6 @@ class Viz(QtGui.QWidget):
         self.run = True
         self.layout = QtGui.QHBoxLayout(self)
         self.label = QtGui.QLabel("Current Stimulus:")
-        # self.label.setFixedWidth(200)
         self.layout.addWidget(self.label)
         self.textbox = QLineEdit(self)
         self.textbox.move(20, 20)
@@ -60,14 +59,15 @@ class Viz(QtGui.QWidget):
         self.gaze_controller = _gaze_controller
         self.init_ui()
 
-    def runner(self):
-        t = threading.Thread(target=self.get_winning_stimulus)
-        t.start()
+    def start_viz(self):
+        gt = threading.Thread(target=self.get_winning_stimulus)
+        gt.start()
 
     def get_winning_stimulus(self):
         while self.run:
             if self.arbitration.winner is not None:
                 self.textbox.setText(self.input_sources[self.arbitration.winner].inscope)
+            # Update GUI every 100ms
             time.sleep(0.1)
 
     @pyqtSlot()

@@ -83,7 +83,7 @@ class Arbitration:
     def init_viz(self):
         self.app = QtGui.QApplication(sys.argv)
         self.gui = v.Viz(self.input_sources, self.gaze_controller, self)
-        self.gui.runner()
+        self.gui.start_viz()
         sys.exit(self.app.exec_())
 
     def read_yaml_config(self):
@@ -151,6 +151,7 @@ class Arbitration:
         time.sleep(0.1)
         for gazecontrol in self.gaze_controller:
             gazecontrol.run = False
+        time.sleep(0.1)
         self.arbitrate_toggle.run = False
         time.sleep(0.1)
         self.gui.run = False
