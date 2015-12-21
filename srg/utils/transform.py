@@ -74,8 +74,6 @@ class AffineTransform:
 
     def set_coords(self, _x, _y, _fov_h, _fov_v):
 
-        print ">>> Derived mapping: %.fx%.f (pixels) to %.fx%.f (fov) for %s" % (_x, _y, _fov_h, _fov_v, self.name)
-
         fov_h = _fov_h
         fov_v = _fov_v
 
