@@ -53,7 +53,7 @@ class Viz(QtGui.QWidget):
         self.layout.addWidget(self.label)
         self.textbox = QLineEdit(self)
         self.textbox.move(20, 20)
-        self.textbox.resize(280, 40)
+        # self.textbox.resize(280, 40)
         self.layout.addWidget(self.textbox)
         self.button = QPushButton('Pause Auto Gaze', self)
         self.button.move(20, 80)
@@ -86,7 +86,7 @@ class Viz(QtGui.QWidget):
                 self.button.setText("Pause Auto Gaze")
 
     def init_ui(self):
-        self.setGeometry(100, 100, 640, 480)
+        self.setGeometry(100, 100, 100, 300)
         self.setWindowTitle(":: Florian's Simple Robot Gaze ::")
         self.button.clicked.connect(self.on_click)
         self.show()
