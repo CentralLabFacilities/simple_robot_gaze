@@ -65,12 +65,12 @@ class Arbitration:
         self.arbitrate_toggle = None
         self.rd               = None
 
+    def start_robot_driver(self):
+        self.rd = d.RobotDriver("ROS", self.outscope.strip())
+
     def configure(self):
         self.read_yaml_config()
         self.configure_middleware()
-
-    def start_robot_driver(self):
-        self.rd = d.RobotDriver("ROS", self.outscope.strip())
 
     def start_arbitrate_thread(self):
         # Start Arbitration
@@ -84,6 +84,7 @@ class Arbitration:
     def init_viz(self):
         self.app = QtGui.QApplication(sys.argv)
         self.gui = v.Viz(self.input_sources, self.gaze_controller, self)
+        self.gui.run()
         sys.exit(self.app.exec_())
 
     def read_yaml_config(self):

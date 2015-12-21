@@ -59,6 +59,8 @@ class Viz(QtGui.QWidget):
         self.input_sources   = _input_source
         self.gaze_controller = _gaze_controller
         self.init_ui()
+
+    def run(self):
         t = threading.Thread(target=self.get_winning_stimulus)
         t.start()
 

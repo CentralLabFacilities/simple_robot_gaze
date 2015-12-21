@@ -47,8 +47,8 @@ def runner(_options):
 
     # Arbitration
     ar = a.Arbitration(_options.config, options.outscope)
-    ar.configure()
     ar.start_robot_driver()
+    ar.configure()
     ar.start_arbitrate_thread()
     ar.start_viz_thread()
 
