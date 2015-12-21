@@ -55,7 +55,6 @@ def runner(_options):
     def signal_handler(sig, frame):
         print ">>> Exiting (signal %s)..." % str(sig)
         ar.request_stop()
-        time.sleep(0.2)
         print ">>> Bye!"
         sys.exit(0)
 

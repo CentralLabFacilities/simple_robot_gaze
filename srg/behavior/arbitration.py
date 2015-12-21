@@ -148,10 +148,10 @@ class Arbitration:
     def request_stop(self):
         for connection in self.input_sources:
             connection.run = False
-        time.sleep(0.1)
+            time.sleep(0.01)
         for gazecontrol in self.gaze_controller:
             gazecontrol.run = False
-        time.sleep(0.1)
+            time.sleep(0.01)
         self.arbitrate_toggle.run = False
         time.sleep(0.1)
         self.gui.run = False
