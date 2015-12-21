@@ -39,10 +39,14 @@ from PyQt4 import QtGui
 from PyQt4.QtGui import *
 from PyQt4.QtCore import pyqtSlot
 
+# SELF
+from srg.middleware import ros as r
 
 class Viz(QtGui.QWidget):
     def __init__(self, _input_source, _gaze_controller, _arbitration):
         super(Viz, self).__init__()
+        self.tc = r.ToggleConnector
+        self.ispaused = False
         self.run = True
         self.layout = QtGui.QHBoxLayout(self)
         self.label = QtGui.QLabel("Current Stimulus:")
@@ -51,7 +55,7 @@ class Viz(QtGui.QWidget):
         self.textbox.move(20, 20)
         self.textbox.resize(280, 40)
         self.layout.addWidget(self.textbox)
-        self.button = QPushButton('click.', self)
+        self.button = QPushButton('Pause Auto Gaze', self)
         self.button.move(20, 80)
         self.layout.addWidget(self.button)
         self.arbitration  = _arbitration
@@ -72,7 +76,14 @@ class Viz(QtGui.QWidget):
 
     @pyqtSlot()
     def on_click(self):
-            pass
+            if self.ispaused is False:
+                self.tc.pause()
+                self.ispaused = True
+                self.button.setText("Resume")
+            else:
+                self.tc.resume()
+                self.ispaused = False
+                self.button.setText("Pause")
 
     def init_ui(self):
         self.setGeometry(100, 100, 640, 480)

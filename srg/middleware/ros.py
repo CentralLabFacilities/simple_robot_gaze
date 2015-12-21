@@ -51,6 +51,20 @@ from geometry_msgs.msg import Point
 from hlrc_client import RobotGaze
 
 
+class ToggleConnector:
+
+    def __init__(self):
+        self.pub = rospy.Publisher("/robotgazetools/toggle", String, queue_size=1)
+
+    def pause(self):
+        p = "pause"
+        self.pub.publish(p)
+
+    def resume(self):
+        r = "resume"
+        self.pub.publish(r)
+
+
 class RosControlConnector:
     def __init__(self):
         self.run = True
