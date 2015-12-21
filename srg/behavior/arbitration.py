@@ -63,12 +63,18 @@ class Arbitration:
         self.middleware_ready = False
         # Robot Control
         self.rd = d.RobotDriver("ROS", _outscope.strip())
+        time.sleep(0.1)
         self.arbitrate_toggle = None
         self.read_yaml_config()
         self.configure_middleware()
+        time.sleep(0.1)
+
+    def start_arbitrate_thread(self):
         # Start Arbitration
         t = threading.Thread(target=self.arbitrate)
         t.start()
+
+    def start_viz_thread(self):
         u = threading.Thread(target=self.init_viz)
         u.start()
 
@@ -98,7 +104,7 @@ class Arbitration:
         idx = 0
         self.arbitrate_toggle = r.RosControlConnector()
         while self.arbitrate_toggle.ready is False:
-            time.sleep(0.05)
+            time.sleep(0.01)
         for item in self.config["priorities"]:
             # Read config file an extract values
             res        = self.config["resolution"][idx].split("x")
@@ -123,7 +129,7 @@ class Arbitration:
                 self.run = False
                 sys.exit(1)
             while mw.ready is False:
-                time.sleep(0.05)
+                time.sleep(0.01)
             self.input_sources.append(mw)
             # Gaze Control
             gc = g.GazeController(self.rd, mw)

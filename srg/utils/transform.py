@@ -32,6 +32,7 @@ Authors: Florian Lier, Simon Schulz
 
 import sys
 
+
 class AffineTransform:
     """
     Derives the transformation between screen
@@ -39,7 +40,8 @@ class AffineTransform:
     """
     def __init__(self, _name):
 
-        print ">>> Initializing Affine Transform for: %s" % _name.strip()
+        self.name = _name.strip()
+        print ">>> Initializing Affine Transform for: %s" % self.name
         # Target ---> The ones you want to map to
         self.target0 = [1.0, 1.0]
         self.target1 = [1.0, 1.0]
@@ -71,7 +73,7 @@ class AffineTransform:
 
     def set_coords(self, _x, _y, _fov_h, _fov_v):
 
-        print ">>> Deriving mapping: %.fx%.f (pixels) to %.fx%.f (fov)" % (_x, _y, _fov_h, _fov_v)
+        print ">>> Deriving mapping: %.fx%.f (pixels) to %.fx%.f (fov) for %s" % (_x, _y, _fov_h, _fov_v, self.name)
 
         fov_h = _fov_h
         fov_v = _fov_v

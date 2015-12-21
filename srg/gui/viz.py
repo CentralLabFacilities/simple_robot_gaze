@@ -66,7 +66,7 @@ class Viz(QtGui.QWidget):
         while self.run:
             if self.arbitration.winner is not None:
                 self.textbox.setText(self.input_sources[self.arbitration.winner].inscope)
-            time.sleep(0.3)
+            time.sleep(0.1)
 
     @pyqtSlot()
     def on_click(self):

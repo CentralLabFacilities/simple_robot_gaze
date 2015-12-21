@@ -47,6 +47,8 @@ def runner(_options):
 
     # Arbitration
     ar = a.Arbitration(_options.config, options.outscope)
+    ar.start_arbitrate_thread()
+    ar.start_viz_thread()
 
     def signal_handler(sig, frame):
         print ">>> Exiting (signal %s)..." % str(sig)

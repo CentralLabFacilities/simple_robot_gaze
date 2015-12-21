@@ -69,9 +69,8 @@ class RosControlConnector:
             print ">>> Auto Arbitrate is RESUMED"
 
     def runner(self):
-        print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope
-        print "---"
         toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
+        print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope
         self.ready = True
         while self.run is True:
             time.sleep(1.0)
@@ -185,7 +184,6 @@ class RosConnector:
         time.sleep(self.stimulus_timeout)
 
     def runner(self):
-        print ">>> Initializing ROS Subscriber to: %s" % self.inscope
         try:
             if self.datatype == "people":
                 person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
@@ -199,6 +197,7 @@ class RosConnector:
         except Exception, e:
             print ">>> ERROR %s" % str(e)
             return
+        print ">>> Initializing ROS Subscriber to: %s" % self.inscope
         self.ready = True
         while self.run is True:
             time.sleep(1.0)

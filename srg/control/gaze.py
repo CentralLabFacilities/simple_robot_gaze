@@ -52,8 +52,7 @@ class GazeController:
         t.start()
 
     def runner(self):
-        print ">>> Initializing Gaze Controller to: %s" % self.rc.outscope.strip()
-        print "---"
+        print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope, self.rc.outscope.strip())
         while self.run is True:
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze_timestamp:
                 self.lastdatum = self.mw.current_robot_gaze_timestamp
@@ -62,4 +61,4 @@ class GazeController:
                     self.rc.robot_controller.set_gaze_target(current_target, True)
             else:
                 time.sleep(0.001)
-        print ">>> Deactivating Gaze Controller to: %s" % self.rc.outscope.strip()
+        print ">>> Deactivating Gaze Controller for: %s" % self.rc.outscope.strip()
