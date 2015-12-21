@@ -51,6 +51,7 @@ class Arbitration:
     def __init__(self, _configfile, _outscope):
         self.run              = True
         self.cfgfile          = _configfile.strip()
+        self.outscope         = _outscope
         self.config           = None
         self.transforms       = []
         self.input_sources    = []
@@ -61,13 +62,15 @@ class Arbitration:
         self.app              = None
         self.winner           = None
         self.middleware_ready = False
-        # Robot Control
-        self.rd = d.RobotDriver("ROS", _outscope.strip())
-        time.sleep(0.1)
         self.arbitrate_toggle = None
+        self.rd               = None
+
+    def configure(self):
         self.read_yaml_config()
         self.configure_middleware()
-        time.sleep(0.1)
+
+    def start_robot_driver(self):
+        self.rd = d.RobotDriver("ROS", self.outscope.strip())
 
     def start_arbitrate_thread(self):
         # Start Arbitration
