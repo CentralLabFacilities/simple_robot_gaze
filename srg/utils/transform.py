@@ -41,7 +41,7 @@ class AffineTransform:
     def __init__(self, _name):
 
         self.name = _name.strip()
-        print ">>> Initializing Affine Transform for: %s" % self.name
+
         # Target ---> The ones you want to map to
         self.target0 = [1.0, 1.0]
         self.target1 = [1.0, 1.0]
@@ -70,6 +70,7 @@ class AffineTransform:
 
         # Test coord
         self.test = [1.0, 1.0]
+        print ">>> Initialized Affine Transform for: %s" % self.name
 
     def set_coords(self, _x, _y, _fov_h, _fov_v):
 
