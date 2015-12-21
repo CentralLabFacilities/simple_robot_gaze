@@ -62,5 +62,5 @@ class GazeController:
                 if self.acquire_prio:
                     self.rc.robot_controller.set_gaze_target(current_target, True)
             else:
-                time.sleep(0.002)
+                time.sleep(0.001)
         print ">>> Deactivating Gaze Controller for: %s" % self.rc.outscope.strip()
