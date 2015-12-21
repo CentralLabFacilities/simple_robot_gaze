@@ -74,7 +74,7 @@ class AffineTransform:
 
     def set_coords(self, _x, _y, _fov_h, _fov_v):
 
-        print ">>> Deriving mapping: %.fx%.f (pixels) to %.fx%.f (fov) for %s" % (_x, _y, _fov_h, _fov_v, self.name)
+        print ">>> Derived mapping: %.fx%.f (pixels) to %.fx%.f (fov) for %s" % (_x, _y, _fov_h, _fov_v, self.name)
 
         fov_h = _fov_h
         fov_v = _fov_v
@@ -115,6 +115,8 @@ class AffineTransform:
         # And finally the test coordinate
         self.test[0] = 512.0
         self.test[1] = 384.0
+
+        print ">>> Derived mapping: %.fx%.f (pixels) to %.fx%.f (fov) for %s" % (_x, _y, _fov_h, _fov_v, self.name.strip())
 
     def calculate_divider(self):
         result = ((self.origin0[0] - self.origin2[0]) * (self.origin1[1] - self.origin2[1])) - \
