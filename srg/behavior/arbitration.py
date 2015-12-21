@@ -52,18 +52,18 @@ class Arbitration:
         self.run              = True
         self.cfgfile          = _configfile.strip()
         self.outscope         = _outscope
-        self.config           = None
+        self.last_info        = time.time()
         self.transforms       = []
         self.input_sources    = []
         self.gaze_controller  = []
         self.boring           = 2
-        self.last_info        = time.time()
+        self.config           = None
         self.gui              = None
         self.app              = None
         self.winner           = None
-        self.middleware_ready = False
         self.arbitrate_toggle = None
         self.rd               = None
+        self.middleware_ready = False
 
     def start_robot_driver(self):
         self.rd = d.RobotDriver("ROS", self.outscope.strip())
@@ -74,17 +74,17 @@ class Arbitration:
 
     def start_arbitrate_thread(self):
         # Start Arbitration
-        t = threading.Thread(target=self.arbitrate)
-        t.start()
+        at = threading.Thread(target=self.arbitrate)
+        at.start()
 
     def start_viz_thread(self):
-        u = threading.Thread(target=self.init_viz)
-        u.start()
+        vt = threading.Thread(target=self.init_viz)
+        vt.start()
 
     def init_viz(self):
         self.app = QtGui.QApplication(sys.argv)
         self.gui = v.Viz(self.input_sources, self.gaze_controller, self)
-        self.gui.run()
+        self.gui.runner()
         sys.exit(self.app.exec_())
 
     def read_yaml_config(self):
@@ -108,7 +108,7 @@ class Arbitration:
         idx = 0
         self.arbitrate_toggle = r.RosControlConnector()
         while self.arbitrate_toggle.ready is False:
-            time.sleep(0.01)
+            time.sleep(0.001)
         for item in self.config["priorities"]:
             # Read config file an extract values
             res        = self.config["resolution"][idx].split("x")
@@ -133,7 +133,7 @@ class Arbitration:
                 self.run = False
                 sys.exit(1)
             while mw.ready is False:
-                time.sleep(0.01)
+                time.sleep(0.001)
             self.input_sources.append(mw)
             # Gaze Control
             gc = g.GazeController(self.rd, mw)
