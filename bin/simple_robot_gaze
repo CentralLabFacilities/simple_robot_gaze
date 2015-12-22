@@ -70,7 +70,7 @@ def run_viz():
     timer.start(100)
     timer.timeout.connect(lambda: None)
     gui = v.Viz(ar.input_sources, ar.gaze_controller, ar)
-    gui.start_viz()
+    gui.start_update_threads()
     gui.show()
     ret = app.exec_()
     print ">>> Exiting..."

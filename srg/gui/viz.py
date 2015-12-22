@@ -30,37 +30,45 @@ Authors: Florian Lier, Simon Schulz
 
 """
 
-# STD
-import time
-import random
-import threading
-
 # PyQT
 from PyQt4 import QtGui
 from PyQt4.QtGui import *
-from PyQt4.QtCore import QThread
-
+from PyQt4.QtCore import *
 
 # SELF
 from srg.middleware import ros as r
 
 
-class UpdateBars(QThread):
-    def __init__(self, _targets, _bars):
+class LabelThread(QThread):
+    def __init__(self, _targets, _activities):
         QThread.__init__(self)
-        self.bars = _bars
         self.targets = _targets
+        self.bars = _activities
 
     def __del__(self):
         self.wait()
 
     def run(self):
         while True:
-            print "running"
-            for data in self.targets.keys():
-                print data
-                self.bars[data].setValue(random.randint(1, 100))
-            self.sleep(1)
+            fake = "fake"
+            self.emit(SIGNAL('set_control_data(QString)'), str(fake))
+            self.msleep(100)
+
+
+class BarsThread(QThread):
+    def __init__(self, _targets, _activities):
+        QThread.__init__(self)
+        self.targets = _targets
+        self.bars = _activities
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        while True:
+            fake = "fake"
+            self.emit(SIGNAL('set_bar_values(QString)'), str(fake))
+            self.msleep(100)
 
 
 class Viz(QtGui.QWidget):
@@ -72,16 +80,16 @@ class Viz(QtGui.QWidget):
         self.gaze_controller = _gaze_controller
 
         self.tc = r.ToggleConnector()
-        self.ispaused = False
+        self.is_paused = False
         self.run = True
 
         self.font = QtGui.QFont()
-        self.font.setPointSize(10)
+        self.font.setPointSize(12)
         self.font.setBold(True)
         self.font.setWeight(75)
 
         self.layout = QtGui.QVBoxLayout(self)
-        self.ccs_label = QtGui.QLabel("Current Control Stimulus :")
+        self.ccs_label = QtGui.QLabel("Controlling Stimulus >")
         self.ccs_label.setFont(self.font)
         self.layout.addWidget(self.ccs_label)
 
@@ -92,44 +100,58 @@ class Viz(QtGui.QWidget):
             name = gc.mw.inscope
             self.info_labels[name] = QtGui.QLabel(name)
             self.current_activity[name] = QtGui.QProgressBar()
-            self.current_activity[name].setMaximum(100)
-            self.current_activity[name].setMinimum(1)
+            self.current_activity[name].setMaximum(24)
+            self.current_activity[name].setMinimum(-24)
         for label in self.info_labels:
             self.layout.addWidget(self.info_labels[label])
             self.layout.addWidget(self.current_activity[label])
 
-        self.pause_button = QPushButton('Pause Auto Gaze', self)
+        if self.arbitration.winner is not None:
+            self.ccs_label.setText("Controlling Stimulus > "+self.input_sources[self.arbitration.winner].inscope)
+            for gc in self.gaze_controller:
+                self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
+            for name in self.current_targets.keys():
+                self.info_labels[name].setText("Targets@"+name+" > "+str(self.current_targets[name]))
+
+        self.pause_button = QPushButton('Pause Simple Robot Gaze', self)
         self.pause_button.clicked.connect(self.pause)
         self.layout.addWidget(self.pause_button)
 
+        self.get_bars_thread = None
+        self.get_label_thread = None
+
         self.init_ui()
 
-    def start_viz(self):
-        gt = threading.Thread(target=self.get_control_data)
-        gt.start()
-        update_bars = UpdateBars(self.current_targets, self.current_activity)
-        update_bars.run()
+    def start_update_threads(self):
+        self.get_label_thread = LabelThread(self.current_targets, self.current_activity)
+        self.connect(self.get_label_thread, SIGNAL("set_control_data(QString)"), self.set_control_data)
+        self.get_label_thread.start()
 
-    def get_control_data(self):
-        while self.run:
-            if self.arbitration.winner is not None:
-                self.ccs_label.setText("Current Controlling Stimulus: "+self.input_sources[self.arbitration.winner].inscope)
-                for gc in self.gaze_controller:
-                    self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
-                for data in self.current_targets.keys():
-                    self.info_labels[data].setText("Current Targets @ "+data+" >>> "+str(self.current_targets[data]))
-            # Run GUI at 100 Hz
-            time.sleep(0.1)
+        self.get_bars_thread = BarsThread(self.current_targets, self.current_activity)
+        self.connect(self.get_bars_thread, SIGNAL("set_bar_values(QString)"), self.set_bar_values)
+        self.get_bars_thread.start()
+
+    def set_bar_values(self, _values):
+        for label in self.info_labels:
+            self.current_activity[label].setValue(self.current_targets[label][0])
+
+    def set_control_data(self, _values):
+        if self.arbitration.winner is not None:
+            self.ccs_label.setText("Controlling Stimulus > "+self.input_sources[self.arbitration.winner].inscope)
+            for gc in self.gaze_controller:
+                self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
+            for name in self.current_targets.keys():
+                self.info_labels[name].setText("Targets@"+name+" > "+str(self.current_targets[name]))
 
     def pause(self):
-            if self.ispaused is False:
+            if self.is_paused is False:
                 self.tc.pause()
-                self.ispaused = True
-                self.pause_button.setText("Resume Auto Gaze")
+                self.is_paused = True
+                self.pause_button.setText("Resume Simple Robot Gaze")
             else:
                 self.tc.resume()
-                self.ispaused = False
-                self.pause_button.setText("Pause Auto Gaze")
+                self.is_paused = False
+                self.pause_button.setText("Pause Simple Robot Gaze")
 
     def exit_srg(self):
         self.arbitration.request_stop()
