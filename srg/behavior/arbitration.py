@@ -160,6 +160,7 @@ class Arbitration:
                 stimulus_timeouts.append(target.stimulus_timeout)
             else:
                 updates.append(None)
+                stimulus_timeouts.append(target.stimulus_timeout)
         self.derive_order(updates, stimulus_timeouts)
 
     def derive_order(self, _updates, _stimulus_timeouts):
