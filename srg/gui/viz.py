@@ -133,7 +133,8 @@ class Viz(QtGui.QWidget):
 
     def set_bar_values(self, _values):
         for label in self.info_labels:
-            self.current_activity[label].setValue(self.current_targets[label][0])
+            if label in self.current_targets.keys():
+                self.current_activity[label].setValue(self.current_targets[label][0])
 
     def set_control_data(self, _values):
         if self.arbitration.winner is not None:
