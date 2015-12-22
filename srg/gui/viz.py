@@ -38,10 +38,29 @@ import threading
 # PyQT
 from PyQt4 import QtGui
 from PyQt4.QtGui import *
-from PyQt4.QtCore import pyqtSlot
+from PyQt4.QtCore import QThread
+
 
 # SELF
 from srg.middleware import ros as r
+
+
+class UpdateBars(QThread):
+    def __init__(self, _targets, _bars):
+        QThread.__init__(self)
+        self.bars = _bars
+        self.targets = _targets
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        while True:
+            print "running"
+            for data in self.targets.keys():
+                print data
+                self.bars[data].setValue(random.randint(1, 100))
+            self.sleep(1)
 
 
 class Viz(QtGui.QWidget):
@@ -75,7 +94,6 @@ class Viz(QtGui.QWidget):
             self.current_activity[name] = QtGui.QProgressBar()
             self.current_activity[name].setMaximum(100)
             self.current_activity[name].setMinimum(1)
-            self.current_activity[name].setValue(random.randint(1, 100))
         for label in self.info_labels:
             self.layout.addWidget(self.info_labels[label])
             self.layout.addWidget(self.current_activity[label])
@@ -84,15 +102,13 @@ class Viz(QtGui.QWidget):
         self.pause_button.clicked.connect(self.pause)
         self.layout.addWidget(self.pause_button)
 
-        # self.quit_button = QPushButton('Close Simple Robot Gaze', self)
-        # self.quit_button.clicked.connect(self.exit_srg)
-        # self.layout.addWidget(self.quit_button)
-
         self.init_ui()
 
     def start_viz(self):
         gt = threading.Thread(target=self.get_control_data)
         gt.start()
+        update_bars = UpdateBars(self.current_targets, self.current_activity)
+        update_bars.run()
 
     def get_control_data(self):
         while self.run:
@@ -102,7 +118,7 @@ class Viz(QtGui.QWidget):
                     self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
                 for data in self.current_targets.keys():
                     self.info_labels[data].setText("Current Targets @ "+data+" >>> "+str(self.current_targets[data]))
-            # Update GUI every 100ms
+            # Run GUI at 100 Hz
             time.sleep(0.1)
 
     def pause(self):
@@ -120,5 +136,4 @@ class Viz(QtGui.QWidget):
 
     def init_ui(self):
         self.setGeometry(100, 100, 640, 100)
-        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [10 Hz GUI Update Rate]")
-        self.show()
+        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [Update Rate 10 Hz]")

@@ -89,7 +89,7 @@ class RosControlConnector:
         toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
         self.ready = True
         while self.run is True:
-            time.sleep(0.02)
+            time.sleep(0.05)
         toggle_subscriber.unregister()
         print ">>> Deactivating ROS Toggle Subscriber to: %s" % self.inscope.strip()
 
@@ -218,6 +218,6 @@ class RosConnector:
             return
         self.ready = True
         while self.run is True:
-            time.sleep(0.02)
+            time.sleep(0.05)
         person_subscriber.unregister()
         print ">>> Deactivating ROS Subscriber to: %s" % self.inscope.strip()

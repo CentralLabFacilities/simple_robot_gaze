@@ -35,15 +35,12 @@ import sys
 import time
 import yaml
 import threading
-from PyQt4 import QtGui
-from PyQt4.QtGui import QApplication
 
 # SELF IMPORTS
 from srg.robot import driver as d
 from srg.control import gaze as g
 from srg.middleware import ros as r
 from srg.utils import transform as t
-from srg.gui import viz as v
 
 
 class Arbitration:
@@ -58,8 +55,6 @@ class Arbitration:
         self.gaze_controller  = []
         self.boring           = 2
         self.config           = None
-        self.gui              = None
-        self.app              = None
         self.winner           = None
         self.arbitrate_toggle = None
         self.rd               = None
@@ -74,16 +69,6 @@ class Arbitration:
     def start_arbitrate_thread(self):
         at = threading.Thread(target=self.arbitrate)
         at.start()
-
-    def start_viz_thread(self):
-        vt = threading.Thread(target=self.init_viz)
-        vt.start()
-
-    def init_viz(self):
-        self.app = QtGui.QApplication(sys.argv)
-        self.gui = v.Viz(self.input_sources, self.gaze_controller, self)
-        self.gui.start_viz()
-        sys.exit(self.app.exec_())
 
     def read_yaml_config(self):
         try:
@@ -107,8 +92,6 @@ class Arbitration:
         idx = 0
         self.arbitrate_toggle = r.RosControlConnector()
         self.arbitrate_toggle.start_mw()
-        while self.arbitrate_toggle.ready is False:
-            time.sleep(0.001)
         for item in self.config["priorities"]:
 
             # Read config file an extract values
@@ -141,6 +124,7 @@ class Arbitration:
             gc = g.GazeController(self.rd, mw)
             self.gaze_controller.append(gc)
             idx += 1
+
         # RUN!
         for i_s in self.input_sources:
             i_s.start_mw()
@@ -153,8 +137,6 @@ class Arbitration:
         for gazecontrol in self.gaze_controller:
             gazecontrol.run = False
         self.arbitrate_toggle.run = False
-        self.gui.run = False
-        QApplication.quit()
         self.run = False
 
     def arbitrate(self):
