@@ -132,17 +132,23 @@ class Viz(QtGui.QWidget):
         self.get_bars_thread.start()
 
     def set_bar_values(self, _values):
-        for label in self.info_labels:
-            if label in self.current_targets.keys():
-                self.current_activity[label].setValue(self.current_targets[label][0])
+        try:
+            for label in self.info_labels:
+                if label in self.current_targets.keys() and label in self.current_activity.keys():
+                    self.current_activity[label].setValue(self.current_targets[label][0])
+        except Exception, sxe:
+            pass
 
     def set_control_data(self, _values):
-        if self.arbitration.winner is not None:
-            self.ccs_label.setText("Controlling Stimulus > "+self.input_sources[self.arbitration.winner].inscope)
-            for gc in self.gaze_controller:
-                self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
-            for name in self.current_targets.keys():
-                self.info_labels[name].setText("Targets@"+name+" > "+str(self.current_targets[name]))
+        try:
+            if self.arbitration.winner is not None:
+                self.ccs_label.setText("Controlling Stimulus > "+self.input_sources[self.arbitration.winner].inscope)
+                for gc in self.gaze_controller:
+                    self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
+                for name in self.current_targets.keys():
+                    self.info_labels[name].setText("Targets@"+name+" > "+str(self.current_targets[name]))
+        except Exception, e:
+            pass
 
     def pause(self):
             if self.is_paused is False:
