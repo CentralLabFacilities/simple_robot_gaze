@@ -35,7 +35,7 @@ from setuptools import setup, find_packages
 version = "0.1"
 filename = "0.1"
 
-setup(name="simplegazecontrol",
+setup(name="simplerobotgaze",
 
       version=filename,
 
