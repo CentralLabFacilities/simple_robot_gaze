@@ -111,6 +111,7 @@ class RosConnector:
         self.stimulus_timeout = float(_stimulus_timeout)
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
+        self.nearest_person_z = 0.0
         self.roi_x            = 0.0
         self.roi_y            = 0.0
         self.point_x          = 0.0
@@ -137,6 +138,7 @@ class RosConnector:
         # print ">> Distance in pixels: ", sort[0][1]
         self.nearest_person_x = ros_data.people[int(sort[0][0])].position.x
         self.nearest_person_y = ros_data.people[int(sort[0][0])].position.y
+        self.nearest_person_z = ros_data.people[int(sort[0][0])].position.z
         # print ">> Position in pixels x:", self.nearest_person_x
         # print ">> Position in pixels y:", self.nearest_person_y
         point = [self.nearest_person_x, self.nearest_person_y]

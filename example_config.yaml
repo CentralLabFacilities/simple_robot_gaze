@@ -30,10 +30,22 @@ modes:
   - absolute
 
 # Skip stimulus input for n seconds, e.g., only react every three seconds to a stimulus: 3.0 | no timeout: 0.0
+# highest allowed value is 2.0 seconds
 stimulus_timeout:
   - 0.0
   - 0.0
   - 0.0
+
+# Peak override: Provide a value that is encoded in your stimulus, e.g, size of face in pixel to override the priotrity
+# This is only evaluated if allow_peak_override is "1"
+peak_overrides:
+  - 100.0
+  - 50.0
+  - 2.0
+
+# See "peak_override"
+allow_peak_override:
+  - 1
 
 # What kind of data are you sending in your input stream, corresponds to priorities
 datatypes:

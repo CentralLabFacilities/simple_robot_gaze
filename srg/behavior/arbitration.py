@@ -53,11 +53,13 @@ class Arbitration:
         self.transforms       = []
         self.input_sources    = []
         self.gaze_controller  = []
+        self.overrides        = []
         self.boring           = 2
-        self.config           = None
-        self.winner           = None
-        self.arbitrate_toggle = None
-        self.rd               = None
+        self.config              = None
+        self.winner              = None
+        self.arbitrate_toggle    = None
+        self.rd                  = None
+        self.allow_peak_override = None
 
     def start_robot_driver(self):
         self.rd = d.RobotDriver("ROS", self.outscope.strip())
@@ -100,7 +102,11 @@ class Arbitration:
             datatypes  = self.config["datatypes"][idx].split(":")
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
-
+            peak_override = int(self.config["allow_peak_override"][0])
+            if peak_override is 1:
+                self.allow_peak_override = peak_override
+                allow_override_threshold = self.config["peak_overrides"][idx]
+                self.overrides.append(allow_override_threshold)
             # Transformations
             at = t.AffineTransform(str(item))
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
@@ -154,18 +160,22 @@ class Arbitration:
     def get_latest_targets(self):
         updates = []
         stimulus_timeouts = []
+        current_gaze_values = []
         for target in self.input_sources:
             if target.current_robot_gaze is not None:
                 updates.append(target.current_robot_gaze_timestamp)
                 stimulus_timeouts.append(target.stimulus_timeout)
+                current_gaze_values.append(target)
             else:
                 updates.append(None)
                 stimulus_timeouts.append(target.stimulus_timeout)
-        self.derive_order(updates, stimulus_timeouts)
+                current_gaze_values.append(None)
+        self.derive_order(updates, stimulus_timeouts, current_gaze_values)
 
-    def derive_order(self, _updates, _stimulus_timeouts):
+    def derive_order(self, _updates, _stimulus_timeouts, _current_gaze_values):
         idx = -1
         n = -1
+        p = -1
         # Now honor priority and latest input
         now = time.time()
         # Default winner is always highest prio
@@ -174,6 +184,22 @@ class Arbitration:
             return
         for stamp in _updates:
             n += 1
+            if self.allow_peak_override is not None:
+                for stamp in _updates:
+                    p += 1
+                    if stamp is not None:
+                        if _current_gaze_values[p].datatype.lower() == "pointstamped":
+                            if int(_current_gaze_values[p].point_z) < int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
+                                idx += 1
+                                winner = idx
+                                break
+                        if _current_gaze_values[p].datatype.lower() == "people":
+                            if int(_current_gaze_values[p].nearest_person_z) > int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
+                                idx += 1
+                                winner = idx
+                                break
             if stamp is not None:
                 if now - stamp <= _stimulus_timeouts[n] + self.boring:
                     idx += 1
