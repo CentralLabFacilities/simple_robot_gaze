@@ -176,6 +176,7 @@ class Arbitration:
         idx = -1
         n = -1
         p = -1
+        override = False
         # Now honor priority and latest input
         now = time.time()
         # Default winner is always highest prio
@@ -187,34 +188,37 @@ class Arbitration:
             n += 1
             if self.allow_peak_override is not None:
                 if len(_current_gaze_values) != len(self.overrides) or len(_current_gaze_values) != len(_stimulus_timeouts):
-                    print ">>> Waiting for data..."
+                    print ">>> Waiting for data in override mode..."
                     return
                 for stamp in _updates:
                     p += 1
                     if stamp is not None:
-                        if _current_gaze_values[p].datatype.lower() == "pointstamped":
-                            if int(_current_gaze_values[p].point_z) < int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
-                                print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
-                                idx += 1
-                                winner = idx
-                                break
                         if _current_gaze_values[p].datatype.lower() == "people":
                             if int(_current_gaze_values[p].nearest_person_z) > int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
                                 print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
                                 idx += 1
                                 winner = idx
+                                override = True
                                 break
-            if stamp is not None:
-                if now - stamp <= _stimulus_timeouts[n] + self.boring:
-                    idx += 1
-                    winner = idx
-                    break
+                        if _current_gaze_values[p].datatype.lower() == "pointstamped":
+                            if int(_current_gaze_values[p].point_z) < int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
+                                idx += 1
+                                winner = idx
+                                override = True
+                                break
+            if not override:
+                if stamp is not None:
+                    if now - stamp <= _stimulus_timeouts[n] + self.boring:
+                        idx += 1
+                        winner = idx
+                        break
+                    else:
+                        # Too boring advance in prios
+                        idx += 1
                 else:
-                    # Too boring advance in prios
+                    # Next prio, because we don't have any values yet.
                     idx += 1
-            else:
-                # Next prio, because we don't have any values yet.
-                idx += 1
         # Now enable the correct gaze controller
         idx = 0
         for gz in self.gaze_controller:
