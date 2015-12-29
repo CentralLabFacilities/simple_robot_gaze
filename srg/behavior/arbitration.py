@@ -180,16 +180,16 @@ class Arbitration:
         now = time.time()
         # Default winner is always highest prio
         winner = 0
-        if len(_updates) != len(_stimulus_timeouts) or len(_current_gaze_values) != len(_updates):
+        if len(_current_gaze_values) != len(_stimulus_timeouts) or len(_current_gaze_values) != len(_updates):
             return
         for stamp in _updates:
             n += 1
             if self.allow_peak_override is not None:
+                if len(_current_gaze_values) != len(self.overrides) or len(_current_gaze_values) != len(_stimulus_timeouts):
+                    return
                 for stamp in _updates:
                     p += 1
                     if stamp is not None:
-                        if len(_current_gaze_values) != len(self.overrides) or len(_current_gaze_values) != len(_stimulus_timeouts):
-                            return
                         if _current_gaze_values[p].datatype.lower() == "pointstamped":
                             if int(_current_gaze_values[p].point_z) < int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
                                 print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
