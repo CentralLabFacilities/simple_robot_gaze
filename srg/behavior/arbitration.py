@@ -180,7 +180,7 @@ class Arbitration:
         now = time.time()
         # Default winner is always highest prio
         winner = 0
-        if len(_updates) != len(_stimulus_timeouts):
+        if len(_updates) != len(_stimulus_timeouts) or len(_current_gaze_values) != len(_updates):
             return
         for stamp in _updates:
             n += 1
