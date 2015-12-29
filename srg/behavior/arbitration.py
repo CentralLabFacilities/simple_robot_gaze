@@ -207,7 +207,7 @@ class Arbitration:
                                 winner = idx
                                 override = True
                                 break
-            if not override:
+            if override is False:
                 if stamp is not None:
                     if now - stamp <= _stimulus_timeouts[n] + self.boring:
                         idx += 1
