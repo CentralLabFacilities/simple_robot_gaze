@@ -188,6 +188,8 @@ class Arbitration:
                 for stamp in _updates:
                     p += 1
                     if stamp is not None:
+                        if len(_current_gaze_values) != len(self.overrides) or len(_current_gaze_values) != len(_stimulus_timeouts):
+                            break
                         if _current_gaze_values[p].datatype.lower() == "pointstamped":
                             if int(_current_gaze_values[p].point_z) < int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
                                 print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
