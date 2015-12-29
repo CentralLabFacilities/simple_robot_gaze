@@ -181,11 +181,13 @@ class Arbitration:
         # Default winner is always highest prio
         winner = 0
         if len(_current_gaze_values) != len(_stimulus_timeouts) or len(_current_gaze_values) != len(_updates):
+            print ">>> Waiting for data..."
             return
         for stamp in _updates:
             n += 1
             if self.allow_peak_override is not None:
                 if len(_current_gaze_values) != len(self.overrides) or len(_current_gaze_values) != len(_stimulus_timeouts):
+                    print ">>> Waiting for data..."
                     return
                 for stamp in _updates:
                     p += 1
