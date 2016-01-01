@@ -54,9 +54,9 @@ def runner(_options):
     # Arbitration
     global ar
     ar = a.Arbitration(_options.config, options.outscope)
-    ar.start_robot_driver()
+    ar.boot_robot_driver()
     ar.configure()
-    ar.start_arbitrate_thread()
+    ar.start()
     # SIGNALING
     signal.signal(signal.SIGINT, signal_handler)
     # GUI
@@ -75,7 +75,7 @@ def run_viz():
     ret = app.exec_()
     print ">>> Exiting..."
     ar.request_stop()
-    gui.run = False
+    gui.run_toggle = False
     time.sleep(0.2)
     app.exit()
     time.sleep(0.2)
@@ -86,7 +86,7 @@ def run_viz():
 def signal_handler(sig, frame):
     print ">>> Exiting (signal %s)..." % str(sig)
     ar.request_stop()
-    gui.run = False
+    gui.run_toggle = False
     time.sleep(0.2)
     app.exit()
     time.sleep(0.2)

@@ -43,10 +43,12 @@ from srg.middleware import ros as r
 from srg.utils import transform as t
 
 
-class Arbitration:
+class Arbitration(threading.Thread):
 
     def __init__(self, _configfile, _outscope):
-        self.run              = True
+        threading.Thread.__init__(self)
+        self.lock             = threading.RLock()
+        self.run_toggle       = True
         self.cfgfile          = _configfile.strip()
         self.outscope         = _outscope
         self.last_info        = time.time()
@@ -61,16 +63,12 @@ class Arbitration:
         self.rd                  = None
         self.allow_peak_override = None
 
-    def start_robot_driver(self):
+    def boot_robot_driver(self):
         self.rd = d.RobotDriver("ROS", self.outscope.strip())
 
     def configure(self):
         self.read_yaml_config()
         self.configure_middleware()
-
-    def start_arbitrate_thread(self):
-        at = threading.Thread(target=self.arbitrate)
-        at.start()
 
     def read_yaml_config(self):
         try:
@@ -93,10 +91,10 @@ class Arbitration:
     def configure_middleware(self):
         idx = 0
         self.arbitrate_toggle = r.RosControlConnector()
-        self.arbitrate_toggle.start_mw()
-        for item in self.config["priorities"]:
+        self.arbitrate_toggle.start()
 
-            # Read config file an extract values
+        # Read config file an extract values
+        for item in self.config["priorities"]:
             res        = self.config["resolution"][idx].split("x")
             fov        = self.config["fov"][idx].split("x")
             datatypes  = self.config["datatypes"][idx].split(":")
@@ -115,52 +113,41 @@ class Arbitration:
 
             # Middleware
             if datatypes[0].lower() == "ros":
-                mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout)
+                mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :( "
-                self.run = False
+                self.run_toggle = False
                 sys.exit(1)
             else:
                 print ">>> Unknown middleware %s" % datatypes[0]
-                self.run = False
+                self.run_toggle = False
                 sys.exit(1)
             self.input_sources.append(mw)
 
             # Gaze Control
-            gc = g.GazeController(self.rd, mw)
+            gc = g.GazeController(self.rd, mw, self.lock)
             self.gaze_controller.append(gc)
             idx += 1
 
         # RUN!
         for i_s in self.input_sources:
-            i_s.start_mw()
+            i_s.start()
         for g_c in self.gaze_controller:
-            g_c.start_gaze()
+            g_c.start()
 
     def request_stop(self):
         for connection in self.input_sources:
-            connection.run = False
+            connection.run_toggle = False
         for gazecontrol in self.gaze_controller:
-            gazecontrol.run = False
-        self.arbitrate_toggle.run = False
-        self.run = False
-
-    def arbitrate(self):
-        while self.run:
-            if self.arbitrate_toggle.pause_auto_arbitrate is False:
-                self.get_latest_targets()
-            else:
-                for gz in self.gaze_controller:
-                    gz.acquire_prio = False
-            hz = 0.01
-            # Running with maximum frequency of 100 Hz
-            time.sleep(hz)
-        print ">>> Stopping Arbitration"
+            gazecontrol.run_toggle = False
+        self.arbitrate_toggle.run_toggle = False
+        self.run_toggle = False
 
     def get_latest_targets(self):
         updates = []
         stimulus_timeouts = []
         current_gaze_values = []
+        self.lock.acquire()
         for target in self.input_sources:
             if target.current_robot_gaze is not None:
                 updates.append(target.current_robot_gaze_timestamp)
@@ -171,43 +158,43 @@ class Arbitration:
                 stimulus_timeouts.append(target.stimulus_timeout)
                 current_gaze_values.append(None)
         self.derive_order(updates, stimulus_timeouts, current_gaze_values)
+        self.lock.release()
 
     def derive_order(self, _updates, _stimulus_timeouts, _current_gaze_values):
+        winner = 0
         idx = -1
         n = -1
         p = -1
         override = False
-        # Now honor priority and latest input
         now = time.time()
-        # Default winner is always highest prio
-        winner = 0
         if len(_current_gaze_values) != len(_stimulus_timeouts) or len(_current_gaze_values) != len(_updates):
             print ">>> Waiting for data..."
             return
-        for stamp in _updates:
-            n += 1
-            if self.allow_peak_override is not None:
-                if len(_current_gaze_values) != len(self.overrides) or len(_current_gaze_values) != len(_stimulus_timeouts):
-                    print ">>> Waiting for data in override mode..."
-                    return
-                for stamp in _updates:
-                    p += 1
-                    if stamp is not None:
-                        if _current_gaze_values[p].datatype.lower() == "people":
-                            if int(_current_gaze_values[p].nearest_person_z) > int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
-                                print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
-                                idx += 1
-                                winner = idx
-                                override = True
-                                break
-                        if _current_gaze_values[p].datatype.lower() == "pointstamped":
-                            if int(_current_gaze_values[p].point_z) < int(self.overrides[p]) and now - stamp <= _stimulus_timeouts[p] + self.boring:
-                                print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
-                                idx += 1
-                                winner = idx
-                                override = True
-                                break
-            if override is False:
+        # Now honor priority and latest input
+        if self.allow_peak_override is not None:
+            if len(_current_gaze_values) != len(self.overrides) or len(_current_gaze_values) != len(_stimulus_timeouts):
+                print ">>> Waiting for data in override mode..."
+                return
+            for stamp_override in _updates:
+                p += 1
+                if stamp_override is not None:
+                    if _current_gaze_values[p].datatype.lower() == "people":
+                        if int(_current_gaze_values[p].nearest_person_z) > int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                            print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
+                            idx += 1
+                            winner = idx
+                            override = True
+                            break
+                    if _current_gaze_values[p].datatype.lower() == "pointstamped":
+                        if int(_current_gaze_values[p].point_z) < int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                            print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
+                            idx += 1
+                            winner = idx
+                            override = True
+                            break
+        if override is False:
+            for stamp in _updates:
+                n += 1
                 if stamp is not None:
                     if now - stamp <= _stimulus_timeouts[n] + self.boring:
                         idx += 1
@@ -232,3 +219,15 @@ class Arbitration:
             else:
                 gz.acquire_prio = False
             idx += 1
+
+    def run(self):
+        while self.run_toggle:
+            if self.arbitrate_toggle.pause_auto_arbitrate is False:
+                self.get_latest_targets()
+            else:
+                for gz in self.gaze_controller:
+                    gz.acquire_prio = False
+            hz = 0.01
+            # Running with maximum frequency of 100 Hz
+            time.sleep(hz)
+        print ">>> Stopping Arbitration"

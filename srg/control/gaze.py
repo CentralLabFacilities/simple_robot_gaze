@@ -35,32 +35,32 @@ import time
 import threading
 
 
-class GazeController:
+class GazeController(threading.Thread):
     """
     The GazeController receives person messages (ROS) and derives
     the nearest person identified. Based on this, the robot's
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self, _robot_controller, _mw):
+    def __init__(self, _robot_controller, _mw, _lock):
+        threading.Thread.__init__(self)
+        self.lock         = _lock
         self.mw           = _mw
-        self.run          = True
+        self.run_toggle   = True
         self.acquire_prio = False
         self.lastdatum    = time.time()
         self.rc           = _robot_controller
 
-    def start_gaze(self):
-        gt = threading.Thread(target=self.runner)
-        gt.start()
-
-    def runner(self):
+    def run(self):
         print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope.strip(), self.rc.outscope.strip())
-        while self.run is True:
+        while self.run_toggle is True:
+            self.lock.acquire()
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze_timestamp:
                 self.lastdatum = self.mw.current_robot_gaze_timestamp
                 current_target = self.mw.current_robot_gaze
                 if self.acquire_prio:
                     self.rc.robot_controller.set_gaze_target(current_target, True)
             else:
-                time.sleep(0.005)
+                time.sleep(0.001)
+            self.lock.release()
         print ">>> Deactivating Gaze Controller for: %s" % self.rc.outscope.strip()

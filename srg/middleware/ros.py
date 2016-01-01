@@ -46,7 +46,6 @@ from sensor_msgs.msg import RegionOfInterest
 from geometry_msgs.msg import PointStamped
 from geometry_msgs.msg import Point
 
-
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
 
@@ -65,16 +64,13 @@ class ToggleConnector:
         self.pub.publish(r)
 
 
-class RosControlConnector:
+class RosControlConnector(threading.Thread):
     def __init__(self):
-        self.run = True
+        threading.Thread.__init__(self)
+        self.run_toggle = True
         self.ready = False
         self.pause_auto_arbitrate = False
         self.inscope = "/robotgazetools/toggle"
-
-    def start_mw(self):
-        mt = threading.Thread(target=self.runner)
-        mt.start()
 
     def control_callback(self, ros_data):
         if ros_data.data.lower() == "pause":
@@ -84,25 +80,27 @@ class RosControlConnector:
             self.pause_auto_arbitrate = False
             print ">>> Auto Arbitrate is RESUMED"
 
-    def runner(self):
+    def run(self):
         print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope.strip()
         toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
         self.ready = True
-        while self.run is True:
+        while self.run_toggle is True:
             time.sleep(0.05)
         toggle_subscriber.unregister()
         print ">>> Deactivating ROS Toggle Subscriber to: %s" % self.inscope.strip()
 
 
-class RosConnector:
+class RosConnector(threading.Thread):
     """
     The GazeController receives person messages (ROS) and derives
     the nearest person identified. Based on this, the robot's
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout):
-        self.run      = True
+    def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
+        threading.Thread.__init__(self)
+        self.lock     = _lock
+        self.run_toggle      = True
         self.ready    = False
         self.trans    = _transform
         self.inscope  = str(_inscope).lower().strip()
@@ -120,11 +118,8 @@ class RosConnector:
         self.current_robot_gaze = None
         self.current_robot_gaze_timestamp = None
 
-    def start_mw(self):
-        mt = threading.Thread(target=self.runner)
-        mt.start()
-
     def people_callback(self, ros_data):
+        self.lock.acquire()
         send_time = ros_data.header.stamp
         idx = -1
         max_distance = {}
@@ -155,9 +150,11 @@ class RosConnector:
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
+        self.lock.release()
         self.honor_stimulus_timeout()
 
     def roi_callback(self, ros_data):
+        self.lock.acquire()
         # ROI MSGS don't feature a header, so we need to set
         # the timestamp here.
         send_time = time.time()
@@ -177,9 +174,11 @@ class RosConnector:
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
+        self.lock.release()
         self.honor_stimulus_timeout()
 
     def point_callback(self, ros_data):
+        self.lock.acquire()
         send_time = ros_data.header.stamp
         self.point_x = ros_data.point.x
         self.point_y = ros_data.point.y
@@ -198,12 +197,13 @@ class RosConnector:
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
+        self.lock.release()
         self.honor_stimulus_timeout()
 
     def honor_stimulus_timeout(self):
         time.sleep(self.stimulus_timeout)
 
-    def runner(self):
+    def run(self):
         print ">>> Initializing ROS Subscriber to: %s" % self.inscope.strip()
         try:
             if self.datatype == "people":
@@ -219,7 +219,7 @@ class RosConnector:
             print ">>> ERROR %s" % str(e)
             return
         self.ready = True
-        while self.run is True:
+        while self.run_toggle is True:
             time.sleep(0.05)
         person_subscriber.unregister()
         print ">>> Deactivating ROS Subscriber to: %s" % self.inscope.strip()

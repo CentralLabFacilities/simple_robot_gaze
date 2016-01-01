@@ -34,4 +34,5 @@ Authors: Florian Lier, Simon Schulz
 class TODO:
 
     def __init__(self):
-        pass
+        print "RSB support not yet implemented"
+        

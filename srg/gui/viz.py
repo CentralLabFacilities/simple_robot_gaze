@@ -50,7 +50,7 @@ class LabelThread(QThread):
 
     def run(self):
         while True:
-            fake = "fake"
+            fake = "None"
             self.emit(SIGNAL('set_control_data(QString)'), str(fake))
             self.msleep(100)
 
@@ -80,8 +80,8 @@ class Viz(QtGui.QWidget):
         self.gaze_controller = _gaze_controller
 
         self.tc = r.ToggleConnector()
-        self.is_paused = False
-        self.run = True
+        self.is_paused  = False
+        self.run_toggle = True
 
         self.font = QtGui.QFont()
         self.font.setPointSize(12)
