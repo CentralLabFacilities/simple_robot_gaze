@@ -60,7 +60,10 @@ class GazeController(threading.Thread):
                 current_target = self.mw.current_robot_gaze
                 if self.acquire_prio:
                     self.rc.robot_controller.set_gaze_target(current_target, True)
+                self.lock.release()
             else:
-                time.sleep(0.001)
-            self.lock.release()
+                self.lock.release()
+                hz = 0.01
+                # Running with maximum frequency of 100 Hz
+                time.sleep(hz)
         print ">>> Deactivating Gaze Controller for: %s" % self.rc.outscope.strip()
