@@ -200,4 +200,4 @@ class Viz(QtGui.QWidget):
 
     def init_ui(self):
         self.setGeometry(100, 100, 550, 200)
-        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [GUI Update Rate 100 Hz]")
+        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [GUI Update Rate 10 Hz]")
