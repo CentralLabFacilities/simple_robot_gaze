@@ -56,7 +56,7 @@ class Arbitration(threading.Thread):
         self.input_sources    = []
         self.gaze_controller  = []
         self.overrides        = []
-        self.boring           = 2
+        self.boring              = None
         self.config              = None
         self.winner              = None
         self.arbitrate_toggle    = None
@@ -89,33 +89,38 @@ class Arbitration(threading.Thread):
             sys.exit(1)
 
     def configure_middleware(self):
-        idx = 0
+        # Start the external control MW Thread
         self.arbitrate_toggle = r.RosControlConnector()
         self.arbitrate_toggle.start()
 
         # Read config file an extract values
+        idx = 0
         for item in self.config["priorities"]:
             res        = self.config["resolution"][idx].split("x")
             fov        = self.config["fov"][idx].split("x")
             datatypes  = self.config["datatypes"][idx].split(":")
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
-            peak_override = int(self.config["allow_peak_override"][0])
+            peak_override    = int(self.config["allow_peak_override"][0])
+            self.boring      = float(self.config["boring_timeout"])
+
+            # Check whether peak_override is "ON" (1)
             if peak_override is 1:
                 self.allow_peak_override = peak_override
                 allow_override_threshold = self.config["peak_overrides"][idx]
                 self.overrides.append(allow_override_threshold)
-            # Transformations
+
+            # Configure Affine Transformations
             at = t.AffineTransform(str(item))
             at.set_coords(float(res[0]), float(res[1]), float(fov[0]), float(fov[1]))
             at.calculate_divider()
             self.transforms.append(at)
 
-            # Middleware
+            # Configure Middleware Adapters
             if datatypes[0].lower() == "ros":
                 mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             elif datatypes[0].lower() == "rsb":
-                print ">>> RSB is currrenly not supported :( "
+                print ">>> RSB is currrenly not supported :| "
                 self.run_toggle = False
                 sys.exit(1)
             else:
@@ -124,12 +129,12 @@ class Arbitration(threading.Thread):
                 sys.exit(1)
             self.input_sources.append(mw)
 
-            # Gaze Control
+            # Configure Gaze Controllers
             gc = g.GazeController(self.rd, mw, self.lock)
             self.gaze_controller.append(gc)
             idx += 1
 
-        # RUN!
+        # RUN EVERYTHING!
         for i_s in self.input_sources:
             i_s.start()
         for g_c in self.gaze_controller:
@@ -147,7 +152,6 @@ class Arbitration(threading.Thread):
         updates = []
         stimulus_timeouts = []
         current_gaze_values = []
-        self.lock.acquire()
         for target in self.input_sources:
             if target.current_robot_gaze is not None:
                 updates.append(target.current_robot_gaze_timestamp)
@@ -158,7 +162,6 @@ class Arbitration(threading.Thread):
                 stimulus_timeouts.append(target.stimulus_timeout)
                 current_gaze_values.append(None)
         self.derive_order(updates, stimulus_timeouts, current_gaze_values)
-        self.lock.release()
 
     def derive_order(self, _updates, _stimulus_timeouts, _current_gaze_values):
         winner = 0
@@ -223,7 +226,9 @@ class Arbitration(threading.Thread):
     def run(self):
         while self.run_toggle:
             if self.arbitrate_toggle.pause_auto_arbitrate is False:
+                self.lock.acquire()
                 self.get_latest_targets()
+                self.lock.release()
             else:
                 for gz in self.gaze_controller:
                     gz.acquire_prio = False

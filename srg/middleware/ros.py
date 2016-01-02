@@ -42,9 +42,7 @@ from std_msgs.msg import Header
 from std_msgs.msg import String
 from people_msgs.msg import Person
 from people_msgs.msg import People
-from sensor_msgs.msg import RegionOfInterest
 from geometry_msgs.msg import PointStamped
-from geometry_msgs.msg import Point
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
@@ -153,30 +151,6 @@ class RosConnector(threading.Thread):
         self.lock.release()
         self.honor_stimulus_timeout()
 
-    def roi_callback(self, ros_data):
-        self.lock.acquire()
-        # ROI MSGS don't feature a header, so we need to set
-        # the timestamp here.
-        send_time = time.time()
-        self.roi_x = ros_data.regionofinterest.x_offset
-        self.roi_y = ros_data.regionofinterest.y_offset
-        point = [self.roi_x, self.roi_y]
-        # Derive coordinate mapping
-        angles = self.trans.derive_mapping_coords(point)
-        if angles is not None:
-            g = RobotGaze()
-            if self.mode == 'absolute':
-                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-            else:
-                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            g.timestamp = send_time.to_sec()
-            self.current_robot_gaze_timestamp = g.timestamp
-            g.pan = angles[0]
-            g.tilt = angles[1]
-            self.current_robot_gaze = g
-        self.lock.release()
-        self.honor_stimulus_timeout()
-
     def point_callback(self, ros_data):
         self.lock.acquire()
         send_time = ros_data.header.stamp
@@ -208,8 +182,6 @@ class RosConnector(threading.Thread):
         try:
             if self.datatype == "people":
                 person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
-            elif self.datatype == "regionofinterest":
-                person_subscriber = rospy.Subscriber(self.inscope, RegionOfInterest, self.roi_callback, queue_size=1)
             elif self.datatype == "pointstamped":
                 person_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
             else:

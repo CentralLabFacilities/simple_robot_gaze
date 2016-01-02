@@ -63,7 +63,7 @@ class GazeController(threading.Thread):
                 self.lock.release()
             else:
                 self.lock.release()
-                hz = 0.01
-                # Running with maximum frequency of 100 Hz
-                time.sleep(hz)
+            hz = 0.01
+            # Running with maximum frequency of 100 Hz
+            time.sleep(hz)
         print ">>> Deactivating Gaze Controller for: %s" % self.rc.outscope.strip()
