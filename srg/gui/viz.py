@@ -52,7 +52,7 @@ class LabelThread(QThread):
         while True:
             fake = "None"
             self.emit(SIGNAL('set_control_data(QString)'), str(fake))
-            self.msleep(200)
+            self.msleep(100)
 
 
 class BarsThread(QThread):
@@ -68,7 +68,7 @@ class BarsThread(QThread):
         while True:
             fake = "fake"
             self.emit(SIGNAL('set_bar_values(QString)'), str(fake))
-            self.msleep(200)
+            self.msleep(100)
 
 
 class Viz(QtGui.QWidget):
@@ -88,6 +88,11 @@ class Viz(QtGui.QWidget):
         self.font.setBold(True)
         self.font.setWeight(75)
 
+        self.font_smaller = QtGui.QFont()
+        self.font_smaller.setPointSize(10)
+        self.font_smaller.setBold(True)
+        self.font_smaller.setWeight(55)
+
         self.layout = QtGui.QVBoxLayout(self)
         self.ccs_label = QtGui.QLabel("Current Control Input>>")
         self.ccs_label.setFont(self.font)
@@ -103,9 +108,13 @@ class Viz(QtGui.QWidget):
             self.maxima[name] = gc.mw.trans.fov
             self.last_values[name] = [0.0, 0.0]
             self.info_labels[name] = QtGui.QLabel(name)
+            self.info_labels[name].setFont(self.font_smaller)
             self.current_activity[name] = QtGui.QProgressBar()
             self.current_activity[name].setMaximum((gc.mw.trans.fov[0]/2)+(gc.mw.trans.fov[1]/2))
             self.current_activity[name].setMinimum(0)
+            self.current_activity[name].setAlignment(Qt.AlignCenter)
+            self.current_activity[name].setFormat('Activity')
+            self.current_activity[name].setFont(self.font_smaller)
         for label in self.info_labels:
             self.layout.addWidget(self.info_labels[label])
             self.layout.addWidget(self.current_activity[label])
@@ -158,6 +167,7 @@ class Viz(QtGui.QWidget):
                     try:
                         percent = self.derive_activity(self.current_targets[label], label)
                         self.current_activity[label].setValue(percent)
+                        self.current_activity[label].setFormat(str(percent)+"% Activity")
                     except Exception, e:
                         pass
 
@@ -189,5 +199,5 @@ class Viz(QtGui.QWidget):
         self.arbitration.request_stop()
 
     def init_ui(self):
-        self.setGeometry(100, 100, 640, 200)
-        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [GUI Update Rate 5 Hz]")
+        self.setGeometry(100, 100, 550, 200)
+        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [GUI Update Rate 100 Hz]")
