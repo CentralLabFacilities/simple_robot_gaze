@@ -52,7 +52,7 @@ class LabelThread(QThread):
         while True:
             fake = "None"
             self.emit(SIGNAL('set_control_data(QString)'), str(fake))
-            self.msleep(100)
+            self.msleep(200)
 
 
 class BarsThread(QThread):
@@ -68,7 +68,7 @@ class BarsThread(QThread):
         while True:
             fake = "fake"
             self.emit(SIGNAL('set_bar_values(QString)'), str(fake))
-            self.msleep(100)
+            self.msleep(200)
 
 
 class Viz(QtGui.QWidget):
@@ -89,32 +89,36 @@ class Viz(QtGui.QWidget):
         self.font.setWeight(75)
 
         self.layout = QtGui.QVBoxLayout(self)
-        self.ccs_label = QtGui.QLabel("Controlling Stimulus >")
+        self.ccs_label = QtGui.QLabel("Current Control Input>>")
         self.ccs_label.setFont(self.font)
         self.layout.addWidget(self.ccs_label)
 
         self.current_targets = {}
         self.current_activity = {}
         self.info_labels = {}
+        self.maxima = {}
+        self.last_values = {}
         for gc in self.gaze_controller:
             name = gc.mw.inscope
+            self.maxima[name] = gc.mw.trans.fov
+            self.last_values[name] = [0.0, 0.0]
             self.info_labels[name] = QtGui.QLabel(name)
             self.current_activity[name] = QtGui.QProgressBar()
-            self.current_activity[name].setMaximum(24)
-            self.current_activity[name].setMinimum(-24)
+            self.current_activity[name].setMaximum((gc.mw.trans.fov[0]/2)+(gc.mw.trans.fov[1]/2))
+            self.current_activity[name].setMinimum(0)
         for label in self.info_labels:
             self.layout.addWidget(self.info_labels[label])
             self.layout.addWidget(self.current_activity[label])
 
         if self.arbitration.winner is not None:
-            self.ccs_label.setText("Controlling Stimulus > "+self.input_sources[self.arbitration.winner].inscope)
+            self.ccs_label.setText("Current Control Input >> " + self.input_sources[self.arbitration.winner].inscope)
             for gc in self.gaze_controller:
                 if gc.mw.current_robot_gaze is not None:
                     self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
                 else:
                     self.current_targets[gc.mw.inscope] = [ -1, -1 ]
             for name in self.current_targets.keys():
-                self.info_labels[name].setText("Targets@"+name+" > "+str(self.current_targets[name]))
+                self.info_labels[name].setText("Derived Gaze Targets >> "+name+" >> "+str(self.current_targets[name]) + " Degree")
 
         self.pause_button = QPushButton('Pause Simple Robot Gaze', self)
         self.pause_button.clicked.connect(self.pause)
@@ -134,17 +138,32 @@ class Viz(QtGui.QWidget):
         self.connect(self.get_bars_thread, SIGNAL("set_bar_values(QString)"), self.set_bar_values)
         self.get_bars_thread.start()
 
+    @staticmethod
+    def percentage(part, whole):
+        return 100 * float(part)/float(whole)
+
+    def derive_activity(self, _values, _label):
+        last_x  = self.last_values[_label][0]
+        last_y  = self.last_values[_label][1]
+        now_x   = _values[0]
+        now_y   = _values[1]
+        delta_x = abs(last_x - now_x)
+        delta_y = abs(last_y - now_y)
+        self.last_values[_label] = _values
+        return delta_x+delta_y
+
     def set_bar_values(self, _values):
             for label in self.info_labels:
                 if label in self.current_targets.keys() and label in self.current_activity.keys():
                     try:
-                        self.current_activity[label].setValue(self.current_targets[label][0])
+                        percent = self.derive_activity(self.current_targets[label], label)
+                        self.current_activity[label].setValue(percent)
                     except Exception, e:
                         pass
 
     def set_control_data(self, _values):
             if self.arbitration.winner is not None:
-                self.ccs_label.setText("Controlling Stimulus > "+self.input_sources[self.arbitration.winner].inscope)
+                self.ccs_label.setText("Current Control Input >> "+self.input_sources[self.arbitration.winner].inscope)
                 for gc in self.gaze_controller:
                     try:
                         self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
@@ -152,7 +171,7 @@ class Viz(QtGui.QWidget):
                         pass
                 for name in self.current_targets.keys():
                     try:
-                        self.info_labels[name].setText("Targets@"+name+" > "+str(self.current_targets[name]))
+                        self.info_labels[name].setText("Derived Gaze Targets >> "+name+" >> "+str(self.current_targets[name]) + " Degree")
                     except Exception, e:
                         pass
 
@@ -170,5 +189,5 @@ class Viz(QtGui.QWidget):
         self.arbitration.request_stop()
 
     def init_ui(self):
-        self.setGeometry(100, 100, 640, 100)
-        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [Update Rate 10 Hz]")
+        self.setGeometry(100, 100, 640, 200)
+        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [GUI Update Rate 5 Hz]")

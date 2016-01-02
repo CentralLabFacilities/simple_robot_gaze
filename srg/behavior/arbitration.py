@@ -102,7 +102,7 @@ class Arbitration(threading.Thread):
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
             peak_override    = int(self.config["allow_peak_override"][0])
-            self.boring      = float(self.config["boring_timeout"])
+            self.boring      = float(self.config["boring_timeout"][0])
 
             # Check whether peak_override is "ON" (1)
             if peak_override is 1:
@@ -216,7 +216,7 @@ class Arbitration(threading.Thread):
                 gz.acquire_prio = True
                 now = time.time()
                 self.winner = winner
-                if now - self.last_info >= 2.0:
+                if now - self.last_info >= 1.0:
                     print ">>> Winning input is %s" % self.input_sources[winner].inscope
                     self.last_info = time.time()
             else:

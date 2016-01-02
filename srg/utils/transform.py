@@ -54,6 +54,9 @@ class AffineTransform:
         self.origin2 = [1.0, 1.0]
         self.origin3 = [1.0, 1.0]
 
+        # Save field of view
+        self.fov = [1.0, 1.0]
+
         # Divider
         self.divider = 1.0
 
@@ -73,6 +76,9 @@ class AffineTransform:
         print ">>> Initialized Affine Transform for: %s" % self.name
 
     def set_coords(self, _x, _y, _fov_h, _fov_v):
+
+        self.fov[0] = _fov_h
+        self.fov[1] = _fov_v
 
         fov_h = _fov_h
         fov_v = _fov_v
