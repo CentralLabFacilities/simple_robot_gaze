@@ -239,6 +239,5 @@ class Arbitration(threading.Thread):
             time.sleep(hz)
             now = time.time()
             duration = now - then
-            print 1/duration
-            self.loop_speed = duration
+            self.loop_speed = round(1/duration, 2)
         print ">>> Stopping Arbitration"
