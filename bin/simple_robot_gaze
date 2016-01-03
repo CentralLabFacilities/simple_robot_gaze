@@ -42,7 +42,6 @@ from optparse import OptionParser
 
 # PYQT
 from PyQt4 import QtGui
-from PyQt4.QtCore import QTimer
 
 # SELF IMPORTS
 from srg.gui import viz as v
@@ -80,9 +79,6 @@ def run_viz():
     """
     global app, gui
     app = QtGui.QApplication(sys.argv)
-    # timer = QTimer()
-    # timer.start(100)
-    # timer.timeout.connect(lambda: None)
     gui = v.Viz(ar.input_sources, ar.gaze_controller, ar)
     gui.start_update_threads()
     gui.show()
