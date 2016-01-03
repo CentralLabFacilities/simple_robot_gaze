@@ -44,31 +44,45 @@ from optparse import OptionParser
 from PyQt4 import QtGui
 from PyQt4.QtCore import QTimer
 
-
 # SELF IMPORTS
 from srg.gui import viz as v
 from srg.behavior import arbitration as a
 
 
 def runner(_options):
-    # Arbitration
+    """
+    Runner Function:
+    1)  Start the Arbitration Thread which will configure the Middleware,
+        Robot Driver and Gaze Control Threads.
+    2)  Start the GUI
+    3)  Implements a SIGNAL handler in order to (catch SIGINT) and gracefully
+        exit program
+    :param _options input options from command line
+    """
     global ar
     ar = a.Arbitration(_options.config, options.outscope)
+    # Init the Robot Driver
     ar.boot_robot_driver()
+    # Middlware and Gaze Configuration
     ar.configure()
+    # Start Arbitration
     ar.start()
-    # SIGNALING
+    # Signal Handling
     signal.signal(signal.SIGINT, signal_handler)
-    # GUI
+    # Run the visualisation
     run_viz()
 
 
 def run_viz():
+    """
+    PtQt Visualisation of incoming inputs and current
+    control input
+    """
     global app, gui
     app = QtGui.QApplication(sys.argv)
-    timer = QTimer()
-    timer.start(100)
-    timer.timeout.connect(lambda: None)
+    # timer = QTimer()
+    # timer.start(100)
+    # timer.timeout.connect(lambda: None)
     gui = v.Viz(ar.input_sources, ar.gaze_controller, ar)
     gui.start_update_threads()
     gui.show()
@@ -84,6 +98,13 @@ def run_viz():
 
 
 def signal_handler(sig, frame):
+    """
+    Callback function for the signal handler, catches signals
+    and gracefully stops the application, i.e., exit subscribers
+    before killing the main thread.
+    :param sig the signal number
+    :param frame frame objects represent execution frames.
+    """
     print ">>> Exiting (signal %s)..." % str(sig)
     ar.request_stop()
     gui.run_toggle = False
