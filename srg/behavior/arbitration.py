@@ -62,6 +62,7 @@ class Arbitration(threading.Thread):
         self.arbitrate_toggle    = None
         self.rd                  = None
         self.allow_peak_override = None
+        self.loop_speed          = 1.0
 
     def boot_robot_driver(self):
         self.rd = d.RobotDriver("ROS", self.outscope.strip())
@@ -225,6 +226,7 @@ class Arbitration(threading.Thread):
 
     def run(self):
         while self.run_toggle:
+            now = time.time()
             if self.arbitrate_toggle.pause_auto_arbitrate is False:
                 self.lock.acquire()
                 self.get_latest_targets()
@@ -235,4 +237,7 @@ class Arbitration(threading.Thread):
             hz = 0.01
             # Running with maximum frequency of 100 Hz
             time.sleep(hz)
+            then = time.time()
+            duration = then - now
+            self.loop_speed = 1000/duration
         print ">>> Stopping Arbitration"

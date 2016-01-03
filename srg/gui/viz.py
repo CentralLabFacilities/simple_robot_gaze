@@ -94,6 +94,11 @@ class Viz(QtGui.QWidget):
         self.font_smaller.setWeight(55)
 
         self.layout = QtGui.QVBoxLayout(self)
+
+        self.loop_label = QtGui.QLabel("Control Loop Speed >> " + self.arbitration.loop_speed + " Hz")
+        self.loop_label.setFont(self.font)
+        self.layout.addWidget(self.loop_label)
+
         self.ccs_label = QtGui.QLabel("Current Control Input>>")
         self.ccs_label.setFont(self.font)
         self.layout.addWidget(self.ccs_label)
