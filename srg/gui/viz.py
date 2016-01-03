@@ -95,7 +95,7 @@ class Viz(QtGui.QWidget):
 
         self.layout = QtGui.QVBoxLayout(self)
 
-        self.loop_label = QtGui.QLabel("Control Loop Speed >> " + self.arbitration.loop_speed + " Hz")
+        self.loop_label = QtGui.QLabel("Control Loop Speed >> " + str(self.arbitration.loop_speed) + " Hz")
         self.loop_label.setFont(self.font)
         self.layout.addWidget(self.loop_label)
 
@@ -179,6 +179,7 @@ class Viz(QtGui.QWidget):
     def set_control_data(self, _values):
             if self.arbitration.winner is not None:
                 self.ccs_label.setText("Current Control Input >> "+self.input_sources[self.arbitration.winner].inscope)
+                self.loop_label = QtGui.QLabel("Control Loop Speed >> " + str(self.arbitration.loop_speed) + " Hz")
                 for gc in self.gaze_controller:
                     try:
                         self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
