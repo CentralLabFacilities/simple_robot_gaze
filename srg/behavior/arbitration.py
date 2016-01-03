@@ -226,7 +226,7 @@ class Arbitration(threading.Thread):
 
     def run(self):
         while self.run_toggle:
-            now = time.time()
+            then = time.time()
             if self.arbitrate_toggle.pause_auto_arbitrate is False:
                 self.lock.acquire()
                 self.get_latest_targets()
@@ -237,7 +237,8 @@ class Arbitration(threading.Thread):
             hz = 0.01
             # Running with maximum frequency of 100 Hz
             time.sleep(hz)
-            then = time.time()
-            duration = then - now
+            now = time.time()
+            duration = now - then
+            print duration
             self.loop_speed = 1000/duration
         print ">>> Stopping Arbitration"
