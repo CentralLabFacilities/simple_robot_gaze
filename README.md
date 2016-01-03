@@ -48,39 +48,56 @@ If you send something other than "pause", simple robot gaze will resume operatio
 The priority of input data streams, the first entry has the highest priority, the last the lowest.
 
 priorities:
-  - /ocvfacerec/ros/people
-  - /dlibfacerec/ros/people
-  - /movement/roi
+  - /robotgazetools/faces
+  - /robotgazetools/saliency
 
-Gaze strategy: relative for moving cameras, absolute for fixed setups, corresponds to the priorities.
-
-modes:
-  - relative
-  - relative
-  - absolute
-
-What kind of data are you sending in your input stream, corresponds to priorities.
+What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented: ros:People, ros:PointStamped
 
 datatypes:
   - ros:People
-  - ros:RegionOfInterest
-  - ros:RegionOfInterest
+  - ros:PointStamped
 
-Resolution of the source camera image, corresponds to the priorities.
+Gaze strategy: relative for moving cameras, absolute for fixed setups, corresponds to the priorities
+
+modes:
+  - relative
+  - absolute
+
+Skip stimulus input x for n seconds. For example: only react every three seconds on stimulus input would be "3.0"
+This corresponds to priorities. The highest allowed value _must_ be less than "boring_timeout" (see below).
+
+stimulus_timeout:
+  - 0.0
+  - 0.0
+
+Based on the input streams (see: priorities). When is a stimulus considered "boring", e.g., no new messages for n
+seconds. The last received timestamp is always evaluated.
+For example: time.now() - timestamp_last_message >= boring_timeout: proceed to the next priority level.
+
+boring_timeout:
+  - 1.0
+
+See "peak_override"
+
+allow_peak_override:
+  - 1
+
+Peak override: Provide a value that is encoded in your stimulus input messages, e.g, size of face in pixels in order
+to override the base priotrity. This field is only evaluated if allow_peak_override is "1" (see above).
+Example: your first priority is facedetection. However, if there is massive motion detected in the second priority,
+override the first priority. Corresponds priorities.
+
+peak_overrides:
+  - 100.0
+  - 50.0
+
+Resolution of the source camera image, corresponds to the priorities
 
 resolution:
   - 320x240
   - 320x240
-  - 320x240
 
 Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
-
 fov:
-  - 58.0x45.0
-  - 58.0x45.0
-  - 58.0x45.0
-
-
-# TODO
-
-Implement RSB support for input scopes and remote control.
+  - 66.0x40.0
+  - 66.0x40.0

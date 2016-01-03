@@ -7,8 +7,6 @@
 # This is accomplished by mapping from the region of interest (faces, ittikoch...) to the camera's
 # field of view, robot joint angles respectively.
 
-# TODO: Implement support for ROS TF targets.
-
 # This file must reside in ~/.config/simplerobotgaze.yaml
 
 # In order to stop simple robot gaze from controlling the robot simple send "pause" (string msg) to:
