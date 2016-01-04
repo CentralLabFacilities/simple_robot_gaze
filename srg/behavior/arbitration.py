@@ -56,6 +56,8 @@ class Arbitration(threading.Thread):
         self.input_sources    = []
         self.gaze_controller  = []
         self.overrides        = []
+        self.is_override         = False
+        self.override_type       = None
         self.boring              = None
         self.config              = None
         self.winner              = None
@@ -166,7 +168,8 @@ class Arbitration(threading.Thread):
 
     def derive_order_and_set_winner(self, _updates, _stimulus_timeouts, _current_gaze_values):
         now = time.time()
-        override = False
+        self.is_override = False
+        self.override_type = None
         winner = 0
         idx = -1
         p = -1
@@ -186,15 +189,17 @@ class Arbitration(threading.Thread):
                         if int(_current_gaze_values[p].nearest_person_z) >= int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
                             print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
                             winner = p
-                            override = True
+                            self.is_override = True
+                            self.override_type = self.input_sources[p].inscope
                             break
                     if _current_gaze_values[p].datatype.lower() == "pointstamped":
                         if int(_current_gaze_values[p].point_z) <= int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
                             print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
                             winner = p
-                            override = True
+                            self.is_override = True
+                            self.override_type = self.input_sources[p].inscope
                             break
-        if override is False:
+        if self.is_override is False:
             for stamp in _updates:
                 n += 1
                 if stamp is not None:
@@ -227,8 +232,9 @@ class Arbitration(threading.Thread):
     def run(self):
         loop_count = 0
         init_time = time.time()
-        tick = 0.0
         while self.run_toggle:
+            tick = time.time()
+            loop_count += 1
             then = time.time()
             if self.arbitrate_toggle.pause_auto_arbitrate is False:
                 self.lock.acquire()
@@ -238,14 +244,12 @@ class Arbitration(threading.Thread):
                 for gz in self.gaze_controller:
                     gz.acquire_prio = False
             now = time.time()
-            # Running with maximum frequency of 50 Hz
-            hz = 0.02-(now-then)
-            if hz > 0:
-                time.sleep(hz)
-            loop_count += 1
-            tick = time.time()
             if tick - init_time >= 1.0:
                 self.loop_speed = loop_count
                 loop_count = 0
                 init_time = time.time()
+            # Running with maximum frequency of 50 Hz
+            hz = 0.02-(now-then)
+            if hz > 0:
+                time.sleep(hz)
         print ">>> Stopping Arbitration"

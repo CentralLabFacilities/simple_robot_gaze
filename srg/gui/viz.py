@@ -75,12 +75,12 @@ class Viz(QtGui.QWidget):
     def __init__(self, _input_source, _gaze_controller, _arbitration):
         super(Viz, self).__init__()
 
-        self.arbitration  = _arbitration
-        self.input_sources   = _input_source
+        self.arbitration = _arbitration
+        self.input_sources = _input_source
         self.gaze_controller = _gaze_controller
 
         self.tc = r.ToggleConnector()
-        self.is_paused  = False
+        self.is_paused = False
         self.run_toggle = True
 
         self.font = QtGui.QFont()
@@ -113,6 +113,13 @@ class Viz(QtGui.QWidget):
         self.loop_label.setFont(self.font_smaller)
         self.layout.addWidget(self.loop_label)
 
+        self.override_button = QtGui.QRadioButton("")
+        self.override_button.setChecked(False)
+        self.override_button.setText("Override >> Negative!")
+        self.override_button.setFont(self.font_smaller_c)
+        self.layout.addWidget(self.override_button)
+
+        self.layout.addWidget(self.h_line)
         self.layout.addWidget(self.h_line)
         self.layout.addWidget(self.h_line)
 
@@ -143,22 +150,29 @@ class Viz(QtGui.QWidget):
             self.layout.addWidget(self.loop_labels[label])
             self.layout.addWidget(self.info_labels[label])
             self.layout.addWidget(self.current_activity[label])
-            h_line = QtGui.QFrame()
-            h_line.setFrameStyle(QtGui.QFrame.HLine | QtGui.QFrame.Plain)
-            h_line.setFixedHeight(0)
-            self.layout.addWidget(h_line)
-            self.layout.addWidget(h_line)
+            self.layout.addWidget(self.h_line)
+            self.layout.addWidget(self.h_line)
+            self.layout.addWidget(self.h_line)
 
         if self.arbitration.winner is not None:
             self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
+
             for gc in self.gaze_controller:
                 if gc.mw.current_robot_gaze is not None:
                     self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
                     self.loop_labels[name].setText("Robot Set Gaze Loop << " + name + " >> " + str(gc.loop_speed) + " Hz")
                 else:
                     self.current_targets[gc.mw.inscope] = [ -1, -1 ]
+
             for name in self.current_targets.keys():
                 self.info_labels[name].setText("Calculated Gaze Targets << "+name+" >> " + str(self.current_targets[name]) + " Degrees")
+
+            if self.arbitration.is_override:
+                self.override_button.setText("Override >> " + self.arbitration.override_type)
+                self.override_button.setChecked(True)
+            else:
+                self.override_button.setChecked(False)
+                self.override_button.setText("Override << Negative!")
 
         self.pause_button = QPushButton('Pause Simple Robot Gaze', self)
         self.pause_button.clicked.connect(self.pause)
@@ -217,6 +231,12 @@ class Viz(QtGui.QWidget):
                         self.info_labels[name].setText("Calculated Gaze Targets << " + name + " >> "+str(self.current_targets[name]) + " Degrees")
                     except Exception, e:
                         pass
+                if self.arbitration.is_override:
+                    self.override_button.setText("Override << " + self.arbitration.override_type)
+                    self.override_button.setChecked(True)
+                else:
+                    self.override_button.setChecked(False)
+                    self.override_button.setText("Override << Negative!")
 
     def pause(self):
             if self.is_paused is False:
