@@ -165,12 +165,12 @@ class Arbitration(threading.Thread):
         self.derive_order_and_set_winner(updates, stimulus_timeouts, current_gaze_values)
 
     def derive_order_and_set_winner(self, _updates, _stimulus_timeouts, _current_gaze_values):
+        now = time.time()
+        override = False
         winner = 0
         idx = -1
-        n = -1
         p = -1
-        override = False
-        now = time.time()
+        n = -1
         if len(_current_gaze_values) != len(_stimulus_timeouts) or len(_current_gaze_values) != len(_updates):
             print ">>> Waiting for data..."
             return
@@ -185,15 +185,13 @@ class Arbitration(threading.Thread):
                     if _current_gaze_values[p].datatype.lower() == "people":
                         if int(_current_gaze_values[p].nearest_person_z) >= int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
                             print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
-                            idx = p
-                            winner = idx
+                            winner = p
                             override = True
                             break
                     if _current_gaze_values[p].datatype.lower() == "pointstamped":
                         if int(_current_gaze_values[p].point_z) <= int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
                             print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
-                            idx = p
-                            winner = idx
+                            winner = p
                             override = True
                             break
         if override is False:
@@ -205,12 +203,14 @@ class Arbitration(threading.Thread):
                         winner = idx
                         break
                     else:
-                        # Too boring advance in prios
+                        # Too boring advance in priorities
                         idx += 1
                 else:
-                    # Next prio, because we don't have any values yet.
+                    # Next prio, because we don't have any solid values yet.
                     idx += 1
-        # Now enable the correct gaze controller
+
+        # Now enable the correct gaze controller, if we dont have anything, always
+        # prioritize first input (0)
         idx = 0
         for gz in self.gaze_controller:
             if idx == winner:
@@ -226,8 +226,8 @@ class Arbitration(threading.Thread):
 
     def run(self):
         loop_count = 0
-        init_time  = time.time()
-        tick  = 0.0
+        init_time = time.time()
+        tick = 0.0
         while self.run_toggle:
             then = time.time()
             if self.arbitrate_toggle.pause_auto_arbitrate is False:
