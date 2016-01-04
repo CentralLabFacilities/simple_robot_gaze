@@ -50,20 +50,33 @@ class GazeController(threading.Thread):
         self.acquire_prio = False
         self.lastdatum    = time.time()
         self.rc           = _robot_controller
+        self.loop_speed   = 1.0
 
     def run(self):
         print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope.strip(), self.rc.outscope.strip())
+        loop_count = 0
+        init_time  = time.time()
+        tick  = 0.0
         while self.run_toggle is True:
+            then = time.time()
             self.lock.acquire()
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze_timestamp:
                 self.lastdatum = self.mw.current_robot_gaze_timestamp
                 current_target = self.mw.current_robot_gaze
+                loop_count += 1
                 if self.acquire_prio:
                     self.rc.robot_controller.set_gaze_target(current_target, True)
                 self.lock.release()
             else:
                 self.lock.release()
-            hz = 0.01
-            # Running with maximum frequency of 100 Hz
-            time.sleep(hz)
+            now = time.time()
+            # Running with maximum frequency of 50 Hz
+            hz = 0.02-(now-then)
+            if hz > 0:
+                time.sleep(hz)
+            tick = time.time()
+            if tick - init_time >= 1.0:
+                self.loop_speed = loop_count
+                loop_count = 0
+                init_time = time.time()
         print ">>> Deactivating Gaze Controller for: %s" % self.rc.outscope.strip()
