@@ -110,13 +110,13 @@ class Viz(QtGui.QWidget):
         self.ccs_label.setStyleSheet('color: darkblue')
         self.layout.addWidget(self.ccs_label)
 
-        self.loop_label = QtGui.QLabel("SRG Main Loop " + str(self.arbitration.loop_speed) + " Hz")
+        self.loop_label = QtGui.QLabel("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
         self.loop_label.setFont(self.font_smaller)
         self.layout.addWidget(self.loop_label)
 
         self.override_button = QtGui.QRadioButton("")
         self.override_button.setChecked(False)
-        self.override_button.setText("Override >> Negative!")
+        self.override_button.setText("Override: Negative!")
         self.override_button.setFont(self.font_smaller_c)
         self.layout.addWidget(self.override_button)
 
@@ -161,19 +161,19 @@ class Viz(QtGui.QWidget):
             for gc in self.gaze_controller:
                 if gc.mw.current_robot_gaze is not None:
                     self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
-                    self.loop_labels[name].setText("Robot Set Gaze Loop " + name + " @ " + str(gc.loop_speed) + " Hz")
+                    self.loop_labels[name].setText("Robot 'Set Gaze' Loop: " + name + " @ " + str(gc.loop_speed) + " Hz")
                 else:
                     self.current_targets[gc.mw.inscope] = [ -1, -1 ]
 
             for name in self.current_targets.keys():
-                self.info_labels[name].setText("Calculated Gaze Targets << " + str(self.current_targets[name]) + " Degrees << " + name )
+                self.info_labels[name].setText("Calculated Gaze Targets: " + str(self.current_targets[name]) + " Degrees << " + name )
 
             if self.arbitration.is_override:
-                self.override_button.setText("Override >> " + self.arbitration.override_type)
+                self.override_button.setText("Override: " + self.arbitration.override_type)
                 self.override_button.setChecked(True)
             else:
                 self.override_button.setChecked(False)
-                self.override_button.setText("Override << Negative!")
+                self.override_button.setText("Override: Negative!")
 
         self.pause_button = QPushButton('Pause Simple Robot Gaze', self)
         self.pause_button.clicked.connect(self.pause)
@@ -223,21 +223,21 @@ class Viz(QtGui.QWidget):
                 self.loop_label.setText("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
                 for gc in self.gaze_controller:
                     try:
-                        self.loop_labels[gc.mw.inscope].setText("Robot Set Gaze Loop << " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
+                        self.loop_labels[gc.mw.inscope].setText("Robot 'Set Gaze' Loop: " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
                         self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
                     except Exception, e:
                         pass
                 for name in self.current_targets.keys():
                     try:
-                        self.info_labels[name].setText("Calculated Gaze Targets << " + str(self.current_targets[name]) + " Degrees << " + name )
+                        self.info_labels[name].setText("Calculated Gaze Targets: " + str(self.current_targets[name]) + " Degrees << " + name )
                     except Exception, e:
                         pass
                 if self.arbitration.is_override:
-                    self.override_button.setText("Override << " + self.arbitration.override_type)
+                    self.override_button.setText("Override: " + self.arbitration.override_type)
                     self.override_button.setChecked(True)
                 else:
                     self.override_button.setChecked(False)
-                    self.override_button.setText("Override << Negative!")
+                    self.override_button.setText("Override: Negative!")
 
     def pause(self):
             if self.is_paused is False:
