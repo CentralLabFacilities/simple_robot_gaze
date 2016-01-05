@@ -107,6 +107,7 @@ class Viz(QtGui.QWidget):
 
         self.ccs_label = QtGui.QLabel("Current Control Input << ")
         self.ccs_label.setFont(self.font)
+        self.ccs_label.setStyleSheet('color: darkblue')
         self.layout.addWidget(self.ccs_label)
 
         self.loop_label = QtGui.QLabel("SRG Main Loop " + str(self.arbitration.loop_speed) + " Hz")
