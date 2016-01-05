@@ -166,7 +166,7 @@ class Viz(QtGui.QWidget):
                     self.current_targets[gc.mw.inscope] = [ -1, -1 ]
 
             for name in self.current_targets.keys():
-                self.info_labels[name].setText("Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + "@ Degrees " )
+                self.info_labels[name].setText("Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees " )
 
             if self.arbitration.is_override:
                 self.override_button.setText("Override: " + self.arbitration.override_type)
@@ -229,7 +229,7 @@ class Viz(QtGui.QWidget):
                         pass
                 for name in self.current_targets.keys():
                     try:
-                        self.info_labels[name].setText("Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + "@ Degrees " )
+                        self.info_labels[name].setText("Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees " )
                     except Exception, e:
                         pass
                 if self.arbitration.is_override:
