@@ -26,6 +26,16 @@ datatypes:
   - ros:People
   - ros:PointStamped
 
+# Resolution of the source camera image, corresponds to the priorities
+resolution:
+  - 320x240
+  - 320x240
+
+# Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
+fov:
+  - 66.0x40.0
+  - 66.0x40.0
+
 # Gaze strategy: relative for moving cameras, absolute for fixed setups, corresponds to the priorities
 modes:
   - relative
@@ -54,16 +64,6 @@ allow_peak_override:
 peak_overrides:
   - 100.0
   - 50.0
-
-# Resolution of the source camera image, corresponds to the priorities
-resolution:
-  - 320x240
-  - 320x240
-
-# Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
-fov:
-  - 66.0x40.0
-  - 66.0x40.0
 
 ############################
 # TODO ROS TF Integration
