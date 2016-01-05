@@ -161,12 +161,12 @@ class Viz(QtGui.QWidget):
             for gc in self.gaze_controller:
                 if gc.mw.current_robot_gaze is not None:
                     self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
-                    self.loop_labels[name].setText("Robot Set Gaze Loop << " + name + " >> " + str(gc.loop_speed) + " Hz")
+                    self.loop_labels[name].setText("Robot Set Gaze Loop " + name + " @ " + str(gc.loop_speed) + " Hz")
                 else:
                     self.current_targets[gc.mw.inscope] = [ -1, -1 ]
 
             for name in self.current_targets.keys():
-                self.info_labels[name].setText("Calculated Gaze Targets << "+name+" >> " + str(self.current_targets[name]) + " Degrees")
+                self.info_labels[name].setText("Calculated Gaze Targets << " + str(self.current_targets[name]) + " Degrees << " + name )
 
             if self.arbitration.is_override:
                 self.override_button.setText("Override >> " + self.arbitration.override_type)
@@ -213,23 +213,23 @@ class Viz(QtGui.QWidget):
                     try:
                         percent = self.derive_activity(self.current_targets[label], label)
                         self.current_activity[label].setValue(percent)
-                        self.current_activity[label].setFormat(str(percent)+"%  Activity (2 Hz) ")
+                        self.current_activity[label].setFormat(str(percent)+"%  Activity (@ 2 Hz) ")
                     except Exception, e:
                         pass
 
     def set_control_data(self, _values):
             if self.arbitration.winner is not None:
                 self.ccs_label.setText("Current Control Input << "+self.input_sources[self.arbitration.winner].inscope)
-                self.loop_label.setText("SRG Main Loop " + str(self.arbitration.loop_speed) + " Hz")
+                self.loop_label.setText("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
                 for gc in self.gaze_controller:
                     try:
-                        self.loop_labels[gc.mw.inscope].setText("Robot Set Gaze Loop << " + gc.mw.inscope + " >> " + str(gc.loop_speed) + " Hz")
+                        self.loop_labels[gc.mw.inscope].setText("Robot Set Gaze Loop << " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
                         self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
                     except Exception, e:
                         pass
                 for name in self.current_targets.keys():
                     try:
-                        self.info_labels[name].setText("Calculated Gaze Targets << " + name + " >> "+str(self.current_targets[name]) + " Degrees")
+                        self.info_labels[name].setText("Calculated Gaze Targets << " + str(self.current_targets[name]) + " Degrees << " + name )
                     except Exception, e:
                         pass
                 if self.arbitration.is_override:
