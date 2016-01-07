@@ -46,6 +46,7 @@ from geometry_msgs.msg import PointStamped
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
+from hlrc_client import RobotTimestamp
 
 
 class ToggleConnector:
