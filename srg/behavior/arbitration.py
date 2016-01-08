@@ -40,6 +40,7 @@ import threading
 from srg.robot import driver as d
 from srg.control import gaze as g
 from srg.middleware import ros as r
+from srg.middleware import rsb as s
 from srg.utils import transform as t
 
 
@@ -48,6 +49,7 @@ class Arbitration(threading.Thread):
     def __init__(self, _configfile, _outscope):
         threading.Thread.__init__(self)
         self.lock             = threading.RLock()
+        self.pause_lock       = threading.RLock()
         self.run_toggle       = True
         self.cfgfile          = _configfile.strip()
         self.outscope         = _outscope
@@ -56,15 +58,20 @@ class Arbitration(threading.Thread):
         self.input_sources    = []
         self.gaze_controller  = []
         self.overrides        = []
-        self.is_override         = False
-        self.override_type       = None
-        self.boring              = None
-        self.config              = None
-        self.winner              = None
-        self.arbitrate_toggle    = None
-        self.rd                  = None
-        self.allow_peak_override = None
-        self.loop_speed          = 1.0
+        self.paused           = Paused()
+        self.is_override          = False
+        self.loop_speed           = 1.0
+        self.override_type        = None
+        self.boring               = None
+        self.config               = None
+        self.winner               = None
+        self.arbitrate_toggle     = None
+        self.arbitrate_toggle_rsb = None
+        self.rd                   = None
+        self.allow_peak_override  = None
+        self.rsb_control_enable   = None
+        self.paused               = None
+        self.prefix               = ""
 
     def boot_robot_driver(self):
         self.rd = d.RobotDriver("ROS", self.outscope.strip())
@@ -93,21 +100,31 @@ class Arbitration(threading.Thread):
 
     def configure_middleware(self):
         # Start the external control MW Thread
-        self.arbitrate_toggle = r.RosControlConnector()
+        self.prefix = self.config["scope_topic_prefix"][0]
+        self.arbitrate_toggle = r.RosControlConnector(self.prefix, self.paused, self.pause_lock)
         self.arbitrate_toggle.start()
+
+        # Is RSB remote control enabled?
+        self.rsb_control_enable = int(self.config["enable_rsb_remote_control"][0])
+        if self.rsb_control_enable is 1:
+            self.arbitrate_toggle_rsb = s.RSBControlConnector(self.prefix, self.paused, self.pause_lock)
+            self.arbitrate_toggle_rsb.start()
+        else:
+            pass
 
         # Read config file an extract values
         idx = 0
+        peak_override = int(self.config["allow_peak_override"][0])
+        self.boring = float(self.config["boring_timeout"][0])
+
         for item in self.config["priorities"]:
             res        = self.config["resolution"][idx].split("x")
             fov        = self.config["fov"][idx].split("x")
             datatypes  = self.config["datatypes"][idx].split(":")
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
-            peak_override    = int(self.config["allow_peak_override"][0])
-            self.boring      = float(self.config["boring_timeout"][0])
 
-            # Check whether peak_override is "ON" (1)
+            # Check if peak_override is "ON" (1)
             if peak_override is 1:
                 self.allow_peak_override = peak_override
                 allow_override_threshold = self.config["peak_overrides"][idx]
@@ -149,6 +166,8 @@ class Arbitration(threading.Thread):
         for gazecontrol in self.gaze_controller:
             gazecontrol.run_toggle = False
         self.arbitrate_toggle.run_toggle = False
+        if self.arbitrate_toggle_rsb is not None:
+            self.arbitrate_toggle_rsb.run_toggle = False
         self.run_toggle = False
 
     def get_latest_targets(self):
@@ -234,15 +253,20 @@ class Arbitration(threading.Thread):
         init_time = time.time()
         while self.run_toggle:
             tick = time.time()
-            loop_count += 1
             then = time.time()
-            if self.arbitrate_toggle.pause_auto_arbitrate is False:
+
+            self.pause_lock.acquire()
+            is_paused = self.paused.get_paused()
+            self.pause_lock.release()
+
+            if is_paused is False:
                 self.lock.acquire()
                 self.get_latest_targets()
                 self.lock.release()
             else:
                 for gz in self.gaze_controller:
                     gz.acquire_prio = False
+
             now = time.time()
             if tick - init_time >= 1.0:
                 self.loop_speed = loop_count
@@ -252,4 +276,19 @@ class Arbitration(threading.Thread):
             hz = 0.02-(now-then)
             if hz > 0:
                 time.sleep(hz)
+            loop_count += 1
         print ">>> Stopping Arbitration"
+
+
+class Paused:
+    def __init__(self):
+        self.paused = False
+
+    def set_pause(self):
+        self.paused = True
+
+    def set_resume(self):
+        self.paused = False
+
+    def get_paused(self):
+        return self.paused

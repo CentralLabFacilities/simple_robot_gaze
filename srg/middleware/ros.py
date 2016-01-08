@@ -51,8 +51,9 @@ from hlrc_client import RobotTimestamp
 
 class ToggleConnector:
 
-    def __init__(self):
-        self.pub = rospy.Publisher("/robotgazetools/toggle", String, queue_size=1)
+    def __init__(self, _prefix):
+        self.prefix = str(_prefix.lower().strip())
+        self.pub = rospy.Publisher(self.prefix+"/robotgazetools/toggle", String, queue_size=1)
 
     def pause(self):
         p = "pause"
@@ -64,19 +65,25 @@ class ToggleConnector:
 
 
 class RosControlConnector(threading.Thread):
-    def __init__(self):
+    def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
         self.run_toggle = True
         self.ready = False
-        self.pause_auto_arbitrate = False
-        self.inscope = "/robotgazetools/toggle"
+        self.lock = _lock
+        self.paused = _paused
+        self.prefix = str(_prefix.lower().strip())
+        self.inscope = self.prefix+"/robotgazetools/toggle"
 
     def control_callback(self, ros_data):
         if ros_data.data.lower() == "pause":
-            self.pause_auto_arbitrate = True
+            self.lock.acquire()
+            self.paused.set_pause()
+            self.lock.release()
             print ">>> Auto Arbitrate is PAUSED"
         else:
-            self.pause_auto_arbitrate = False
+            self.lock.acquire()
+            self.paused.set_resume()
+            self.lock.release()
             print ">>> Auto Arbitrate is RESUMED"
 
     def run(self):
@@ -98,8 +105,8 @@ class RosConnector(threading.Thread):
     """
     def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
         threading.Thread.__init__(self)
-        self.lock     = _lock
-        self.run_toggle      = True
+        self.lock       = _lock
+        self.run_toggle = True
         self.ready    = False
         self.trans    = _transform
         self.inscope  = str(_inscope).lower().strip()

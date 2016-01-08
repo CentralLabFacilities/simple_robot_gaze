@@ -79,7 +79,7 @@ class Viz(QtGui.QWidget):
         self.input_sources = _input_source
         self.gaze_controller = _gaze_controller
 
-        self.tc = r.ToggleConnector()
+        self.tc = r.ToggleConnector(self.arbitration.prefix)
         self.is_paused = False
         self.run_toggle = True
 

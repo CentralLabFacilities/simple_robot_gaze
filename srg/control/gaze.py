@@ -55,7 +55,7 @@ class GazeController(threading.Thread):
     def run(self):
         print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope.strip(), self.rc.outscope.strip())
         loop_count = 0
-        init_time  = time.time()
+        init_time = time.time()
         while self.run_toggle is True:
             then = time.time()
             tick = time.time()
