@@ -20,6 +20,16 @@ priorities:
   - /robotgazetools/faces
   - /robotgazetools/saliency
 
+# This client features various remote control functions, these are usually available
+# under $prefix/simplerobotgaze/something. The default is robot/simple/robotgaze/something
+scope_topic_prefix:
+  - robot
+
+# ROS remote control support is enabled by default, if you wish to control remotely via RSB
+# set this to "1"
+enable_rsb_remote_control:
+  - 1
+
 # What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
 # ros:People, ros:PointStamped
 datatypes:

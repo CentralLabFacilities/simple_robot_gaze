@@ -38,19 +38,34 @@ import threading
 import rsb
 
 
-class RSBToggleConnector:
+class RSBToggleConnector(threading.Thread):
 
-    def __init__(self):
-        self.inscope = "/robotgazetools/toggle"
-        self.toggle_publisher = rsb.createInformer(self.inscope, dataType=str)
+    def __init__(self, _prefix, _paused, _pause_lock):
+        self.run_toggle = True
+        self.lock       = _pause_lock
+        self.paused     = _paused
+        self.prefix     = str(_prefix.lower().strip())
+        self.setscope   = self.prefix+"/robotgazetools/set/toggle"
+        self.outscope   = self.prefix+"/robotgazetools/get/toggle"
+        self.toggle_setter    = rsb.createInformer(self.setscope, dataType=str)
+        self.toggle_informer  = rsb.createInformer(self.outscope, dataType=str)
+        self.p = "pause"
+        self.r = "resume"
 
     def pause(self):
-        p = "pause"
-        self.toggle_publisher.publishData(p)
+        self.toggle_setter.publishData(self.p)
 
     def resume(self):
-        r = "resume"
-        self.toggle_publisher.publishData(r)
+        self.toggle_setter.publishData(self.r)
+
+    def run(self):
+        while self.run_toggle is True:
+            self.lock.acquire()
+            self.toggle_informer.publishData(str(self.paused.get_pause()))
+            self.lock.release()
+            time.sleep(0.05)
+        self.toggle_informer.deactivate()
+        self.toggle_setter.deactivate()
 
 
 class RSBControlConnector(threading.Thread):
@@ -62,7 +77,7 @@ class RSBControlConnector(threading.Thread):
         self.lock  = _lock
         self.toggle_listener = None
         self.prefix = str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgazetools/toggle"
+        self.inscope = self.prefix+"/robotgazetools/set/toggle"
 
     def control_callback(self, event):
         if event.data.lower() == "pause":

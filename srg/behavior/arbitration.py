@@ -50,6 +50,7 @@ class Arbitration(threading.Thread):
         threading.Thread.__init__(self)
         self.lock             = threading.RLock()
         self.pause_lock       = threading.RLock()
+        self.paused           = Paused()
         self.run_toggle       = True
         self.cfgfile          = _configfile.strip()
         self.outscope         = _outscope
@@ -58,9 +59,10 @@ class Arbitration(threading.Thread):
         self.input_sources    = []
         self.gaze_controller  = []
         self.overrides        = []
-        self.paused           = Paused()
         self.is_override          = False
         self.loop_speed           = 1.0
+        self.pause_info_ros       = None
+        self.pause_info_rsb       = None
         self.override_type        = None
         self.boring               = None
         self.config               = None
@@ -101,16 +103,21 @@ class Arbitration(threading.Thread):
     def configure_middleware(self):
         # Start the external control MW Thread
         self.prefix = self.config["scope_topic_prefix"][0]
+
         self.arbitrate_toggle = r.RosControlConnector(self.prefix, self.paused, self.pause_lock)
         self.arbitrate_toggle.start()
+        self.pause_info_ros = r.ToggleConnector(self.prefix, self.paused, self.pause_lock)
+        self.pause_info_ros.start()
 
         # Is RSB remote control enabled?
         self.rsb_control_enable = int(self.config["enable_rsb_remote_control"][0])
         if self.rsb_control_enable is 1:
             self.arbitrate_toggle_rsb = s.RSBControlConnector(self.prefix, self.paused, self.pause_lock)
             self.arbitrate_toggle_rsb.start()
+            self.pause_info_rsb = s.ToggleConnector(self.prefix, self.paused, self.pause_lock)
+            self.pause_info_rsb.start()
         else:
-            pass
+            self.arbitrate_toggle_rsb = None
 
         # Read config file an extract values
         idx = 0
@@ -163,11 +170,16 @@ class Arbitration(threading.Thread):
     def request_stop(self):
         for connection in self.input_sources:
             connection.run_toggle = False
+
         for gazecontrol in self.gaze_controller:
             gazecontrol.run_toggle = False
+
         self.arbitrate_toggle.run_toggle = False
+        self.self.pause_info_ros.run_toggle = False
+
         if self.arbitrate_toggle_rsb is not None:
             self.arbitrate_toggle_rsb.run_toggle = False
+            self.self.pause_info_rsb.run_toggle = False
         self.run_toggle = False
 
     def get_latest_targets(self):
@@ -274,8 +286,10 @@ class Arbitration(threading.Thread):
                 init_time = time.time()
             # Running with maximum frequency of 50 Hz
             hz = 0.02-(now-then)
+
             if hz > 0:
                 time.sleep(hz)
+
             loop_count += 1
         print ">>> Stopping Arbitration"
 

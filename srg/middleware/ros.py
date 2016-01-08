@@ -49,19 +49,31 @@ from hlrc_client import RobotGaze
 from hlrc_client import RobotTimestamp
 
 
-class ToggleConnector:
+class ToggleConnector(threading.Thread):
 
-    def __init__(self, _prefix):
-        self.prefix = str(_prefix.lower().strip())
-        self.pub = rospy.Publisher(self.prefix+"/robotgazetools/toggle", String, queue_size=1)
+    def __init__(self, _prefix, _paused, _lock):
+        self.prefix     = str(_prefix.lower().strip())
+        self.pause      = _paused
+        self.lock       = _lock
+        self.run_toggle = True
+        self.pub      = rospy.Publisher(self.prefix+"/robotgazetools/set/toggle", String, queue_size=1)
+        self.pub_info = rospy.Publisher(self.prefix+"/robotgazetools/get/toggle", String, queue_size=1)
+        self.p = "pause"
+        self.r = "resume"
+        self.rate = rospy.Rate(50)
 
     def pause(self):
-        p = "pause"
-        self.pub.publish(p)
+        self.pub.publish(self.p)
 
     def resume(self):
-        r = "resume"
-        self.pub.publish(r)
+        self.pub.publish(self.r)
+
+    def run(self):
+        while self.run_toggle is True:
+            self.lock.acquire()
+            self.pub_info.publish(str(self.paused.get_pause()))
+            self.lock.release()
+            self.rate.sleep()
 
 
 class RosControlConnector(threading.Thread):
