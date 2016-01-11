@@ -175,7 +175,7 @@ class Viz(QtGui.QWidget):
                 self.override_button.setChecked(False)
                 self.override_button.setText("Override: Negative!")
 
-        self.pause_button = QPushButton('Toggle Gaze Status Pause Mode', self)
+        self.pause_button = QPushButton('Toggle Pause Mode', self)
         self.pause_button.clicked.connect(self.pause)
         self.layout.addWidget(self.pause_button)
 
