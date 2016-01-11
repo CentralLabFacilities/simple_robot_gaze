@@ -53,7 +53,7 @@ class RSBPauseConnector(threading.Thread):
         self.is_paused  = False
         self.prefix     = str("/"+_prefix.lower().strip())
         self.setscope   = str(self.prefix+"/robotgaze/set/pause").strip()
-        self.outscope   = str(self.prefix+"/robotgazetools/get/pause").strip()
+        self.outscope   = str(self.prefix+"/robotgaze/get/pause").strip()
         self.toggle_setter   = rsb.createInformer(self.setscope, dataType=bool)
         self.toggle_informer = rsb.createInformer(self.outscope, dataType=bool)
         self.p = True
@@ -66,7 +66,7 @@ class RSBPauseConnector(threading.Thread):
         self.toggle_setter.publishData(self.r)
 
     def run(self):
-        print ">>> Initializing RSB Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
+        print ">>> Initializing RSB Pause Publisher to: %s" % self.outscope
         while self.run_toggle is True:
             self.lock.acquire()
             self.toggle_informer.publishData(self.paused.get_paused())
@@ -75,7 +75,7 @@ class RSBPauseConnector(threading.Thread):
             time.sleep(0.05)
         self.toggle_informer.deactivate()
         self.toggle_setter.deactivate()
-        print ">>> Deactivating RSB Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
+        print ">>> Deactivating RSB Pause Publisher to: %s" % self.outscope
 
 
 class RSBSetDirectGazeConnector(threading.Thread):
