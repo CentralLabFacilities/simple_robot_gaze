@@ -72,6 +72,7 @@ class RSBPauseConnector(threading.Thread):
 
 
 class RSBControlConnector(threading.Thread):
+
     def __init__(self, _prefix, _pause, _lock):
         threading.Thread.__init__(self)
         self.run_toggle = True
