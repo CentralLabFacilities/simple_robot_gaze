@@ -39,11 +39,11 @@ Please use the CITK to install this component, there is already a project file f
 
 The file must reside in ~/.config/simplerobotgaze.yaml
 
-In order to stop simple robot gaze from controlling the robot simple send "pause" (string msg) to:
+In order to pause simple robot gaze from controlling the robot simple send "true" to (resume = "false"):
 
     /robotgazetools/set/pause
 
-In order to get the current status subscribe to:
+In order to get the current status subscribe (return true or false) to:
 
     /robotgazetools/get/pause
 
