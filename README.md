@@ -41,9 +41,11 @@ The file must reside in ~/.config/simplerobotgaze.yaml
 
 In order to stop simple robot gaze from controlling the robot simple send "pause" (string msg) to:
 
-    /srg/arbitrate/toggle
+    /robotgazetools/set/pause
 
-If you send something other than "pause", simple robot gaze will resume operation.
+In order to get the current status subscribe to:
+
+    /robotgazetools/get/pause
 
 The priority of input data streams, the first entry has the highest priority, the last the lowest.
 

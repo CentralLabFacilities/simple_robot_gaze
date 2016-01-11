@@ -52,6 +52,7 @@ from hlrc_client import RobotTimestamp
 class ROSPauseConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _lock):
+        threading.Thread.__init__(self)
         self.prefix     = str(_prefix.lower().strip())
         self.pause      = _paused
         self.is_paused  = False
