@@ -36,7 +36,7 @@ from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
 # SELF
-from srg.middleware import ros as r
+from srg.middleware import ros_conn as r
 
 
 class LabelThread(QThread):
@@ -79,8 +79,8 @@ class Viz(QtGui.QWidget):
         self.input_sources = _input_source
         self.gaze_controller = _gaze_controller
 
-        self.tc = r.ROSPauseConnector(self.arbitration.prefix, self.arbitration.paused, self.arbitration.pause_lock)
-        self.is_paused = self.arbitration.paused
+        self.tc = r.ROSPauseConnector(self.arbitration.prefix, self.arbitration.paused_instance, self.arbitration.pause_lock)
+        self.is_paused = self.arbitration.paused_instance
         self.run_toggle = True
 
         self.font = QtGui.QFont()
@@ -240,12 +240,12 @@ class Viz(QtGui.QWidget):
                     self.override_button.setText("Override: Negative!")
 
     def pause(self):
-            if self.self.tc.is_paused is False:
+            if self.is_paused.get_paused() is False:
                 self.tc.pause()
-                self.pause_button.setText("Simple Robot Pause Gaze Status:" + str(self.is_paused.getPause()))
+                self.pause_button.setText("Set Gaze Status Pause Mode: " + str(self.is_paused.get_paused()))
             else:
                 self.tc.resume()
-                self.pause_button.setText("Simple Robot Pause Gaze Status:" + str(self.is_paused.getPause()))
+                self.pause_button.setText("Set Gaze Status Pause Mode: " + str(self.is_paused.get_paused()))
 
     def exit_srg(self):
         self.arbitration.request_stop()

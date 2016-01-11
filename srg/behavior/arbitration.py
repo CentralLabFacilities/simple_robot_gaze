@@ -39,8 +39,8 @@ import threading
 # SELF IMPORTS
 from srg.robot import driver as d
 from srg.control import gaze as g
-from srg.middleware import ros as r
-from srg.middleware import rsb as s
+from srg.middleware import ros_conn as r
+from srg.middleware import rsb_conn as s
 from srg.utils import transform as t
 from srg.utils.pause import Paused
 
@@ -176,11 +176,11 @@ class Arbitration(threading.Thread):
             gazecontrol.run_toggle = False
 
         self.arbitrate_toggle_ros.run_toggle = False
-        self.self.pause_info_ros.run_toggle = False
+        self.pause_info_ros.run_toggle = False
 
         if self.arbitrate_toggle_rsb is not None:
             self.arbitrate_toggle_rsb.run_toggle = False
-            self.self.pause_info_rsb.run_toggle = False
+            self.pause_info_rsb.run_toggle = False
         self.run_toggle = False
 
     def get_latest_targets(self):

@@ -39,7 +39,7 @@ import threading
 import rospy
 import roslib
 from std_msgs.msg import Header
-from std_msgs.msg import String
+from std_msgs.msg import Bool
 from people_msgs.msg import Person
 from people_msgs.msg import People
 from geometry_msgs.msg import PointStamped
@@ -53,28 +53,28 @@ class ROSPauseConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
-        self.prefix     = str(_prefix.lower().strip())
-        self.pause      = _paused
+        self.prefix     = "/"+str(_prefix.lower().strip())
+        self.paused      = _paused
         self.is_paused  = False
         self.lock       = _lock
         self.run_toggle = True
-        self.pub      = rospy.Publisher(self.prefix+"/robotgazetools/set/pause", String, queue_size=1)
-        self.pub_info = rospy.Publisher(self.prefix+"/robotgazetools/get/pause", String, queue_size=1)
-        self.p = "pause"
-        self.r = "resume"
+        self.pub_setpause = rospy.Publisher(self.prefix+"/robotgazetools/set/pause", Bool, queue_size=1)
+        self.pub_getpause = rospy.Publisher(self.prefix+"/robotgazetools/get/pause", Bool, queue_size=1)
+        self.p = True
+        self.r = False
         self.rate = rospy.Rate(50)
 
     def pause(self):
-        self.pub.publish(self.p)
+        self.pub_setpause.publish(self.p)
 
     def resume(self):
-        self.pub.publish(self.r)
+        self.pub_setpause.publish(self.r)
 
     def run(self):
         while self.run_toggle is True:
             self.lock.acquire()
-            self.pub_info.publish(str(self.paused.get_pause()))
-            self.is_paused = self.paused.get_pause()
+            self.pub_getpause.publish(self.paused.get_paused())
+            self.is_paused = self.paused.get_paused()
             self.lock.release()
             self.rate.sleep()
 
@@ -86,29 +86,29 @@ class ROSControlConnector(threading.Thread):
         self.ready = False
         self.lock = _lock
         self.paused = _paused
-        self.prefix = str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgazetools/get/pause"
+        self.prefix = "/"+str(_prefix.lower().strip())
+        self.inscope = self.prefix+"/robotgazetools/set/pause"
 
     def control_callback(self, ros_data):
-        if ros_data.data.lower() == "pause":
+        if ros_data.data is True:
             self.lock.acquire()
             self.paused.set_pause()
             self.lock.release()
-            print ">>> Auto Arbitrate is PAUSED"
+            print ">>> Auto Arbitrate is PAUSED (ROS)"
         else:
             self.lock.acquire()
             self.paused.set_resume()
             self.lock.release()
-            print ">>> Auto Arbitrate is RESUMED"
+            print ">>> Auto Arbitrate is RESUMED (ROS)"
 
     def run(self):
-        print ">>> Initializing ROS Toggle Subscriber to: %s" % self.inscope.strip()
-        toggle_subscriber = rospy.Subscriber(self.inscope, String, self.control_callback, queue_size=1)
+        print ">>> Initializing ROS Status Subscriber to: %s" % self.inscope.strip()
+        toggle_subscriber = rospy.Subscriber(self.inscope, Bool, self.control_callback, queue_size=1)
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
         toggle_subscriber.unregister()
-        print ">>> Deactivating ROS Toggle Subscriber to: %s" % self.inscope.strip()
+        print ">>> Deactivating ROS Status Subscriber to: %s" % self.inscope.strip()
 
 
 class ROSDataConnector(threading.Thread):

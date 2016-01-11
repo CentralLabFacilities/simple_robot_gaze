@@ -41,17 +41,18 @@ import rsb
 class RSBPauseConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _pause_lock):
+        threading.Thread.__init__(self)
         self.run_toggle = True
         self.lock       = _pause_lock
         self.paused     = _paused
         self.is_paused  = False
-        self.prefix     = str(_prefix.lower().strip())
-        self.setscope   = self.prefix+"/robotgazetools/set/pause"
-        self.outscope   = self.prefix+"/robotgazetools/get/pause"
-        self.toggle_setter    = rsb.createInformer(self.setscope, dataType=str)
-        self.toggle_informer  = rsb.createInformer(self.outscope, dataType=str)
-        self.p = "pause"
-        self.r = "resume"
+        self.prefix     = str("/"+_prefix.lower().strip())
+        self.setscope   = str(self.prefix+"/robotgazetools/set/pause").strip()
+        self.outscope   = str(self.prefix+"/robotgazetools/get/pause").strip()
+        self.toggle_setter   = rsb.createInformer(self.setscope, dataType=bool)
+        self.toggle_informer = rsb.createInformer(self.outscope, dataType=bool)
+        self.p = True
+        self.r = False
 
     def pause(self):
         self.toggle_setter.publishData(self.p)
@@ -62,8 +63,8 @@ class RSBPauseConnector(threading.Thread):
     def run(self):
         while self.run_toggle is True:
             self.lock.acquire()
-            self.toggle_informer.publishData(str(self.paused.get_pause()))
-            self.is_paused = self.paused.get_pause()
+            self.toggle_informer.publishData(self.paused.get_paused())
+            self.is_paused = self.paused.get_paused()
             self.lock.release()
             time.sleep(0.05)
         self.toggle_informer.deactivate()
@@ -78,30 +79,30 @@ class RSBControlConnector(threading.Thread):
         self.pause = _pause
         self.lock  = _lock
         self.toggle_listener = None
-        self.prefix = str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgazetools/set/pause"
+        self.prefix  = str("/"+_prefix.lower().strip())
+        self.inscope = str(self.prefix+"/robotgazetools/set/pause").strip()
 
     def control_callback(self, event):
-        if event.data.lower() == "pause":
+        if event.data is True:
             self.lock.acquire()
             self.pause.set_pause()
             self.lock.release()
-            print ">>> Auto Arbitrate is PAUSED"
+            print ">>> Auto Arbitrate is PAUSED (RSB)"
         else:
             self.lock.acquire()
             self.lock.set_resume()
             self.lock.release()
-            print ">>> Auto Arbitrate is RESUMED"
+            print ">>> Auto Arbitrate is RESUMED (RSB)"
 
     def run(self):
-        print ">>> Initializing RSB Toggle Subscriber to: %s" % self.inscope.strip()
+        print ">>> Initializing RSB Status Subscriber to: %s" % self.inscope.strip()
         self.toggle_listener = rsb.createListener(self.inscope)
         self.toggle_listener.addHandler(self.control_callback)
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
         self.toggle_listener.deactivate()
-        print ">>> Deactivating RSB Toggle Subscriber to: %s" % self.inscope.strip()
+        print ">>> Deactivating RSB Status Subscriber to: %s" % self.inscope.strip()
 
 
 class RSBDataConnector(threading.Thread):
