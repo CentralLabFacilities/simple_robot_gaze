@@ -99,7 +99,8 @@ class RSBSetDirectGazeConnector(threading.Thread):
     def direct_gaze_callback(self, event):
         if event.data:
             try:
-                send_time = event.sendTime
+                # TODO event sendtime!!!
+                send_time = event.time.time()
                 self.point_x = event.data.azimuth
                 self.point_y = event.data.elevation
                 point = [self.point_x, self.point_y]
@@ -148,7 +149,7 @@ class RSBControlConnector(threading.Thread):
             print ">>> Auto Arbitrate is PAUSED (RSB)"
         else:
             self.lock.acquire()
-            self.lock.set_resume()
+            self.pause.set_resume()
             self.lock.release()
             print ">>> Auto Arbitrate is RESUMED (RSB)"
 
