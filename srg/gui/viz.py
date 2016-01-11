@@ -242,10 +242,10 @@ class Viz(QtGui.QWidget):
     def pause(self):
             if self.is_paused.get_paused() is False:
                 self.tc.pause()
-                self.pause_button.setText("Set Gaze Status Pause Mode: " + str(self.is_paused.get_paused()))
+                self.pause_button.setText("Set Gaze Status Pause: " + str(self.is_paused.get_paused()))
             else:
                 self.tc.resume()
-                self.pause_button.setText("Set Gaze Status Pause Mode: " + str(self.is_paused.get_paused()))
+                self.pause_button.setText("Set Gaze Status Pause: " + str(self.is_paused.get_paused()))
 
     def exit_srg(self):
         self.arbitration.request_stop()
