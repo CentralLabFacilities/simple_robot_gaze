@@ -41,11 +41,11 @@ The file must reside in ~/.config/simplerobotgaze.yaml
 
 In order to pause simple robot gaze from controlling the robot simple send "true" to (resume = "false"):
 
-    /robotgazetools/set/pause
+    /robotgaze/set/pause
 
 In order to get the current status subscribe (return true or false) to:
 
-    /robotgazetools/get/pause
+    /robotgaze/get/pause
 
 The priority of input data streams, the first entry has the highest priority, the last the lowest.
 

@@ -58,8 +58,8 @@ class ROSPauseConnector(threading.Thread):
         self.is_paused  = False
         self.lock       = _lock
         self.run_toggle = True
-        self.pub_setpause = rospy.Publisher(self.prefix+"/robotgazetools/set/pause", Bool, queue_size=1)
-        self.pub_getpause = rospy.Publisher(self.prefix+"/robotgazetools/get/pause", Bool, queue_size=1)
+        self.pub_setpause = rospy.Publisher(self.prefix+"/robotgaze/set/pause", Bool, queue_size=1)
+        self.pub_getpause = rospy.Publisher(self.prefix+"/robotgaze/get/pause", Bool, queue_size=1)
         self.p = True
         self.r = False
         self.rate = rospy.Rate(50)
@@ -88,7 +88,7 @@ class ROSControlConnector(threading.Thread):
         self.lock = _lock
         self.paused = _paused
         self.prefix = "/"+str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgazetools/set/pause"
+        self.inscope = self.prefix+"/robotgaze/set/pause"
 
     def control_callback(self, ros_data):
         if ros_data.data is True:

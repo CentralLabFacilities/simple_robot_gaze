@@ -47,7 +47,7 @@ class RSBPauseConnector(threading.Thread):
         self.paused     = _paused
         self.is_paused  = False
         self.prefix     = str("/"+_prefix.lower().strip())
-        self.setscope   = str(self.prefix+"/robotgazetools/set/pause").strip()
+        self.setscope   = str(self.prefix+"/robotgaze/set/pause").strip()
         self.outscope   = str(self.prefix+"/robotgazetools/get/pause").strip()
         self.toggle_setter   = rsb.createInformer(self.setscope, dataType=bool)
         self.toggle_informer = rsb.createInformer(self.outscope, dataType=bool)
@@ -81,7 +81,7 @@ class RSBControlConnector(threading.Thread):
         self.lock  = _lock
         self.toggle_listener = None
         self.prefix  = str("/"+_prefix.lower().strip())
-        self.inscope = str(self.prefix+"/robotgazetools/set/pause").strip()
+        self.inscope = str(self.prefix+"/robotgaze/set/pause").strip()
 
     def control_callback(self, event):
         if event.data is True:

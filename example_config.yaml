@@ -9,9 +9,8 @@
 
 # This file must reside in ~/.config/simplerobotgaze.yaml
 
-# In order to stop simple robot gaze from controlling the robot simple send "pause" (string msg) to:
-# /srg/arbitrate/toggle
-# If you send something other than "pause", simple robot gaze will resume operation.
+# In order to pause robot gaze from controlling the robot simply send "true" (bool msg) to:
+# $prefix/robotgaze/set/pause
 
 ---
 
@@ -21,7 +20,7 @@ priorities:
   - /robotgazetools/saliency
 
 # This client features various remote control functions, these are usually available
-# under $prefix/simplerobotgaze/something. The default is robot/simple/robotgaze/something
+# under $prefix/robotgaze/something. The default is /robotgaze/something
 scope_topic_prefix:
   - robot
 
