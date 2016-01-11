@@ -100,7 +100,7 @@ class RSBSetDirectGazeConnector(threading.Thread):
         if event.data:
             try:
                 # TODO event sendtime!!!
-                send_time = event.time.time()
+                send_time = time.time()
                 self.point_x = event.data.azimuth
                 self.point_y = event.data.elevation
                 point = [self.point_x, self.point_y]
