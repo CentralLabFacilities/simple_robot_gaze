@@ -36,7 +36,7 @@ import threading
 
 # RSB Specifics
 import rsb
-from rstsandbox.spatial.PanTiltAngle_pb2 import PanTiltAngle
+from rstsandbox.geometry.SphericalDirectionFloat_pb2 import SphericalDirectionFloat
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
@@ -93,14 +93,14 @@ class RSBSetDirectGazeConnector(threading.Thread):
         self.prefix = "/"+str(_prefix.lower().strip())
         self.set_gaze = None
         self.setscope = self.prefix+"/robotgaze/set/gaze"
-        self.converter = rsb.converter.ProtocolBufferConverter(messageClass=PanTiltAngle)
+        self.converter = rsb.converter.ProtocolBufferConverter(messageClass=SphericalDirectionFloat)
         rsb.converter.registerGlobalConverter(self.converter)
 
     def direct_gaze_callback(self, event):
         if event.data:
             send_time = event.sendTime
-            self.point_x = event.data.pan
-            self.point_y = event.data.tilt
+            self.point_x = event.data.azimuth
+            self.point_y = event.data.elevation
             point = [self.point_x, self.point_y]
             if point is not None and self.last_time_stamp != send_time:
                 g = RobotGaze()
