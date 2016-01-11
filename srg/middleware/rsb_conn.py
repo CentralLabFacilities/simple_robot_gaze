@@ -113,6 +113,7 @@ class RSBSetDirectGazeConnector(threading.Thread):
                     self.last_robot_gaze = g
                     self.robot_driver.set_gaze_target(g, True)
                     self.last_time_stamp = send_time
+                    print ">>> Direct Gaze (RSB) set to: %f, %f" % (g.pan, g.tilt)
             except Exception, e:
                 print ">>> Error: ", str(e)
 
