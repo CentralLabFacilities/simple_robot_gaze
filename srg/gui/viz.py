@@ -79,8 +79,8 @@ class Viz(QtGui.QWidget):
         self.input_sources = _input_source
         self.gaze_controller = _gaze_controller
 
-        self.tc = r.ToggleConnector(self.arbitration.prefix, self.arbitration.paused, self.arbitration.pause_lock)
-        self.is_paused = False
+        self.tc = r.ROSPauseConnector(self.arbitration.prefix, self.arbitration.paused, self.arbitration.pause_lock)
+        self.is_paused = self.arbitration.paused
         self.run_toggle = True
 
         self.font = QtGui.QFont()
@@ -175,7 +175,7 @@ class Viz(QtGui.QWidget):
                 self.override_button.setChecked(False)
                 self.override_button.setText("Override: Negative!")
 
-        self.pause_button = QPushButton('Pause Simple Robot Gaze', self)
+        self.pause_button = QPushButton('Simple Robot Gaze Pause Status', self)
         self.pause_button.clicked.connect(self.pause)
         self.layout.addWidget(self.pause_button)
 
@@ -240,14 +240,12 @@ class Viz(QtGui.QWidget):
                     self.override_button.setText("Override: Negative!")
 
     def pause(self):
-            if self.is_paused is False:
+            if self.self.tc.is_paused is False:
                 self.tc.pause()
-                self.is_paused = True
-                self.pause_button.setText("Resume Simple Robot Gaze")
+                self.pause_button.setText("Simple Robot Pause Gaze Status:" + str(self.is_paused.getPause()))
             else:
                 self.tc.resume()
-                self.is_paused = False
-                self.pause_button.setText("Pause Simple Robot Gaze")
+                self.pause_button.setText("Simple Robot Pause Gaze Status:" + str(self.is_paused.getPause()))
 
     def exit_srg(self):
         self.arbitration.request_stop()

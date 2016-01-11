@@ -49,15 +49,16 @@ from hlrc_client import RobotGaze
 from hlrc_client import RobotTimestamp
 
 
-class ToggleConnector(threading.Thread):
+class ROSPauseConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _lock):
         self.prefix     = str(_prefix.lower().strip())
         self.pause      = _paused
+        self.is_paused  = False
         self.lock       = _lock
         self.run_toggle = True
-        self.pub      = rospy.Publisher(self.prefix+"/robotgazetools/set/toggle", String, queue_size=1)
-        self.pub_info = rospy.Publisher(self.prefix+"/robotgazetools/get/toggle", String, queue_size=1)
+        self.pub      = rospy.Publisher(self.prefix+"/robotgazetools/set/pause", String, queue_size=1)
+        self.pub_info = rospy.Publisher(self.prefix+"/robotgazetools/get/pause", String, queue_size=1)
         self.p = "pause"
         self.r = "resume"
         self.rate = rospy.Rate(50)
@@ -72,11 +73,12 @@ class ToggleConnector(threading.Thread):
         while self.run_toggle is True:
             self.lock.acquire()
             self.pub_info.publish(str(self.paused.get_pause()))
+            self.is_paused = self.paused.get_pause()
             self.lock.release()
             self.rate.sleep()
 
 
-class RosControlConnector(threading.Thread):
+class ROSControlConnector(threading.Thread):
     def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
         self.run_toggle = True
@@ -84,7 +86,7 @@ class RosControlConnector(threading.Thread):
         self.lock = _lock
         self.paused = _paused
         self.prefix = str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgazetools/toggle"
+        self.inscope = self.prefix+"/robotgazetools/get/pause"
 
     def control_callback(self, ros_data):
         if ros_data.data.lower() == "pause":
@@ -108,7 +110,7 @@ class RosControlConnector(threading.Thread):
         print ">>> Deactivating ROS Toggle Subscriber to: %s" % self.inscope.strip()
 
 
-class RosConnector(threading.Thread):
+class ROSDataConnector(threading.Thread):
     """
     The GazeController receives person messages (ROS) and derives
     the nearest person identified. Based on this, the robot's

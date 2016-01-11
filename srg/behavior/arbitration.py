@@ -42,6 +42,7 @@ from srg.control import gaze as g
 from srg.middleware import ros as r
 from srg.middleware import rsb as s
 from srg.utils import transform as t
+from srg.utils.pause import Paused
 
 
 class Arbitration(threading.Thread):
@@ -50,8 +51,7 @@ class Arbitration(threading.Thread):
         threading.Thread.__init__(self)
         self.lock             = threading.RLock()
         self.pause_lock       = threading.RLock()
-        self.paused           = Paused()
-        self.run_toggle       = True
+        self.paused_instance  = Paused()
         self.cfgfile          = _configfile.strip()
         self.outscope         = _outscope
         self.last_info        = time.time()
@@ -59,6 +59,7 @@ class Arbitration(threading.Thread):
         self.input_sources    = []
         self.gaze_controller  = []
         self.overrides        = []
+        self.run_toggle       = True
         self.is_override          = False
         self.loop_speed           = 1.0
         self.pause_info_ros       = None
@@ -67,12 +68,11 @@ class Arbitration(threading.Thread):
         self.boring               = None
         self.config               = None
         self.winner               = None
-        self.arbitrate_toggle     = None
+        self.arbitrate_toggle_ros = None
         self.arbitrate_toggle_rsb = None
         self.rd                   = None
         self.allow_peak_override  = None
         self.rsb_control_enable   = None
-        self.paused               = None
         self.prefix               = ""
 
     def boot_robot_driver(self):
@@ -104,20 +104,21 @@ class Arbitration(threading.Thread):
         # Start the external control MW Thread
         self.prefix = self.config["scope_topic_prefix"][0]
 
-        self.arbitrate_toggle = r.RosControlConnector(self.prefix, self.paused, self.pause_lock)
-        self.arbitrate_toggle.start()
-        self.pause_info_ros = r.ToggleConnector(self.prefix, self.paused, self.pause_lock)
+        self.arbitrate_toggle_ros = r.ROSControlConnector(self.prefix, self.paused_instance, self.pause_lock)
+        self.arbitrate_toggle_ros.start()
+        self.pause_info_ros = r.ROSPauseConnector(self.prefix, self.paused_instance, self.pause_lock)
         self.pause_info_ros.start()
 
         # Is RSB remote control enabled?
         self.rsb_control_enable = int(self.config["enable_rsb_remote_control"][0])
         if self.rsb_control_enable is 1:
-            self.arbitrate_toggle_rsb = s.RSBControlConnector(self.prefix, self.paused, self.pause_lock)
+            self.arbitrate_toggle_rsb = s.RSBControlConnector(self.prefix, self.paused_instance, self.pause_lock)
             self.arbitrate_toggle_rsb.start()
-            self.pause_info_rsb = s.ToggleConnector(self.prefix, self.paused, self.pause_lock)
+            self.pause_info_rsb = s.RSBPauseConnector(self.prefix, self.paused_instance, self.pause_lock)
             self.pause_info_rsb.start()
         else:
             self.arbitrate_toggle_rsb = None
+            self.pause_info_rsb = None
 
         # Read config file an extract values
         idx = 0
@@ -145,7 +146,7 @@ class Arbitration(threading.Thread):
 
             # Configure Middleware Adapters
             if datatypes[0].lower() == "ros":
-                mw = r.RosConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
+                mw = r.ROSDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             elif datatypes[0].lower() == "rsb":
                 print ">>> RSB is currrenly not supported :| "
                 self.run_toggle = False
@@ -174,7 +175,7 @@ class Arbitration(threading.Thread):
         for gazecontrol in self.gaze_controller:
             gazecontrol.run_toggle = False
 
-        self.arbitrate_toggle.run_toggle = False
+        self.arbitrate_toggle_ros.run_toggle = False
         self.self.pause_info_ros.run_toggle = False
 
         if self.arbitrate_toggle_rsb is not None:
@@ -268,7 +269,7 @@ class Arbitration(threading.Thread):
             then = time.time()
 
             self.pause_lock.acquire()
-            is_paused = self.paused.get_paused()
+            is_paused = self.paused_instance.get_paused()
             self.pause_lock.release()
 
             if is_paused is False:
@@ -292,17 +293,3 @@ class Arbitration(threading.Thread):
 
             loop_count += 1
         print ">>> Stopping Arbitration"
-
-
-class Paused:
-    def __init__(self):
-        self.paused = False
-
-    def set_pause(self):
-        self.paused = True
-
-    def set_resume(self):
-        self.paused = False
-
-    def get_paused(self):
-        return self.paused

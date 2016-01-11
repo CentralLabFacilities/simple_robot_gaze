@@ -38,15 +38,16 @@ import threading
 import rsb
 
 
-class RSBToggleConnector(threading.Thread):
+class RSBPauseConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _pause_lock):
         self.run_toggle = True
         self.lock       = _pause_lock
         self.paused     = _paused
+        self.is_paused  = False
         self.prefix     = str(_prefix.lower().strip())
-        self.setscope   = self.prefix+"/robotgazetools/set/toggle"
-        self.outscope   = self.prefix+"/robotgazetools/get/toggle"
+        self.setscope   = self.prefix+"/robotgazetools/set/pause"
+        self.outscope   = self.prefix+"/robotgazetools/get/pause"
         self.toggle_setter    = rsb.createInformer(self.setscope, dataType=str)
         self.toggle_informer  = rsb.createInformer(self.outscope, dataType=str)
         self.p = "pause"
@@ -62,6 +63,7 @@ class RSBToggleConnector(threading.Thread):
         while self.run_toggle is True:
             self.lock.acquire()
             self.toggle_informer.publishData(str(self.paused.get_pause()))
+            self.is_paused = self.paused.get_pause()
             self.lock.release()
             time.sleep(0.05)
         self.toggle_informer.deactivate()
@@ -77,7 +79,7 @@ class RSBControlConnector(threading.Thread):
         self.lock  = _lock
         self.toggle_listener = None
         self.prefix = str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgazetools/set/toggle"
+        self.inscope = self.prefix+"/robotgazetools/set/pause"
 
     def control_callback(self, event):
         if event.data.lower() == "pause":
@@ -102,7 +104,7 @@ class RSBControlConnector(threading.Thread):
         print ">>> Deactivating RSB Toggle Subscriber to: %s" % self.inscope.strip()
 
 
-class RSBConnector(threading.Thread):
+class RSBDataConnector(threading.Thread):
     """
     The GazeController receives person messages (ROS) and derives
     the nearest person identified. Based on this, the robot's
