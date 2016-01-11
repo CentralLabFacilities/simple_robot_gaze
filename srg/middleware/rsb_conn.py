@@ -98,20 +98,23 @@ class RSBSetDirectGazeConnector(threading.Thread):
 
     def direct_gaze_callback(self, event):
         if event.data:
-            send_time = event.sendTime
-            self.point_x = event.data.azimuth
-            self.point_y = event.data.elevation
-            point = [self.point_x, self.point_y]
-            if point is not None and self.last_time_stamp != send_time:
-                g = RobotGaze()
-                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-                g.gaze_timestamp = RobotTimestamp(send_time)
-                g.pan = point[0]
-                g.tilt = point[1]
-                g.roll = 0.0
-                self.last_robot_gaze = g
-                self.robot_driver.set_gaze_target(g, True)
-                self.last_time_stamp = send_time
+            try:
+                send_time = event.sendTime
+                self.point_x = event.data.azimuth
+                self.point_y = event.data.elevation
+                point = [self.point_x, self.point_y]
+                if point is not None and self.last_time_stamp != send_time:
+                    g = RobotGaze()
+                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+                    g.gaze_timestamp = RobotTimestamp(send_time)
+                    g.pan = point[0]
+                    g.tilt = point[1]
+                    g.roll = 0.0
+                    self.last_robot_gaze = g
+                    self.robot_driver.set_gaze_target(g, True)
+                    self.last_time_stamp = send_time
+            except Exception, e:
+                print ">>> Error: ", str(e)
 
     def run(self):
         print ">>> Initializing RSB Direct Gaze Subscriber to: %s" % self.setscope.strip()
