@@ -36,6 +36,11 @@ import threading
 
 # RSB Specifics
 import rsb
+from rstsandbox.spatial.PanTiltAngle_pb2 import PanTiltAngle
+
+# HLRC IMPORTS
+from hlrc_client import RobotGaze
+from hlrc_client import RobotTimestamp
 
 
 class RSBPauseConnector(threading.Thread):
@@ -61,6 +66,7 @@ class RSBPauseConnector(threading.Thread):
         self.toggle_setter.publishData(self.r)
 
     def run(self):
+        print ">>> Initializing RSB Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
         while self.run_toggle is True:
             self.lock.acquire()
             self.toggle_informer.publishData(self.paused.get_paused())
@@ -69,6 +75,53 @@ class RSBPauseConnector(threading.Thread):
             time.sleep(0.05)
         self.toggle_informer.deactivate()
         self.toggle_setter.deactivate()
+        print ">>> Deactivating RSB Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
+
+
+class RSBSetDirectGazeConnector(threading.Thread):
+
+    def __init__(self, _prefix, _rd):
+        threading.Thread.__init__(self)
+        self.run_toggle = True
+        self.robot_driver = _rd
+        self.point_x = 0.0
+        self.point_y = 0.0
+        self.point_z = 0.0
+        self.ready = False
+        self.last_robot_gaze = None
+        self.last_time_stamp = time.time()
+        self.prefix = "/"+str(_prefix.lower().strip())
+        self.set_gaze = None
+        self.setscope = self.prefix+"/robotgaze/set/gaze"
+        self.converter = rsb.converter.ProtocolBufferConverter(messageClass=PanTiltAngle)
+        rsb.converter.registerGlobalConverter(self.converter)
+
+    def direct_gaze_callback(self, event):
+        if event.data:
+            send_time = event.sendTime
+            self.point_x = event.data.pan
+            self.point_y = event.data.tilt
+            point = [self.point_x, self.point_y]
+            if point is not None and self.last_time_stamp != send_time:
+                g = RobotGaze()
+                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+                g.gaze_timestamp = RobotTimestamp(send_time)
+                g.pan = point[0]
+                g.tilt = point[1]
+                g.roll = 0.0
+                self.last_robot_gaze = g
+                self.robot_driver.set_gaze_target(g, True)
+                self.last_time_stamp = send_time
+
+    def run(self):
+        print ">>> Initializing RSB Direct Gaze Subscriber to: %s" % self.setscope.strip()
+        self.set_gaze = rsb.createListener(self.setscope)
+        self.set_gaze.addHandler(self.direct_gaze_callback)
+        self.ready = True
+        while self.run_toggle is True:
+            time.sleep(0.05)
+        self.set_gaze.deactivate()
+        print ">>> Deactivating RSB Direct Gaze Subscriber to: %s" % self.setscope.strip()
 
 
 class RSBControlConnector(threading.Thread):
@@ -96,14 +149,14 @@ class RSBControlConnector(threading.Thread):
             print ">>> Auto Arbitrate is RESUMED (RSB)"
 
     def run(self):
-        print ">>> Initializing RSB Status Subscriber to: %s" % self.inscope.strip()
+        print ">>> Initializing RSB Pause Subscriber to: %s" % self.inscope.strip()
         self.toggle_listener = rsb.createListener(self.inscope)
         self.toggle_listener.addHandler(self.control_callback)
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
         self.toggle_listener.deactivate()
-        print ">>> Deactivating RSB Status Subscriber to: %s" % self.inscope.strip()
+        print ">>> Deactivating RSB Pause Subscriber to: %s" % self.inscope.strip()
 
 
 class RSBDataConnector(threading.Thread):

@@ -62,6 +62,8 @@ class Arbitration(threading.Thread):
         self.run_toggle       = True
         self.is_override          = False
         self.loop_speed           = 1.0
+        self.direct_gaze_ros      = None
+        self.direct_gaze_rsb      = None
         self.pause_info_ros       = None
         self.pause_info_rsb       = None
         self.override_type        = None
@@ -108,6 +110,8 @@ class Arbitration(threading.Thread):
         self.arbitrate_toggle_ros.start()
         self.pause_info_ros = r.ROSPauseConnector(self.prefix, self.paused_instance, self.pause_lock)
         self.pause_info_ros.start()
+        self.direct_gaze_ros = r.ROSSetDirectGazeConnector(self.prefix, self.rd)
+        self.direct_gaze_ros.start()
 
         # Is RSB remote control enabled?
         self.rsb_control_enable = int(self.config["enable_rsb_remote_control"][0])
@@ -116,6 +120,8 @@ class Arbitration(threading.Thread):
             self.arbitrate_toggle_rsb.start()
             self.pause_info_rsb = s.RSBPauseConnector(self.prefix, self.paused_instance, self.pause_lock)
             self.pause_info_rsb.start()
+            self.direct_gaze_rsb = s.RSBSetDirectGazeConnector(self.prefix, self.rd)
+            self.direct_gaze_rsb.start()
         else:
             self.arbitrate_toggle_rsb = None
             self.pause_info_rsb = None
@@ -177,10 +183,15 @@ class Arbitration(threading.Thread):
 
         self.arbitrate_toggle_ros.run_toggle = False
         self.pause_info_ros.run_toggle = False
+        self.direct_gaze_ros.run_toggle = False
 
         if self.arbitrate_toggle_rsb is not None:
             self.arbitrate_toggle_rsb.run_toggle = False
             self.pause_info_rsb.run_toggle = False
+            self.direct_gaze_rsb.run_toggle = False
+
+        time.sleep(0.05)
+
         self.run_toggle = False
 
     def get_latest_targets(self):
