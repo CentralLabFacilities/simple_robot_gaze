@@ -1,7 +1,5 @@
 """
 
-This file is part of FINITE STATE MACHINE BASED TESTING.
-
 Copyright(c) <Florian Lier, Simon Schulz>
 http://opensource.cit-ec.de/fsmt
 

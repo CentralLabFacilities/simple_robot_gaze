@@ -10,7 +10,7 @@
 # This file must reside in ~/.config/simplerobotgaze.yaml
 
 # In order to pause robot gaze from controlling the robot simply send "true" (bool msg) to:
-# $prefix/robotgaze/set/pause
+# $prefix/robotgaze/set/pause using either RSB or ROS.
 
 ---
 
@@ -20,14 +20,14 @@ priorities:
   - /robotgazetools/saliency
 
 # This client features various remote control functions, these are usually available
-# under $prefix/robotgaze/something. The default is /robotgaze/something
+# under /$scope_topic_prefix/robotgaze/something. The default is /robot/robotgaze/something
 scope_topic_prefix:
   - robot
 
-# ROS remote control support is enabled by default, if you wish to control remotely via RSB
-# set this to "1"
+# ROS remote control support is enabled by default, if you wish to control Gaze remotely via
+# RSB set this to "1"
 enable_rsb_remote_control:
-  - 1
+  - 0
 
 # What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
 # ros:People, ros:PointStamped
@@ -72,7 +72,7 @@ allow_peak_override:
 # override the first priority. Corresponds priorities.
 peak_overrides:
   - 100.0
-  - 50.0
+  - 10.0
 
 ############################
 # TODO ROS TF Integration
