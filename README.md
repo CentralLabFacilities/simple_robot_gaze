@@ -24,7 +24,6 @@ In order to directly send gaze targets send PointStamped msgs (ROS) or Spherical
 enable_rsb_remote_control:
   - 0
 
-
 The priority of input data streams, the first entry has the highest priority
 
     priorities:
@@ -37,7 +36,6 @@ under /$scope_topic_prefix/robotgaze/something. The default is /robot/robotgaze/
     scope_topic_prefix:
         - robot
 
-
 What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
 ROS: ros:People, ros:PointStamped
 RSB: rsb:faces, rsb:SphericalDirectionFloat
@@ -45,7 +43,6 @@ RSB: rsb:faces, rsb:SphericalDirectionFloat
     datatypes:
     - ros:People
     - rsb:SphericalDirectionFloat
-
 
 Resolution of the source camera image, corresponds to the priorities
 
