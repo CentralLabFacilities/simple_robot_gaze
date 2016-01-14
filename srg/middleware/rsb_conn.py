@@ -203,7 +203,10 @@ class RSBDataConnector(threading.Thread):
         idx = -1
         max_distance = {}
         data = event.getData()
-        if not data.faces:
+        if data.faces:
+            print data.faces
+        else:
+            print "No Faces"
             return
         for face in data.faces:
             print face
