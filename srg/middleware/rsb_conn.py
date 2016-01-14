@@ -245,6 +245,7 @@ class RSBDataConnector(threading.Thread):
                 except Exception, e:
                     print ">>> ERROR %s" % str(e)
                 rsb_subscriber = rsb.createListener(self.inscope)
+                rsb_subscriber.addHandler(self.faces_callback)
             elif self.datatype == "sphericaldirectionfloat":
                 try:
                     self.s = rsb.converter.ProtocolBufferConverter(messageClass=SphericalDirectionFloat)
@@ -252,6 +253,7 @@ class RSBDataConnector(threading.Thread):
                 except Exception, e:
                     print ">>> ERROR %s" % str(e)
                 rsb_subscriber = rsb.createListener(self.inscope)
+                print ">>> WARNING: No Handler Implemented..."
             else:
                 print ">>> RSB Subscriber DataType not supported %s" % self.datatype.strip()
                 return
