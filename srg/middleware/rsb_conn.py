@@ -202,7 +202,7 @@ class RSBDataConnector(threading.Thread):
         send_time = event.metaData.sendTime
         idx = -1
         max_distance = {}
-        for face in event.Faces:
+        for face in event.getData():
             print face
             idx += 1
             max_distance[str(idx)] = face.region.width * face.region.height
