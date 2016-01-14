@@ -192,12 +192,10 @@ class RSBDataConnector(threading.Thread):
         self.point_z          = 0.0
         self.current_robot_gaze = None
         self.current_robot_gaze_timestamp = None
-        self.f  = rsb.converter.ProtocolBufferConverter(messageClass=Face)
-        self.fs = rsb.converter.ProtocolBufferConverter(messageClass=Faces)
-        self.b  = rsb.converter.ProtocolBufferConverter(messageClass=BoundingBox)
-        rsb.converter.registerGlobalConverter(self.f)
-        rsb.converter.registerGlobalConverter(self.fs)
-        rsb.converter.registerGlobalConverter(self.b)
+        self.f  = None
+        self.fs = None
+        self.b  = None
+        self.s  = None
 
     def faces_callback(self, event):
         self.lock.acquire()
@@ -235,6 +233,22 @@ class RSBDataConnector(threading.Thread):
         print ">>> Initializing RSB Subscriber to: %s" % self.inscope.strip()
         try:
             if self.datatype == "faces":
+                try:
+                    self.f  = rsb.converter.ProtocolBufferConverter(messageClass=Face)
+                    self.fs = rsb.converter.ProtocolBufferConverter(messageClass=Faces)
+                    self.b  = rsb.converter.ProtocolBufferConverter(messageClass=BoundingBox)
+                    rsb.converter.registerGlobalConverter(self.f)
+                    rsb.converter.registerGlobalConverter(self.fs)
+                    rsb.converter.registerGlobalConverter(self.b)
+                except Exception, e:
+                    print ">>> ERROR %s" % str(e)
+                rsb_subscriber = rsb.createListener(self.inscope)
+            elif self.datatype == "sphericaldirectionfloat":
+                try:
+                    self.s = rsb.converter.ProtocolBufferConverter(messageClass=SphericalDirectionFloat)
+                    rsb.converter.registerGlobalConverter(self.s)
+                except Exception, e:
+                    print ">>> ERROR %s" % str(e)
                 rsb_subscriber = rsb.createListener(self.inscope)
             else:
                 print ">>> RSB Subscriber DataType not supported %s" % self.datatype.strip()

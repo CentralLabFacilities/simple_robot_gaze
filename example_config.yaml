@@ -30,7 +30,9 @@ enable_rsb_remote_control:
   - 0
 
 # What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
-# ros:People, ros:PointStamped
+# ROS: ros:People, ros:PointStamped
+# RSB: rsb:faces
+
 datatypes:
   - ros:People
   - ros:PointStamped
