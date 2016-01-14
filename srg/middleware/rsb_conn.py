@@ -230,7 +230,7 @@ class RSBDataConnector(threading.Thread):
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
-            print g
+        self.lock.release()
         self.honor_stimulus_timeout()
 
     def honor_stimulus_timeout(self):
