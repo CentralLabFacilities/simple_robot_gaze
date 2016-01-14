@@ -59,7 +59,7 @@ def runner(_options):
     global ar
     ar = a.Arbitration(_options.config, options.outscope)
     # Init the Robot Driver
-    ar.boot_robot_driver(str(options.middleware))
+    ar.boot_robot_driver(str(options.middleware).upper())
     # Middlware and Gaze Configuration
     ar.configure()
     # Start Arbitration

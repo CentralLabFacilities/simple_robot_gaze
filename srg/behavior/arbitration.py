@@ -76,7 +76,7 @@ class Arbitration(threading.Thread):
         self.prefix               = ""
 
     def boot_robot_driver(self, _mw):
-        self.rd = d.RobotDriver(str(_mw), self.outscope.strip())
+        self.rd = d.RobotDriver(_mw, self.outscope.strip())
 
     def configure(self):
         self.read_yaml_config()
