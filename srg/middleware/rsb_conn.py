@@ -203,6 +203,7 @@ class RSBDataConnector(threading.Thread):
         idx = -1
         max_distance = {}
         for face in event.Faces:
+            print face
             idx += 1
             max_distance[str(idx)] = face.region.width * face.region.height
         sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
@@ -223,6 +224,7 @@ class RSBDataConnector(threading.Thread):
             g.pan = angles[0]
             g.tilt = angles[1]
             self.current_robot_gaze = g
+            print g
         self.lock.release()
         self.honor_stimulus_timeout()
 
