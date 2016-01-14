@@ -31,11 +31,11 @@ enable_rsb_remote_control:
 
 # What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
 # ROS: ros:People, ros:PointStamped
-# RSB: rsb:faces
+# RSB: rsb:faces, rsb:SphericalDirectionFloat
 
 datatypes:
   - ros:People
-  - ros:PointStamped
+  - rsb:SphericalDirectionFloat
 
 # Resolution of the source camera image, corresponds to the priorities
 resolution:

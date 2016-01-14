@@ -34,11 +34,13 @@ RSB set this to "1"
         - 0
 
 What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
-ros:People, ros:PointStamped
+ROS: ros:People, ros:PointStamped
+RSB: rsb:faces, rsb:SphericalDirectionFloat
 
     datatypes:
-        - ros:People
-        - ros:PointStamped
+    - ros:People
+    - rsb:SphericalDirectionFloat
+
 
 Resolution of the source camera image, corresponds to the priorities
 
