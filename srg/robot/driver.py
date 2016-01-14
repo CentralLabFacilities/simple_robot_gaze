@@ -41,7 +41,7 @@ class RobotDriver:
     Provides better encapsulation though...
     """
     def __init__(self, _mw, _outscope):
-        print(">>> Initializing Robot Controller")
+        print ">>> Initializing Robot Controller using: %s" % _mw
         self.mw               = _mw
         self.outscope         = _outscope.strip()
         self.robot_controller = RobotController(self.mw, self.outscope, logging.INFO)

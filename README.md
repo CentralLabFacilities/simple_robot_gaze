@@ -1,4 +1,4 @@
----- Simple Robot Gaze Config File ----
+# Simple Robot Gaze Config File
 
 The Simple Robot Gaze component coordinates a Robot's gaze direction.
 This can be done by a) providing (multiple) input sources and by b) prioritizing them.
@@ -13,7 +13,22 @@ In order to pause robot gaze from controlling the robot simply send "true" (bool
 
     $prefix/robotgaze/set/pause using either RSB or ROS.
 
----
+
+In order to directly send gaze targets send PointStamped msgs (ROS) or SphericalDirectionFloat (RSB) to:
+
+    $prefix/robotgaze/set/gaze
+
+
+# The connection to High Level Control Server should be established via ROS or RSB?
+main_control_middleware:
+  - ROS
+
+
+# ROS remote control support is enabled by default, if you wish to control Gaze remotely via
+# RSB set this to "1"
+enable_rsb_remote_control:
+  - 0
+
 
 The priority of input data streams, the first entry has the highest priority
 
@@ -27,11 +42,6 @@ under /$scope_topic_prefix/robotgaze/something. The default is /robot/robotgaze/
     scope_topic_prefix:
         - robot
 
-ROS remote control support is enabled by default, if you wish to control Gaze remotely via
-RSB set this to "1"
-
-    enable_rsb_remote_control:
-        - 0
 
 What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
 ROS: ros:People, ros:PointStamped
