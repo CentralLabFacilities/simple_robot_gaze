@@ -250,9 +250,9 @@ class ROSDataConnector(threading.Thread):
         print ">>> Initializing ROS Data Subscriber to: %s" % self.inscope.strip()
         try:
             if self.datatype == "people":
-                person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
+                ros_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
             elif self.datatype == "pointstamped":
-                person_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
+                ros_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
             else:
                 print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
                 return
@@ -262,5 +262,5 @@ class ROSDataConnector(threading.Thread):
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
-        person_subscriber.unregister()
+        ros_subscriber.unregister()
         print ">>> Deactivating ROS Data Subscriber to: %s" % self.inscope.strip()

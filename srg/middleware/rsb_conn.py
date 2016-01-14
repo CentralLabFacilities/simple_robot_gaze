@@ -30,11 +30,15 @@ Authors: Florian Lier, Simon Schulz
 
 # STD IMPORTS
 import time
+import operator
 import threading
 
 # RSB Specifics
 import rsb
 from rstsandbox.geometry.SphericalDirectionFloat_pb2 import SphericalDirectionFloat
+from rst.vision.Face_pb2 import Face
+from rst.vision.Faces_pb2 import Faces
+from rst.geometry.BoundingBox_pb2 import BoundingBox
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
@@ -97,8 +101,7 @@ class RSBSetDirectGazeConnector(threading.Thread):
     def direct_gaze_callback(self, event):
         if event.data:
             try:
-                # TODO event sendtime!!!
-                send_time = time.time()
+                send_time = event.metaData.sendTime
                 self.point_x = event.data.azimuth
                 self.point_y = event.data.elevation
                 point = [self.point_x, self.point_y]
@@ -169,15 +172,10 @@ class RSBDataConnector(threading.Thread):
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self):
-        pass
-
-    # TODO #
-    """
     def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
         threading.Thread.__init__(self)
-        self.lock     = _lock
-        self.run_toggle      = True
+        self.lock       = _lock
+        self.run_toggle = True
         self.ready    = False
         self.trans    = _transform
         self.inscope  = str(_inscope).lower().strip()
@@ -194,25 +192,25 @@ class RSBDataConnector(threading.Thread):
         self.point_z          = 0.0
         self.current_robot_gaze = None
         self.current_robot_gaze_timestamp = None
+        self.f  = rsb.converter.ProtocolBufferConverter(messageClass=Face)
+        self.fs = rsb.converter.ProtocolBufferConverter(messageClass=Faces)
+        self.b  = rsb.converter.ProtocolBufferConverter(messageClass=BoundingBox)
+        rsb.converter.registerGlobalConverter(self.f)
+        rsb.converter.registerGlobalConverter(self.fs)
+        rsb.converter.registerGlobalConverter(self.b)
 
-    def people_callback(self, ros_data):
+    def faces_callback(self, event):
         self.lock.acquire()
-        send_time = ros_data.header.stamp
+        send_time = event.metaData.sendTime
         idx = -1
         max_distance = {}
-        for person in ros_data.people:
+        for face in event.Faces:
             idx += 1
-            max_distance[str(idx)] = person.position.z
-        # print ">> Persons found {idx, distance}: ", max_distance
+            max_distance[str(idx)] = face.region.width * face.region.height
         sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
-        # print ">> Nearest Face: ", sort
-        # print ">> Index: ", sort[0][0]
-        # print ">> Distance in pixels: ", sort[0][1]
-        self.nearest_person_x = ros_data.people[int(sort[0][0])].position.x
-        self.nearest_person_y = ros_data.people[int(sort[0][0])].position.y
-        self.nearest_person_z = ros_data.people[int(sort[0][0])].position.z
-        # print ">> Position in pixels x:", self.nearest_person_x
-        # print ">> Position in pixels y:", self.nearest_person_y
+        self.nearest_person_x = event.Faces[int(sort[0][0])].region.top_left.x
+        self.nearest_person_y = event.Faces[int(sort[0][0])].region.top_left.y
+        self.nearest_person_z = event.Faces[int(sort[0][0])].face.region.width * event.Faces[int(sort[0][0])].face.region.height
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
@@ -222,30 +220,7 @@ class RSBDataConnector(threading.Thread):
                 g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
             else:
                 g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-            self.current_robot_gaze_timestamp = send_time.to_sec()
-            g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
-            g.pan = angles[0]
-            g.tilt = angles[1]
-            self.current_robot_gaze = g
-        self.lock.release()
-        self.honor_stimulus_timeout()
-
-    def point_callback(self, ros_data):
-        self.lock.acquire()
-        send_time = ros_data.header.stamp
-        self.point_x = ros_data.point.x
-        self.point_y = ros_data.point.y
-        self.point_z = ros_data.point.z
-        point = [self.point_x, self.point_y]
-        # Derive coordinate mapping
-        angles = self.trans.derive_mapping_coords(point)
-        if angles is not None:
-            g = RobotGaze()
-            if self.mode == 'absolute':
-                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-            else:
-                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            self.current_robot_gaze_timestamp = send_time.to_sec()
+            self.current_robot_gaze_timestamp = send_time
             g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
             g.pan = angles[0]
             g.tilt = angles[1]
@@ -257,14 +232,12 @@ class RSBDataConnector(threading.Thread):
         time.sleep(self.stimulus_timeout)
 
     def run(self):
-        print ">>> Initializing ROS Subscriber to: %s" % self.inscope.strip()
+        print ">>> Initializing RSB Subscriber to: %s" % self.inscope.strip()
         try:
-            if self.datatype == "people":
-                person_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
-            elif self.datatype == "pointstamped":
-                person_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
+            if self.datatype == "faces":
+                rsb_subscriber = rsb.createListener(self.inscope)
             else:
-                print ">>> ROS Subscriber DataType not supported %s" % self.datatype.strip()
+                print ">>> RSB Subscriber DataType not supported %s" % self.datatype.strip()
                 return
         except Exception, e:
             print ">>> ERROR %s" % str(e)
@@ -272,6 +245,5 @@ class RSBDataConnector(threading.Thread):
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
-        person_subscriber.unregister()
+        rsb_subscriber.deactivate()
         print ">>> Deactivating ROS Subscriber to: %s" % self.inscope.strip()
-    """

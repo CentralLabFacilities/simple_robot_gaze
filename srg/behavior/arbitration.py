@@ -152,11 +152,9 @@ class Arbitration(threading.Thread):
             if datatypes[0].lower() == "ros":
                 mw = r.ROSDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             elif datatypes[0].lower() == "rsb":
-                print ">>> RSB is currrenly not supported :| "
-                self.run_toggle = False
-                sys.exit(1)
+                mw = s.RSBDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             else:
-                print ">>> Unknown middleware %s" % datatypes[0]
+                print ">>> Unknown middleware or type %s" % datatypes[0]
                 self.run_toggle = False
                 sys.exit(1)
             self.input_sources.append(mw)
@@ -225,6 +223,7 @@ class Arbitration(threading.Thread):
                 return
             for stamp_override in _updates:
                 p += 1
+                # TODO: Reimplement this using a metric and RSB support.
                 if stamp_override is not None:
                     if _current_gaze_values[p].datatype.lower() == "people":
                         if int(_current_gaze_values[p].nearest_person_z) >= int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
