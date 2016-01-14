@@ -206,7 +206,7 @@ class RSBDataConnector(threading.Thread):
         if len(data.faces) > 0:
             pass
         else:
-            print "No faces Found"
+            self.lock.release()
             return
         for f in data.faces:
             print f
@@ -231,7 +231,6 @@ class RSBDataConnector(threading.Thread):
             g.tilt = angles[1]
             self.current_robot_gaze = g
             print g
-        self.lock.release()
         self.honor_stimulus_timeout()
 
     def honor_stimulus_timeout(self):
