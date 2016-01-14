@@ -19,11 +19,6 @@ In order to directly send gaze targets send PointStamped msgs (ROS) or Spherical
     $prefix/robotgaze/set/gaze
 
 
-# The connection to High Level Control Server should be established via ROS or RSB?
-main_control_middleware:
-  - ROS
-
-
 # ROS remote control support is enabled by default, if you wish to control Gaze remotely via
 # RSB set this to "1"
 enable_rsb_remote_control:

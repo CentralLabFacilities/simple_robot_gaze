@@ -59,7 +59,7 @@ def runner(_options):
     global ar
     ar = a.Arbitration(_options.config, options.outscope)
     # Init the Robot Driver
-    ar.boot_robot_driver(str(_options.config["main_control_middleware"][0]))
+    ar.boot_robot_driver(str(options.middleware))
     # Middlware and Gaze Configuration
     ar.configure()
     # Start Arbitration
@@ -128,6 +128,11 @@ if __name__ == '__main__':
                       dest="loglevel",
                       default="info",
                       help="Set the logging level for console output. Available are info and debug. [Default: info]")
+    parser.add_option("-m", "--middleware",
+                      action="store",
+                      dest="middleware",
+                      default="ROS",
+                      help="Set the default middleware. Supported is ROS and RSB [Default: ROS]")
 
     (options, args) = parser.parse_args()
 

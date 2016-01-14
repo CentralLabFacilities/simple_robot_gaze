@@ -14,11 +14,6 @@
 
 ---
 
-# The connection to High Level Control Server should be established via ROS or RSB? The default is
-# ROS, this is always on. You might set this to RSB, however ROS is still needed.
-main_control_middleware:
-  - ROS
-
 # ROS remote control support is enabled by default, if you wish to control Gaze remotely via
 # RSB set this to "1"
 enable_rsb_remote_control:
