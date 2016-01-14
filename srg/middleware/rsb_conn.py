@@ -203,19 +203,19 @@ class RSBDataConnector(threading.Thread):
         idx = -1
         max_distance = {}
         data = event.getData()
-        if data.faces:
-            print data.faces
+        if len(data.faces) > 0:
+            pass
         else:
-            print "No Faces"
+            print "No faces Found"
             return
-        for face in data.faces:
-            print face
+        for f in data.faces:
+            print f
             idx += 1
-            max_distance[str(idx)] = face.region.width * face.region.height
+            max_distance[str(idx)] = f.region.width * f.region.height
         sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
-        self.nearest_person_x = event.Faces[int(sort[0][0])].region.top_left.x
-        self.nearest_person_y = event.Faces[int(sort[0][0])].region.top_left.y
-        self.nearest_person_z = event.Faces[int(sort[0][0])].face.region.width * event.Faces[int(sort[0][0])].face.region.height
+        self.nearest_person_x = data.faces[int(sort[0][0])].region.top_left.x
+        self.nearest_person_y = data.faces[int(sort[0][0])].region.top_left.y
+        self.nearest_person_z = data.faces[int(sort[0][0])].face.region.width * data.faces[int(sort[0][0])].face.region.height
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
