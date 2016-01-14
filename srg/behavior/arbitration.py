@@ -42,6 +42,9 @@ from srg.middleware import rsb_conn as s
 from srg.utils import transform as t
 from srg.utils.pause import Paused
 
+# ROS
+import rospy
+
 
 class Arbitration(threading.Thread):
 
@@ -101,6 +104,8 @@ class Arbitration(threading.Thread):
             sys.exit(1)
 
     def configure_middleware(self):
+        rospy.init_node('simplerobotgaze')
+
         # Start the external control MW Thread
         self.prefix = self.config["scope_topic_prefix"][0]
 
