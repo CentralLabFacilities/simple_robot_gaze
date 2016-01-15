@@ -200,6 +200,7 @@ class RSBDataConnector(threading.Thread):
     def faces_callback(self, event):
         data = event.getData()
         if len(data.faces) > 0:
+            """
             self.lock.acquire()
             send_time = event.metaData.sendTime
             idx = -1
@@ -228,6 +229,7 @@ class RSBDataConnector(threading.Thread):
                 self.current_robot_gaze = g
             self.lock.release()
             self.honor_stimulus_timeout()
+            """
             print "Exiting Callback"
 
     def honor_stimulus_timeout(self):
