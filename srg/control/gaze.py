@@ -62,7 +62,10 @@ class GazeController(threading.Thread):
                 self.lastdatum = self.mw.current_robot_gaze_timestamp
                 current_target = self.mw.current_robot_gaze
                 if self.acquire_prio:
-                    self.rc.robot_controller.set_gaze_target(current_target, True)
+                    try:
+                        self.rc.robot_controller.set_gaze_target(current_target, True)
+                    except Exception, e:
+                        print ">>> ERROR (set_gaze): %s" % str(e)
                     print "Set Gaze"
                     loop_count += 1
                 self.lock.release()
