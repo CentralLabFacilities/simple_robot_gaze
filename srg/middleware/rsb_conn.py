@@ -237,7 +237,7 @@ class RSBDataConnector(threading.Thread):
         time.sleep(self.stimulus_timeout)
 
     def run(self):
-        print ">>> Initializing RSB Subscriber to: %s" % self.inscope.strip()
+        print ">>> Initializing RSB Data Subscriber to: %s" % self.inscope.strip()
         try:
             if self.datatype == "faces":
                 try:
@@ -269,4 +269,4 @@ class RSBDataConnector(threading.Thread):
         while self.run_toggle is True:
             time.sleep(0.05)
         rsb_subscriber.deactivate()
-        print ">>> Deactivating ROS Subscriber to: %s" % self.inscope.strip()
+        print ">>> Deactivating RSB Data Subscriber to: %s" % self.inscope.strip()
