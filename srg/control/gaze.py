@@ -63,6 +63,7 @@ class GazeController(threading.Thread):
                 current_target = self.mw.current_robot_gaze
                 if self.acquire_prio:
                     self.rc.robot_controller.set_gaze_target(current_target, True)
+                    print "Set Gaze"
                     loop_count += 1
                 self.lock.release()
             else:
