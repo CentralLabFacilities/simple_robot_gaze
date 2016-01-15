@@ -216,7 +216,6 @@ class RSBDataConnector(threading.Thread):
                 point = [self.nearest_person_x, self.nearest_person_y]
                 # Derive coordinate mapping
                 angles = self.trans.derive_mapping_coords(point)
-                print angles
                 if angles is not None:
                     g = RobotGaze()
                     if self.mode == 'relative':
