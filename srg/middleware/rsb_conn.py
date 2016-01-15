@@ -206,7 +206,6 @@ class RSBDataConnector(threading.Thread):
                 idx = -1
                 max_distance = {}
                 for f in data.faces:
-                    print f
                     idx += 1
                     max_distance[str(idx)] = f.region.width * f.region.height
                 sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
