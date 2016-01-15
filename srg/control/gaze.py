@@ -64,6 +64,7 @@ class GazeController(threading.Thread):
                 if self.acquire_prio:
                     try:
                         print ">>> (setting_gaze)"
+                        print current_target
                         self.rc.robot_controller.set_gaze_target(current_target, True)
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
