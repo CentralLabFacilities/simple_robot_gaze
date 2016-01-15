@@ -198,40 +198,37 @@ class RSBDataConnector(threading.Thread):
         self.s  = None
 
     def faces_callback(self, event):
-        self.lock.acquire()
-        send_time = event.metaData.sendTime
-        idx = -1
-        max_distance = {}
         data = event.getData()
         if len(data.faces) > 0:
-            pass
-        else:
+            self.lock.acquire()
+            send_time = event.metaData.sendTime
+            idx = -1
+            max_distance = {}
+
+            for f in data.faces:
+                idx += 1
+                max_distance[str(idx)] = f.region.width * f.region.height
+            sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
+            self.nearest_person_x = data.faces[int(sort[0][0])].region.top_left.x
+            self.nearest_person_y = data.faces[int(sort[0][0])].region.top_left.y
+            self.nearest_person_z = data.faces[int(sort[0][0])].region.width * data.faces[int(sort[0][0])].region.height
+            point = [self.nearest_person_x, self.nearest_person_y]
+            # Derive coordinate mapping
+            angles = self.trans.derive_mapping_coords(point)
+            if angles is not None:
+                g = RobotGaze()
+                if self.mode == 'relative':
+                    g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+                else:
+                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+                self.current_robot_gaze_timestamp = send_time
+                g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
+                g.pan = angles[0]
+                g.tilt = angles[1]
+                self.current_robot_gaze = g
             self.lock.release()
-            return
-        for f in data.faces:
-            idx += 1
-            max_distance[str(idx)] = f.region.width * f.region.height
-        sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
-        self.nearest_person_x = data.faces[int(sort[0][0])].region.top_left.x
-        self.nearest_person_y = data.faces[int(sort[0][0])].region.top_left.y
-        self.nearest_person_z = data.faces[int(sort[0][0])].region.width * data.faces[int(sort[0][0])].region.height
-        point = [self.nearest_person_x, self.nearest_person_y]
-        # Derive coordinate mapping
-        angles = self.trans.derive_mapping_coords(point)
-        if angles is not None:
-            g = RobotGaze()
-            if self.mode == 'relative':
-                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-            else:
-                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-            self.current_robot_gaze_timestamp = send_time
-            g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
-            g.pan = angles[0]
-            g.tilt = angles[1]
-            self.current_robot_gaze = g
-        self.lock.release()
-        self.honor_stimulus_timeout()
-        print "Exiting Callback"
+            self.honor_stimulus_timeout()
+            print "Exiting Callback"
 
     def honor_stimulus_timeout(self):
         time.sleep(self.stimulus_timeout)
