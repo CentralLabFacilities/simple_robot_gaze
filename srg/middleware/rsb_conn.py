@@ -231,8 +231,8 @@ class RSBDataConnector(threading.Thread):
                     g = RobotGaze()
                     g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
                     g.gaze_timestamp = RobotTimestamp(send_time)
-                    g.pan = point[0]
-                    g.tilt = point[1]
+                    g.pan = 10.0
+                    g.tilt = 10.0
                     g.roll = 0.0
                     self.current_robot_gaze = g
                     self.current_robot_gaze_timestamp = send_time
