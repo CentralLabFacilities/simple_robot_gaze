@@ -215,7 +215,7 @@ class RSBDataConnector(threading.Thread):
                 point = [self.nearest_person_x, self.nearest_person_y]
                 # Derive coordinate mapping
                 angles = self.trans.derive_mapping_coords(point)
-                """if angles is not None:
+                if angles is not None:
                     g = RobotGaze()
                     if self.mode == 'relative':
                         g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
@@ -223,20 +223,9 @@ class RSBDataConnector(threading.Thread):
                         g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
                     self.current_robot_gaze_timestamp = send_time
                     g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
-                    g.pan = 10.00  #angles[0]
-                    g.tilt = 10.00 #angles[1]
+                    g.pan = angles[0]
+                    g.tilt = angles[1]
                     self.current_robot_gaze = g
-                """
-                if angles is not None:
-                    g = RobotGaze()
-                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-                    g.gaze_timestamp = RobotTimestamp(send_time)
-                    g.pan = 10.0
-                    g.tilt = 10.0
-                    g.roll = 0.0
-                    self.current_robot_gaze = g
-                    self.current_robot_gaze_timestamp = send_time
-                    print ">>> Gaze (RSB) set to: %f, %f" % (g.pan, g.tilt)
                 self.lock.release()
             except Exception, e:
                 print ">>> Error %s" % str(e)
