@@ -209,7 +209,6 @@ class RSBDataConnector(threading.Thread):
             self.lock.release()
             return
         for f in data.faces:
-            print f
             idx += 1
             max_distance[str(idx)] = f.region.width * f.region.height
         sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
@@ -232,6 +231,7 @@ class RSBDataConnector(threading.Thread):
             self.current_robot_gaze = g
         self.lock.release()
         self.honor_stimulus_timeout()
+        print "Exiting Callback"
 
     def honor_stimulus_timeout(self):
         time.sleep(self.stimulus_timeout)

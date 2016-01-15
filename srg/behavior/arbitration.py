@@ -179,8 +179,8 @@ class Arbitration(threading.Thread):
         for connection in self.input_sources:
             connection.run_toggle = False
 
-        for gazecontrol in self.gaze_controller:
-            gazecontrol.run_toggle = False
+        for gaze_control in self.gaze_controller:
+            gaze_control.run_toggle = False
 
         self.arbitrate_toggle_ros.run_toggle = False
         self.pause_info_ros.run_toggle = False
