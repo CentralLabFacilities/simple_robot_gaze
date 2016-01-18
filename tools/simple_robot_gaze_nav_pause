@@ -1,0 +1,105 @@
+#!/usr/bin/python
+
+"""
+
+Copyright(c) <Florian Lier, Simon Schulz>
+http://opensource.cit-ec.de/fsmt
+
+This file may be licensed under the terms of the
+GNU Lesser General Public License Version 3 (the ``LGPL''),
+or (at your option) any later version.
+
+Software distributed under the License is distributed
+on an ``AS IS'' basis, WITHOUT WARRANTY OF ANY KIND, either
+express or implied. See the LGPL for the specific language
+governing rights and limitations.
+
+You should have received a copy of the LGPL along with this
+program. If not, go to http://www.gnu.org/licenses/lgpl.html
+or write to the Free Software Foundation, Inc.,
+51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+The development of this software was supported by the
+Excellence Cluster EXC 277 Cognitive Interaction Technology.
+The Excellence Cluster EXC 277 is a grant of the Deutsche
+Forschungsgemeinschaft (DFG) in the context of the German
+Excellence Initiative.
+
+Authors: Florian Lier, Simon Schulz
+<flier, sschulz>@techfak.uni-bielefeld.de
+
+"""
+
+# STD IMPORTS
+import sys
+import time
+
+# ROS IMPORTS
+import rospy
+import roslib
+from std_msgs.msg import Bool
+from std_msgs.msg import Header
+from geometry_msgs.msg import Point
+from geometry_msgs.msg import PointStamped
+from move_base_msgs.msg import MoveBaseActionFeedback
+
+
+class MovementCheck:
+
+    def __init__(self, _prefix):
+        rospy.init_node('action_listener')
+        self.is_moving    = False
+        self.send_time    = time.time()
+        self.last_time    = self.send_time
+        self.pub_setpause = rospy.Publisher(_prefix.strip()+"/robotgaze/set/pause", Bool, queue_size=1)
+        self.pub_setgaze  = rospy.Publisher(_prefix.strip()+"/robotgaze/set/gaze", PointStamped, queue_size=1)
+        self.move_sub     = rospy.Subscriber("/move_base/feedback", MoveBaseActionFeedback, self.action_callback)
+
+    def action_callback(self, data):
+        if data is not None:
+            self.send_time = data.header.stamp
+
+    def stop_it(self):
+        h = Header
+        h.frame_id = "0"
+        h.stamp = time.time()
+
+        ps = PointStamped
+        ps.header = h
+
+        p = Point
+        p.x = 0.0
+        p.y = 0.0
+        p.z = 0.0
+        ps.point = p
+
+        pause = Bool
+        pause.data = True
+
+        self.pub_setpause.publish(pause)
+        time.sleep(0.2)
+        self.pub_setgaze.publish(ps)
+
+    def resume_it(self):
+        pause = Bool
+        pause.data = False
+        self.pub_setpause.publish(pause)
+
+    def periodic_check(self):
+        if self.send_time != self.last_time:
+            self.is_moving = True
+            self.stop_it()
+            self.last_time = self.send_time
+        else:
+            if self.is_moving:
+                self.is_moving = False
+                self.resume_it()
+            else:
+                pass
+
+if __name__ == '__main__':
+    mvc = MovementCheck(str(sys.argv[1]))
+    while True:
+        mvc.periodic_check()
+        time.sleep(1)
+

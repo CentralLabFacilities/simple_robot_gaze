@@ -34,34 +34,22 @@ version = "0.1"
 filename = "0.1"
 
 setup(name="simplerobotgaze",
-
       version=filename,
-
       description="A Simple script that takes ROS person messages as input and steers a "
                   "humanoid robot head using the HLRC client",
-
       long_description="A Simple script that takes ROS person messages as input and steers a "
                        "humanoid robot head using the HLRC client",
-
       author="Florian Lier, Simon Schulz",
-
       author_email="flier[at]techfak.uni-bielefeld.de and sschulz[at]techfak.uni-bielefeld.de",
-
       url="https://projects.cit-ec.uni-bielefeld.de/git/flobi.demo.git",
-
       download_url="https://projects.cit-ec.uni-bielefeld.de/git/flobi.demo.git",
-
-      scripts=["bin/simple_robot_gaze"],
-
+      scripts=["bin/simple_robot_gaze", "tools/simple_robot_gaze_nav_pause"],
       packages=find_packages(exclude=["*.tests",
                                       "*.tests.*",
                                       "tests.*",
                                       "tests"]),
-
       keywords=['HLRC', 'Robot Gaze'],
-
       license="LGPLv3",
-
       classifiers=[
           'Development Status :: Beta',
           'Environment :: Console',
@@ -73,5 +61,4 @@ setup(name="simplerobotgaze",
           'Programming Language :: Python',
           'Topic :: Text Processing :: Markup :: XML'
       ],
-
-      )
+)
