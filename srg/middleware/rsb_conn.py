@@ -225,6 +225,7 @@ class RSBDataConnector(threading.Thread):
                     g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
                     g.pan = angles[0]
                     g.tilt = angles[1]
+                    g.roll = 0.0
                     self.current_robot_gaze = g
                 self.lock.release()
             except Exception, e:

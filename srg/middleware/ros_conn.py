@@ -214,7 +214,7 @@ class ROSDataConnector(threading.Thread):
             g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
             g.pan = angles[0]
             g.tilt = angles[1]
-            g.pan = 0.0
+            g.roll = 0.0
             self.current_robot_gaze = g
         self.lock.release()
         self.honor_stimulus_timeout()
