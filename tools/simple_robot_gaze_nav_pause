@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
         mvc.move_sub.unregister()
         mvc.pub_setpause.unregister()
-        mvc.pub_setgaze..unregister()
+        mvc.pub_setgaze.unregister()
         print "Cleanup and Exit..."
         sys.exit(0)
 
