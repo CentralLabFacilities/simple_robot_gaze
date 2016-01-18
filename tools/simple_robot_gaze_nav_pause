@@ -33,6 +33,7 @@ Authors: Florian Lier, Simon Schulz
 # STD IMPORTS
 import sys
 import time
+import signal
 
 # ROS IMPORTS
 import rospy
@@ -98,12 +99,24 @@ class MovementCheck:
                 pass
 
 if __name__ == '__main__':
+
+    run = True
+
+    def signal_handler(signal, frame):
+        global run
+        run = False
+
     if len(sys.argv) < 2:
         print "You need to provide a scope prefix, e.g., /meka"
         sys.exit(1)
     else:
         mvc = MovementCheck(str(sys.argv[1]))
-        while True:
+        signal.signal(signal.SIGINT, signal_handler)
+
+        while run:
             mvc.periodic_check()
             time.sleep(1)
+
+        mvc.move_sub.unregister()
+        sys.exit(0)
 
