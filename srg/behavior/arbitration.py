@@ -29,6 +29,7 @@ Authors: Florian Lier, Simon Schulz
 """
 
 # STD IMPORTS
+import os
 import sys
 import time
 import yaml
@@ -105,7 +106,8 @@ class Arbitration(threading.Thread):
 
     def configure_middleware(self):
         if self.rd.mw.upper() == "RSB":
-            rospy.init_node('simplerobotgaze')
+            host = os.getenv("HOSTNAME")
+            rospy.init_node('simplerobotgaze'+host)
 
         # Start the external control MW Thread
         self.prefix = self.config["scope_topic_prefix"][0]
