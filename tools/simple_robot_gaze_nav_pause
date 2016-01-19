@@ -61,11 +61,11 @@ class MovementCheck:
             self.send_time = data.header.stamp
 
     def stop_it(self):
-        h = Header
+        h = Header()
         h.frame_id = "0"
         h.stamp = time.time()
 
-        ps = PointStamped
+        ps = PointStamped()
         ps.header = h
 
         p = Point
@@ -74,7 +74,7 @@ class MovementCheck:
         p.z = 0.0
         ps.point = p
 
-        pause = Bool
+        pause = Bool()
         pause.data = True
 
         self.pub_setpause.publish(pause)
