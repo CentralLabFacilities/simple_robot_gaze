@@ -68,7 +68,7 @@ class MovementCheck:
         ps = PointStamped()
         ps.header = h
 
-        p = Point
+        p = Point()
         p.x = 0.0
         p.y = 0.0
         p.z = 0.0
@@ -82,7 +82,7 @@ class MovementCheck:
         self.pub_setgaze.publish(ps)
 
     def resume_it(self):
-        pause = Bool
+        pause = Bool()
         pause.data = False
         self.pub_setpause.publish(pause)
 
