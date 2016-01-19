@@ -43,29 +43,29 @@ from std_msgs.msg import Bool
 from std_msgs.msg import Header
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import PointStamped
-from move_base_msgs.msg import MoveBaseActionFeedback
+from move_base_msgs.msg import MoveBaseFeedback
 
 
 class MovementCheck:
 
     def __init__(self, _prefix):
-        # host = os.uname()[1]
         rospy.init_node('simplerobotgazenavpause')
         self.is_moving    = False
         self.send_time    = time.time()
         self.last_time    = self.send_time
         self.pub_setpause = rospy.Publisher(_prefix.strip()+"/robotgaze/set/pause", Bool, queue_size=1)
         self.pub_setgaze  = rospy.Publisher(_prefix.strip()+"/robotgaze/set/gaze", PointStamped, queue_size=1)
-        self.move_sub     = rospy.Subscriber("/move_base/feedback", MoveBaseActionFeedback, self.action_callback)
+        self.move_sub     = rospy.Subscriber("/move_base/feedback", MoveBaseFeedback, self.action_callback)
 
     def action_callback(self, data):
         if data is not None:
-            self.send_time = data.header.stamp
+            print ">>> Got MoveBase MSG"
+            self.send_time = time.time()
 
     def stop_it(self):
         h = Header()
         h.frame_id = "0"
-        h.stamp = time.time()
+        h.stamp = rospy.Time.now()
 
         ps = PointStamped()
         ps.header = h
@@ -80,13 +80,16 @@ class MovementCheck:
         pause.data = True
 
         self.pub_setpause.publish(pause)
+	print ">>> Sent Pause"
         time.sleep(0.2)
         self.pub_setgaze.publish(ps)
+	print ">>> Sent Gaze (0,0,0)"
 
     def resume_it(self):
         pause = Bool()
         pause.data = False
         self.pub_setpause.publish(pause)
+        print ">>> Sent Resume"
 
     def periodic_check(self):
         if self.send_time != self.last_time:
