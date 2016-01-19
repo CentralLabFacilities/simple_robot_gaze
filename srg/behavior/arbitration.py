@@ -105,9 +105,10 @@ class Arbitration(threading.Thread):
             sys.exit(1)
 
     def configure_middleware(self):
-        if self.rd.mw.upper() == "RSB":
-            host = os.uname()[1]
-            rospy.init_node('simplerobotgaze'+host)
+        #if self.rd.mw.upper() == "RSB":
+
+        host = os.uname()[1]
+        rospy.init_node('simplerobotgaze'+host)
 
         # Start the external control MW Thread
         self.prefix = self.config["scope_topic_prefix"][0]
