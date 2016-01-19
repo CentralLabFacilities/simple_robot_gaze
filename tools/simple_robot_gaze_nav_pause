@@ -49,8 +49,8 @@ from move_base_msgs.msg import MoveBaseActionFeedback
 class MovementCheck:
 
     def __init__(self, _prefix):
-        host = os.uname()[1]
-        rospy.init_node('simplerobotgazenavpause'+host)
+        # host = os.uname()[1]
+        rospy.init_node('simplerobotgazenavpause')
         self.is_moving    = False
         self.send_time    = time.time()
         self.last_time    = self.send_time
