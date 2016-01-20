@@ -211,7 +211,7 @@ class RSBDataConnector(threading.Thread):
                 sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
                 self.nearest_person_x = data.faces[int(sort[0][0])].region.top_left.x + data.faces[int(sort[0][0])].region.width/2
                 self.nearest_person_y = data.faces[int(sort[0][0])].region.top_left.y + data.faces[int(sort[0][0])].region.height/2
-                self.nearest_person_z = data.faces[int(sort[0][0])].region.width * data.faces[int(sort[0][0])].region.height
+                self.nearest_person_z = data.faces[int(sort[0][0])].region.width + data.faces[int(sort[0][0])].region.height
                 point = [self.nearest_person_x, self.nearest_person_y]
                 # Derive coordinate mapping
                 angles = self.trans.derive_mapping_coords(point)
