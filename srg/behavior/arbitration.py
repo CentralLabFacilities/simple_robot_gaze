@@ -153,7 +153,7 @@ class Arbitration(threading.Thread):
                     self.plugins.append(plugin_class())
             except Exception, e:
                 print ">>> Plugin could not be loaded %s" % str(e)
-                self.run_toggle = False
+                self.request_stop()
                 sys.exit(1)
             # Check if peak_override is "ON" (1)
             if peak_override is 1:
@@ -174,8 +174,9 @@ class Arbitration(threading.Thread):
                 mw = s.RSBDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             else:
                 print ">>> Unknown middleware or type %s" % datatypes[0]
-                self.run_toggle = False
+                self.request_stop()
                 sys.exit(1)
+
             self.input_sources.append(mw)
 
             # Configure Gaze Controllers
