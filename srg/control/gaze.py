@@ -48,10 +48,10 @@ class GazeController(threading.Thread):
         self.acquire_prio = False
         self.lastdatum    = time.time()
         self.rc           = _robot_controller
-        self.closed_loop_timeout   = 10.0
         self.closed_loop_informer  = _closed_loop
-        self.loop_speed   = 1.0
+        self.closed_loop_timeout   = 5.0
         self.target_tolerance = 5.0
+        self.loop_speed   = 1.0
 
     def run(self):
         print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope.strip(), self.rc.outscope.strip())
@@ -69,12 +69,11 @@ class GazeController(threading.Thread):
                         self.rc.robot_controller.set_gaze_target(current_target, True)
                         if self.closed_loop_informer is not None:
                             pan, tilt = self.closed_loop_informer.get_current_head_state()
-                            while pan - self.target_tolerance > abs(current_target.pan) or tilt - self.target_tolerance > abs(current_target.tilt):
+                            while abs(pan) - self.target_tolerance > abs(current_target.pan) or abs(tilt) - self.target_tolerance > abs(current_target.tilt):
                                 time.sleep(0.001)
                                 pan, tilt = self.closed_loop_informer.get_current_head_state()
                                 if time.time() - tick >= self.closed_loop_timeout:
-                                    print ">>> Warning: Targets not reached within %d seconds" % int(self.closed_loop_timeout)
-                                    print ">>> Warning: Targets after 10 Seconds: pan --> %f tilt --> %f" % (pan, tilt)
+                                    print ">>> Warning: Position after %f seconds: pan --> %f tilt --> %f" % (self.closed_loop_timeout, pan, tilt)
                                     break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
