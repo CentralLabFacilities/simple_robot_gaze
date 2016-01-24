@@ -247,7 +247,7 @@ class RSBDataConnector(threading.Thread):
                     rsb.converter.registerGlobalConverter(self.fs)
                     rsb.converter.registerGlobalConverter(self.b)
                 except Exception, e:
-                    print ">>> ERROR %s" % str(e)
+                    print ">>> WARNING %s" % str(e)
                 rsb_subscriber = rsb.createListener(self.inscope)
                 rsb_subscriber.addHandler(self.faces_callback)
             elif self.datatype == "sphericaldirectionfloat":
@@ -255,7 +255,7 @@ class RSBDataConnector(threading.Thread):
                     self.s = rsb.converter.ProtocolBufferConverter(messageClass=SphericalDirectionFloat)
                     rsb.converter.registerGlobalConverter(self.s)
                 except Exception, e:
-                    print ">>> ERROR %s" % str(e)
+                    print ">>> WARNING %s" % str(e)
                 rsb_subscriber = rsb.createListener(self.inscope)
                 print ">>> WARNING: No Handler Implemented..."
             else:

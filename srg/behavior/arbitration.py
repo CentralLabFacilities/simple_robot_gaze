@@ -148,11 +148,10 @@ class Arbitration(threading.Thread):
             try:
                 if str(plugin).lower() == "open":
                     self.plugins.append(None)
-                    print ">>> NO PLUG-IN registered %s" % item
                 else:
                     plugin_class = get_class(plugin)
                     self.plugins.append(plugin_class())
-                    print ">>> PLUG-IN registered %s for %s" % (plugin, item)
+                    print ">>> CLOSED LOOP PLUG-IN registered %s --> %s" % (plugin, item)
             except Exception, e:
                 print ">>> Plugin could not be loaded %s" % str(e)
                 self.request_stop()
