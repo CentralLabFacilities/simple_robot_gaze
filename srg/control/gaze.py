@@ -49,7 +49,7 @@ class GazeController(threading.Thread):
         self.lastdatum    = time.time()
         self.rc           = _robot_controller
         self.closed_loop_informer  = _closed_loop
-        self.closed_loop_timeout   = 3.0
+        self.closed_loop_timeout   = 2.0
         self.target_tolerance = 5.0
         self.loop_speed   = 1.0
 
