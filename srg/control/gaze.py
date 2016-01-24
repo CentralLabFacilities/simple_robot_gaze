@@ -29,7 +29,6 @@ Authors: Florian Lier, Simon Schulz
 """
 
 # STD IMPORTS
-from sqlalchemy.sql.functions import current_date
 import time
 import threading
 
