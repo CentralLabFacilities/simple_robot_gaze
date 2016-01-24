@@ -24,6 +24,16 @@ priorities:
   - /robotgazetools/faces
   - /robotgazetools/saliency
 
+
+# The control loop field allows to set the control strategy to be set either "open", which means
+# no robot feedback is taken into account when sending gaze targets. If set, i.e., srgplugins.mekarobot
+# SRG will automatically load the plugin and wait for the next target to be sent if, and only if, the
+# desired position has been reached (default timeout is 10 seconds.). Plugin Documentation:
+# https://github.com/CentralLabFacilities/simple_robot_gaze_plugins
+control_loop:
+  - open
+  - srgplugins.mekarobot
+
 # This client features various remote control functions, these are usually available
 # under /$scope_topic_prefix/robotgaze/something. The default is /robot/robotgaze/something
 scope_topic_prefix:

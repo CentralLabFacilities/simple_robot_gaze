@@ -9,20 +9,25 @@ field of view, robot joint angles respectively.
 
 This file must reside in ~/.config/simplerobotgaze.yaml
 
+This client features various remote control functions, these are usually available
+under /$scope_topic_prefix/robotgaze/$something . The default is /robot/robotgaze/$something
+
+    scope_topic_prefix:
+        - robot
+
 In order to pause robot gaze from controlling the robot simply send "true" (bool msg) to:
 
-    $prefix/robotgaze/set/pause using either RSB or ROS.
-
+    $scope_topic_prefix/robotgaze/set/pause using either RSB or ROS
 
 In order to directly send gaze targets send PointStamped msgs (ROS) or SphericalDirectionFloat (RSB) to:
 
-    $prefix/robotgaze/set/gaze
+    $scope_topic_prefix/robotgaze/set/gaze
 
+ROS remote control support is enabled by default. If you wish to control SRG remotely via
+RSB set this to "1". If you don't know what RSB is, leave this value "0"
 
-# ROS remote control support is enabled by default, if you wish to control Gaze remotely via
-# RSB set this to "1"
-enable_rsb_remote_control:
-  - 0
+    enable_rsb_remote_control:
+        - 0
 
 The priority of input data streams, the first entry has the highest priority
 
@@ -30,27 +35,32 @@ The priority of input data streams, the first entry has the highest priority
         - /robotgazetools/faces
         - /robotgazetools/saliency
 
-This client features various remote control functions, these are usually available
-under /$scope_topic_prefix/robotgaze/something. The default is /robot/robotgaze/something
+The control loop field allows to set the control strategy to be set either "open", which means
+no robot feedback is taken into account when sending gaze targets (fire and forget). Or, if set, i.e.,
+srgplugins.mekarobot SRG will automatically load the provided plugin and wait for the next target to be
+sent if, and only if, the desired position (provided by the loaded plugin) has been reached (default timeout is 10 seconds.).
+Plugin Documentation: https://github.com/CentralLabFacilities/simple_robot_gaze_plugins.
+If you are unsure leave this value "open"
 
-    scope_topic_prefix:
-        - robot
+    control_loop:
+        - open
+        - srgplugins.mekarobot
 
-What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
+What kind of data are you sending via your input stream, corresponds to priorities. Currently implemented:
 ROS: ros:People, ros:PointStamped
-RSB: rsb:faces, rsb:SphericalDirectionFloat
+RSB: rsb:Faces, rsb:SphericalDirectionFloat
 
     datatypes:
     - ros:People
     - rsb:SphericalDirectionFloat
 
-Resolution of the source camera image, corresponds to the priorities
+Resolution of the data source, corresponds to the priorities
 
     resolution:
         - 320x240
         - 320x240
 
-Camera field of view horizontal and vertical (in degree), also corresponds to the priorities.
+Robot's field of view horizontal and vertical (in degree), also corresponds to the priorities.
 
     fov:
         - 66.0x40.0

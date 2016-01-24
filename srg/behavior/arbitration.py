@@ -38,10 +38,11 @@ import threading
 # SELF IMPORTS
 from srg.robot import driver as d
 from srg.control import gaze as g
+from srg.utils.pause import Paused
+from srg.utils import transform as t
 from srg.middleware import ros_conn as r
 from srg.middleware import rsb_conn as s
-from srg.utils import transform as t
-from srg.utils.pause import Paused
+from srg.utils.classloader import get_class
 
 # ROS
 import rospy
@@ -59,6 +60,7 @@ class Arbitration(threading.Thread):
         self.last_info        = time.time()
         self.transforms       = []
         self.input_sources    = []
+        self.plugins          = []
         self.gaze_controller  = []
         self.overrides        = []
         self.run_toggle       = True
@@ -142,6 +144,13 @@ class Arbitration(threading.Thread):
             datatypes  = self.config["datatypes"][idx].split(":")
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
+            plugin = self.config["control_loop"][idx]
+            if str(plugin).lower() == "open":
+                self.plugins.append(None)
+            else:
+                plugin_mod = get_class(plugin)
+                plugin_instance = plugin_mod.SRGRobotFeedback()
+                self.plugins.append(plugin_instance)
 
             # Check if peak_override is "ON" (1)
             if peak_override is 1:
@@ -167,8 +176,10 @@ class Arbitration(threading.Thread):
             self.input_sources.append(mw)
 
             # Configure Gaze Controllers
-            gc = g.GazeController(self.rd, mw, self.lock)
+            gc = g.GazeController(self.rd, mw, self.lock, self.plugins[idx])
             self.gaze_controller.append(gc)
+
+            # Process Next Config Value
             idx += 1
 
         # RUN EVERYTHING!

@@ -40,7 +40,7 @@ class GazeController(threading.Thread):
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self, _robot_controller, _mw, _lock):
+    def __init__(self, _robot_controller, _mw, _lock, _closed_loop):
         threading.Thread.__init__(self)
         self.lock         = _lock
         self.mw           = _mw
@@ -48,7 +48,10 @@ class GazeController(threading.Thread):
         self.acquire_prio = False
         self.lastdatum    = time.time()
         self.rc           = _robot_controller
+        self.closed_loop_timeout   = 10.0
+        self.closed_loop_informer  = _closed_loop
         self.loop_speed   = 1.0
+        self.target_tolerance = 5.0
 
     def run(self):
         print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope.strip(), self.rc.outscope.strip())
@@ -64,6 +67,13 @@ class GazeController(threading.Thread):
                 if self.acquire_prio:
                     try:
                         self.rc.robot_controller.set_gaze_target(current_target, True)
+                        if self.closed_loop_informer is not None:
+                            while self.closed_loop_informer.get_current_head_state()[0] - self.target_tolerance > abs(current_target.pan)\
+                                    and self.closed_loop_informer.get_current_head_state()[1] - self.target_tolerance > abs(current_target.tilt):
+                                    time.sleep(0.001)
+                                    if time.time() - tick >= self.closed_loop_timeout:
+                                        print ">>> Warning: Target not reached within %f seconds" % self.closed_loop_timeout
+                                        break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
                     loop_count += 1
