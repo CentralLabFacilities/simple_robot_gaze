@@ -198,6 +198,10 @@ class Arbitration(threading.Thread):
         for gaze_control in self.gaze_controller:
             gaze_control.run_toggle = False
 
+        for plugin in self.plugins:
+            if plugin is not None:
+                plugin.stop()
+
         self.arbitrate_toggle_ros.run_toggle = False
         self.pause_info_ros.run_toggle = False
         self.direct_gaze_ros.run_toggle = False
