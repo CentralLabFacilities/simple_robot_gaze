@@ -145,12 +145,16 @@ class Arbitration(threading.Thread):
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
             plugin = self.config["control_loop"][idx]
-            if str(plugin).lower() == "open":
-                self.plugins.append(None)
-            else:
-                plugin_class = get_class(plugin)
-                self.plugins.append(plugin_class())
-
+            try:
+                if str(plugin).lower() == "open":
+                    self.plugins.append(None)
+                else:
+                    plugin_class = get_class(plugin)
+                    self.plugins.append(plugin_class())
+            except Exception, e:
+                print ">>> Plugin could not be loaded %s" % str(e)
+                self.run_toggle = False
+                sys.exit(1)
             # Check if peak_override is "ON" (1)
             if peak_override is 1:
                 self.allow_peak_override = peak_override
