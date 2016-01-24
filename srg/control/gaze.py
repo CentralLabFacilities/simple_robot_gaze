@@ -70,15 +70,15 @@ class GazeController(threading.Thread):
                         if self.closed_loop_informer is not None:
                             pan, tilt = self.closed_loop_informer.get_current_head_state()
 
-                            print abs(current_target.pan), abs(current_target.tilt)
-                            print "+++++++++++++++++++++"
-                            print abs(pan), abs(tilt)
+                            # print abs(current_target.pan), abs(current_target.tilt)
+                            # print "+++++++++++++++++++++"
+                            # print abs(pan), abs(tilt)
 
                             while abs(pan) - self.target_tolerance < abs(current_target.pan) or abs(tilt) - self.target_tolerance < abs(current_target.tilt):
                                 time.sleep(0.001)
                                 pan, tilt = self.closed_loop_informer.get_current_head_state()
                                 if time.time() - tick >= self.closed_loop_timeout:
-                                    print ">>> Warning: Position after %f seconds: pan --> %f tilt --> %f" % (self.closed_loop_timeout, pan, tilt)
+                                    print ">>> Warning: position after %.2f seconds: pan --> %.2f tilt --> %.2f" % (self.closed_loop_timeout, pan, tilt)
                                     break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
