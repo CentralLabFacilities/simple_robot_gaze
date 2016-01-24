@@ -32,7 +32,7 @@ priorities:
 # https://github.com/CentralLabFacilities/simple_robot_gaze_plugins
 control_loop:
   - open
-  - srgplugins.mekarobot
+  - srgplugins.mekarobot.mekahead.SRGMekaRobotFeedback
 
 # This client features various remote control functions, these are usually available
 # under /$scope_topic_prefix/robotgaze/something. The default is /robot/robotgaze/something

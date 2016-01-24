@@ -148,9 +148,8 @@ class Arbitration(threading.Thread):
             if str(plugin).lower() == "open":
                 self.plugins.append(None)
             else:
-                plugin_mod = get_class(plugin)
-                plugin_instance = plugin_mod.SRGRobotFeedback()
-                self.plugins.append(plugin_instance)
+                plugin_class = get_class(plugin)
+                self.plugins.append(plugin_class())
 
             # Check if peak_override is "ON" (1)
             if peak_override is 1:
