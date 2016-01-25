@@ -72,6 +72,7 @@ class GazeController(threading.Thread):
                             while abs(pan) - self.target_tolerance < abs(current_target.pan) or abs(tilt) - self.target_tolerance < abs(current_target.tilt):
                                 time.sleep(0.001)
                                 pan, tilt = self.closed_loop_informer.get_current_head_state()
+                                print pan, tilt
                                 if time.time() - tick >= self.closed_loop_timeout:
                                     print ">>> Warning: desired position [%.2f | %.2f] after %.2f seconds --> [%.2f | %.2f] " % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt)
                                     break
