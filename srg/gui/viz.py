@@ -139,7 +139,7 @@ class Viz(QtGui.QWidget):
             self.loop_labels[name].setFont(self.font_smaller_c)
 
             self.current_activity[name] = QtGui.QProgressBar()
-            self.current_activity[name].setMaximum((gc.mw.trans.fov[0]/2)+(gc.mw.trans.fov[1]/2))
+            self.current_activity[name].setMaximum(abs((gc.mw.trans.fov[0]/2)+(gc.mw.trans.fov[1]/2)))
             self.current_activity[name].setMinimum(0)
             self.current_activity[name].setAlignment(Qt.AlignCenter)
             self.current_activity[name].setFormat('Activity')
