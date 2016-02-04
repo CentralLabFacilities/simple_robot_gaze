@@ -161,7 +161,7 @@ class Arbitration(threading.Thread):
             if peak_override is 1:
                 self.allow_peak_override = peak_override
                 allow_override_threshold = self.config["peak_overrides"][idx].split(":")
-                self.overrides.append(allow_override_threshold[0])
+                self.overrides.append(float(allow_override_threshold[0]))
                 self.override_modes.append(str(allow_override_threshold[1]))
 
             # Configure Affine Transformations
