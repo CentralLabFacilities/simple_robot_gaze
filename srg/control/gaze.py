@@ -65,9 +65,9 @@ class GazeController(threading.Thread):
             self.lock.acquire(1)
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze_timestamp:
                 self.lastdatum = self.mw.current_robot_gaze_timestamp
-                current_target = self.mw.current_robot_gaze
                 if self.acquire_prio:
                     try:
+                       current_target = self.mw.current_robot_gaze
                         self.rc.robot_controller.set_gaze_target(current_target, True)
                         if self.closed_loop_informer is not None:
                             pan, tilt = self.closed_loop_informer.get_current_head_state()
