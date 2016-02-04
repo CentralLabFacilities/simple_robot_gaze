@@ -82,17 +82,6 @@ class GazeController(threading.Thread):
                                         print c.WARNING + ">>> Absolute target [%.2f | %.2f] NOT reached in %.2f sec --> Current pos. [%.2f | %.2f] " \
                                                           % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
                                         break
-                            else:
-                                while abs(current_target.pan) >= self.target_tolerance:
-                                    current_target = self.mw.current_robot_gaze
-                                    self.rc.robot_controller.set_gaze_target(current_target, True)
-                                    time.sleep(0.025)
-                                    pan, tilt = self.closed_loop_informer.get_current_head_state()
-                                    # print pan, tilt
-                                    if time.time() - tick >= self.closed_loop_timeout:
-                                        print c.WARNING + ">>> WARN: %s" % self.mw.inscope + c.ENDC
-                                        print c.WARNING + ">>> Relative target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(current_target.pan)) + c.ENDC
-                                        break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
                     loop_count += 1
