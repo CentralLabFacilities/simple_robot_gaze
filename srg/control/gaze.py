@@ -72,7 +72,6 @@ class GazeController(threading.Thread):
                         if self.closed_loop_informer is not None:
                             pan, tilt = self.closed_loop_informer.get_current_head_state()
                             while abs(pan - current_target.pan) > self.target_tolerance:
-                                print "Diff: ", abs(pan - current_target.pan)
                                 # self.rc.robot_controller.set_gaze_target(current_target, True)
                                 time.sleep(0.025)
                                 pan, tilt = self.closed_loop_informer.get_current_head_state()

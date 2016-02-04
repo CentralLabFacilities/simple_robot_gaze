@@ -217,7 +217,7 @@ class Viz(QtGui.QWidget):
 
     def set_control_data(self, _values):
             if self.arbitration.winner is not None:
-                self.ccs_label.setText("Current Control Input << "+self.input_sources[self.arbitration.winner].inscope)
+                self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
                 self.loop_label.setText("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
                 for gc in self.gaze_controller:
                     try:
