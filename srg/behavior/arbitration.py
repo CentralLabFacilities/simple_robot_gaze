@@ -253,17 +253,15 @@ class Arbitration(threading.Thread):
                 # TODO: Reimplement this using a metric and RSB support.
                 if stamp_override is not None:
                     if _current_gaze_values[p].datatype.lower() == "people":
-                        if int(_current_gaze_values[p].nearest_person_z) >= int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
-                            # print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
-                            print ">>> Override %s" % _current_gaze_values[p].inscope.lower()
+                        if _current_gaze_values[p].nearest_person_z >= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                            print ">>> Override %s (%.2f >= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
                             winner = p
                             self.is_override = True
                             self.override_type = self.input_sources[p].inscope
                             break
                     if _current_gaze_values[p].datatype.lower() == "pointstamped":
-                        if int(_current_gaze_values[p].point_z) <= int(self.overrides[p]) and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
-                            # print ">>> Override %s" % _current_gaze_values[p].datatype.lower()
-                            print ">>> Override %s" % _current_gaze_values[p].inscope.lower()
+                        if _current_gaze_values[p].point_z <= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                            print ">>> Override %s (%.2f <= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
                             winner = p
                             self.is_override = True
                             self.override_type = self.input_sources[p].inscope
