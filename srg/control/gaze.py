@@ -79,7 +79,7 @@ class GazeController(threading.Thread):
                                     if time.time() - tick >= self.closed_loop_timeout:
                                         print c.WARNING + ">>> WARN: %s" % self.mw.inscope + c.ENDC
                                         print c.WARNING + ">>> Target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(pan - current_target.pan)) + c.ENDC
-                                        print c.WARNING + ">>> Target [%.2f | %.2f] NOT reached in %.2f sec --> Current pos. [%.2f | %.2f] " \
+                                        print c.WARNING + ">>> Absolute target [%.2f | %.2f] NOT reached in %.2f sec --> Current pos. [%.2f | %.2f] " \
                                                           % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
                                         break
                             else:
@@ -91,7 +91,7 @@ class GazeController(threading.Thread):
                                     # print pan, tilt
                                     if time.time() - tick >= self.closed_loop_timeout:
                                         print c.WARNING + ">>> WARN: %s" % self.mw.inscope + c.ENDC
-                                        print c.WARNING + ">>> Target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(pan - current_target.pan)) + c.ENDC
+                                        print c.WARNING + ">>> Relative target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(current_target.pan)) + c.ENDC
                                         break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
