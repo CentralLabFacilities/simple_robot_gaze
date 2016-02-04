@@ -32,6 +32,8 @@ Authors: Florian Lier, Simon Schulz
 import time
 import threading
 
+# SELF
+from srg.utils.colors import BColors as c
 
 class GazeController(threading.Thread):
     """
@@ -70,11 +72,14 @@ class GazeController(threading.Thread):
                         if self.closed_loop_informer is not None:
                             pan, tilt = self.closed_loop_informer.get_current_head_state()
                             while abs(pan - current_target.pan) > self.target_tolerance:
+                                print "Diff: ", abs(pan - current_target.pan)
+                                # self.rc.robot_controller.set_gaze_target(current_target, True)
                                 time.sleep(0.025)
                                 pan, tilt = self.closed_loop_informer.get_current_head_state()
                                 # print pan, tilt
                                 if time.time() - tick >= self.closed_loop_timeout:
-                                    print ">>> Warning: desired position [%.2f | %.2f] after %.2f seconds --> [%.2f | %.2f] " % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt)
+                                    print c.WARNING + ">>> WARN: target [%.2f | %.2f] NOT reached within %.2f sec --> current pos. [%.2f | %.2f] " \
+                                                      % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
                                     break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
