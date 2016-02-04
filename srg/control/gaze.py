@@ -75,6 +75,7 @@ class GazeController(threading.Thread):
                                 # print pan, tilt
                                 if time.time() - tick >= self.closed_loop_timeout:
                                     print ">>> Warning: desired position [%.2f | %.2f] after %.2f seconds --> [%.2f | %.2f] " % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt)
+                                    self.lock.release()
                                     break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
