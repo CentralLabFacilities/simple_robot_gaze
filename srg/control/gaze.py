@@ -77,8 +77,8 @@ class GazeController(threading.Thread):
                                     pan, tilt = self.closed_loop_informer.get_current_head_state()
                                     # print pan, tilt
                                     if time.time() - tick >= self.closed_loop_timeout:
-                                        print c.WARNING + ">>> WARN: %s" % self.mw.inscope
-                                        print c.WARNING + ">>> Target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(pan - current_target.pan))
+                                        print c.WARNING + ">>> WARN: %s" % self.mw.inscope  + c.ENDC
+                                        print c.WARNING + ">>> Target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(pan - current_target.pan))  + c.ENDC
                                         print c.WARNING + ">>> Target [%.2f | %.2f] NOT reached in %.2f sec --> Current pos. [%.2f | %.2f] " \
                                                           % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
                                         break
@@ -90,8 +90,8 @@ class GazeController(threading.Thread):
                                     pan, tilt = self.closed_loop_informer.get_current_head_state()
                                     # print pan, tilt
                                     if time.time() - tick >= self.closed_loop_timeout:
-                                        print c.WARNING + ">>> WARN: %s" % self.mw.inscope
-                                        print c.WARNING + ">>> Target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(pan - current_target.pan))
+                                        print c.WARNING + ">>> WARN: %s" % self.mw.inscope + c.ENDC
+                                        print c.WARNING + ">>> Target Offset too high (> %d degree) --> %.2f" % (self.target_tolerance, abs(pan - current_target.pan))  + c.ENDC
                                         break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
