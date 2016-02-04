@@ -62,7 +62,7 @@ class GazeController(threading.Thread):
         while self.run_toggle is True:
             then = time.time()
             tick = time.time()
-            self.lock.acquire()
+            self.lock.acquire(1)
             if self.mw.current_robot_gaze is not None and self.lastdatum != self.mw.current_robot_gaze_timestamp:
                 self.lastdatum = self.mw.current_robot_gaze_timestamp
                 current_target = self.mw.current_robot_gaze

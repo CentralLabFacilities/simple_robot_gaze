@@ -70,7 +70,7 @@ class RSBPauseConnector(threading.Thread):
     def run(self):
         print ">>> Initializing RSB Pause Publisher to: %s" % self.outscope
         while self.run_toggle is True:
-            self.lock.acquire()
+            self.lock.acquire(1)
             self.toggle_informer.publishData(self.paused.get_paused())
             self.is_paused = self.paused.get_paused()
             self.lock.release()
@@ -144,12 +144,12 @@ class RSBControlConnector(threading.Thread):
 
     def control_callback(self, event):
         if event.data is True:
-            self.lock.acquire()
+            self.lock.acquire(1)
             self.pause.set_pause()
             self.lock.release()
             print ">>> Auto Arbitrate is PAUSED (RSB)"
         else:
-            self.lock.acquire()
+            self.lock.acquire(1)
             self.pause.set_resume()
             self.lock.release()
             print ">>> Auto Arbitrate is RESUMED (RSB)"
@@ -200,7 +200,7 @@ class RSBDataConnector(threading.Thread):
     def faces_callback(self, event):
         data = event.getData()
         if len(data.faces) > 0:
-            self.lock.acquire()
+            self.lock.acquire(1)
             try:
                 send_time = event.metaData.sendTime
                 idx = -1

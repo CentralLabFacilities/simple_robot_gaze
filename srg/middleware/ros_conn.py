@@ -71,7 +71,7 @@ class ROSPauseConnector(threading.Thread):
     def run(self):
         print ">>> Initializing ROS Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
         while self.run_toggle is True:
-            self.lock.acquire()
+            self.lock.acquire(1)
             self.pub_getpause.publish(self.paused.get_paused())
             self.is_paused = self.paused.get_paused()
             self.lock.release()
@@ -135,12 +135,12 @@ class ROSControlConnector(threading.Thread):
 
     def control_callback(self, ros_data):
         if ros_data.data is True:
-            self.lock.acquire()
+            self.lock.acquire(1)
             self.paused.set_pause()
             self.lock.release()
             print ">>> Auto Arbitrate is PAUSED (ROS)"
         else:
-            self.lock.acquire()
+            self.lock.acquire(1)
             self.paused.set_resume()
             self.lock.release()
             print ">>> Auto Arbitrate is RESUMED (ROS)"
@@ -184,7 +184,7 @@ class ROSDataConnector(threading.Thread):
         self.current_robot_gaze_timestamp = None
 
     def people_callback(self, ros_data):
-        self.lock.acquire()
+        self.lock.acquire(1)
         send_time = ros_data.header.stamp
         idx = -1
         max_distance = {}
@@ -220,7 +220,7 @@ class ROSDataConnector(threading.Thread):
         self.honor_stimulus_timeout()
 
     def point_callback(self, ros_data):
-        self.lock.acquire()
+        self.lock.acquire(1)
         send_time = ros_data.header.stamp
         self.point_x = ros_data.point.x
         self.point_y = ros_data.point.y

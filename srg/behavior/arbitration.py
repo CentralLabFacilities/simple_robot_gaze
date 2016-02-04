@@ -303,12 +303,12 @@ class Arbitration(threading.Thread):
             tick = time.time()
             then = time.time()
 
-            self.pause_lock.acquire()
+            self.pause_lock.acquire(1)
             is_paused = self.paused_instance.get_paused()
             self.pause_lock.release()
 
             if is_paused is False:
-                self.lock.acquire()
+                self.lock.acquire(1)
                 self.get_latest_targets()
                 self.lock.release()
             else:
