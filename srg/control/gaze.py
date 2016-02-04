@@ -72,7 +72,7 @@ class GazeController(threading.Thread):
                         if self.closed_loop_informer is not None:
                             pan, tilt = self.closed_loop_informer.get_current_head_state()
                             if self.mw.mode == "absolute":
-                                while abs(pan - current_target.pan) >= self.target_tolerance:
+                                while abs(pan - current_target.pan*-1) >= self.target_tolerance:
                                     time.sleep(0.025)
                                     pan, tilt = self.closed_loop_informer.get_current_head_state()
                                     # print pan, tilt
