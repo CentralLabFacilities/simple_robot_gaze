@@ -78,7 +78,7 @@ class GazeController(threading.Thread):
                                 pan, tilt = self.closed_loop_informer.get_current_head_state()
                                 # print pan, tilt
                                 if time.time() - tick >= self.closed_loop_timeout:
-                                    print c.WARNING + ">>> WARN: target [%.2f | %.2f] NOT reached within %.2f sec --> current pos. [%.2f | %.2f] " \
+                                    print c.WARNING + ">>> WARN: Target [%.2f | %.2f] NOT reached within %.2f sec --> current pos. [%.2f | %.2f] " \
                                                       % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
                                     break
                     except Exception, e:

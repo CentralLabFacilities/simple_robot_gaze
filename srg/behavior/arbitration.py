@@ -289,11 +289,11 @@ class Arbitration(threading.Thread):
                 gz.acquire_prio = True
                 now = time.time()
                 self.winner = winner
-                if now - self.last_info >= 1.0:
-                    print ">>> Winning input is %s" % self.input_sources[winner].inscope
-                    self.last_info = time.time()
             else:
                 gz.acquire_prio = False
+            if now - self.last_info >= 1.0:
+                    print ">>> Winning input is %s" % self.input_sources[winner].inscope
+                    self.last_info = time.time()
             idx += 1
 
     def run(self):
@@ -327,4 +327,5 @@ class Arbitration(threading.Thread):
                 time.sleep(hz)
 
             loop_count += 1
+            s
         print ">>> Stopping Arbitration"
