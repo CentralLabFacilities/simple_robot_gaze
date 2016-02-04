@@ -63,6 +63,7 @@ class Arbitration(threading.Thread):
         self.plugins          = []
         self.gaze_controller  = []
         self.overrides        = []
+        self.override_modes   = []
         self.run_toggle       = True
         self.is_override          = False
         self.loop_speed           = 1.0
@@ -159,8 +160,9 @@ class Arbitration(threading.Thread):
             # Check if peak_override is "ON" (1)
             if peak_override is 1:
                 self.allow_peak_override = peak_override
-                allow_override_threshold = self.config["peak_overrides"][idx]
-                self.overrides.append(allow_override_threshold)
+                allow_override_threshold = self.config["peak_overrides"][idx].split(":")
+                self.overrides.append(allow_override_threshold[0])
+                self.override_modes.append(str(allow_override_threshold[1]))
 
             # Configure Affine Transformations
             at = t.AffineTransform(str(item))
@@ -252,20 +254,38 @@ class Arbitration(threading.Thread):
                 p += 1
                 # TODO: Reimplement this using a metric and RSB support.
                 if stamp_override is not None:
+
                     if _current_gaze_values[p].datatype.lower() == "people":
-                        if _current_gaze_values[p].nearest_person_z >= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
-                            print ">>> Override %s (%.2f >= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
-                            winner = p
-                            self.is_override = True
-                            self.override_type = self.input_sources[p].inscope
-                            break
+                        if self.override_modes[p] == ">":
+                            if _current_gaze_values[p].nearest_person_z >= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s (%.2f >= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
+                                winner = p
+                                self.is_override = True
+                                self.override_type = self.input_sources[p].inscope
+                                break
+                        else:
+                            if _current_gaze_values[p].nearest_person_z <= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s (%.2f <= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
+                                winner = p
+                                self.is_override = True
+                                self.override_type = self.input_sources[p].inscope
+                                break
+
                     if _current_gaze_values[p].datatype.lower() == "pointstamped":
-                        if _current_gaze_values[p].point_z <= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
-                            print ">>> Override %s (%.2f <= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
-                            winner = p
-                            self.is_override = True
-                            self.override_type = self.input_sources[p].inscope
-                            break
+                        if self.override_modes[p] == ">":
+                            if _current_gaze_values[p].point_z >= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s (%.2f >= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
+                                winner = p
+                                self.is_override = True
+                                self.override_type = self.input_sources[p].inscope
+                                break
+                        else:
+                            if _current_gaze_values[p].point_z <= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s (%.2f <= %.2f)" % (_current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z, self.overrides[p])
+                                winner = p
+                                self.is_override = True
+                                self.override_type = self.input_sources[p].inscope
+                                break
         if self.is_override is False:
             for stamp in _updates:
                 n += 1

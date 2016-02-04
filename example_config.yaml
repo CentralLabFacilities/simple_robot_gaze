@@ -82,10 +82,10 @@ allow_peak_override:
 # Peak override: Provide a value that is encoded in your stimulus input messages, e.g, size of face in pixels in order
 # to override the base priotrity. This field is only evaluated if allow_peak_override is "1" (see above).
 # Example: your first priority is facedetection. However, if there is massive motion detected in the second priority,
-# override the first priority. Corresponds priorities.
+# override the first priority. Corresponds priorities. ":> or :<" is to be interpreted as larger than or lower than number.
 peak_overrides:
-  - 100.0
-  - 10.0
+  - 100.0:>
+  - 10.0:<
 
 ############################
 # TODO ROS TF Integration
