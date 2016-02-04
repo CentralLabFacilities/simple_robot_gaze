@@ -71,15 +71,28 @@ class GazeController(threading.Thread):
                         self.rc.robot_controller.set_gaze_target(current_target, True)
                         if self.closed_loop_informer is not None:
                             pan, tilt = self.closed_loop_informer.get_current_head_state()
-                            while abs(pan - current_target.pan) > self.target_tolerance:
-                                # self.rc.robot_controller.set_gaze_target(current_target, True)
-                                time.sleep(0.025)
-                                pan, tilt = self.closed_loop_informer.get_current_head_state()
-                                # print pan, tilt
-                                if time.time() - tick >= self.closed_loop_timeout:
-                                    print c.WARNING + ">>> WARN: Target [%.2f | %.2f] NOT reached within %.2f sec --> current pos. [%.2f | %.2f] " \
-                                                      % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
-                                    break
+                            if self.mw.mode == "absolute":
+                                while abs(pan - current_target.pan) >= self.target_tolerance:
+                                    # self.rc.robot_controller.set_gaze_target(current_target, True)
+                                    time.sleep(0.025)
+                                    pan, tilt = self.closed_loop_informer.get_current_head_state()
+                                    # print pan, tilt
+                                    if time.time() - tick >= self.closed_loop_timeout:
+                                        print c.WARNING + ">>> WARN: %s" % self.mw.inscope
+                                        print c.WARNING + ">>> Target [%.2f | %.2f] NOT reached in %.2f sec --> Current pos. [%.2f | %.2f] " \
+                                                          % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
+                                        break
+                            else:
+                                while abs(current_target.pan) >= self.target_tolerance:
+                                    # self.rc.robot_controller.set_gaze_target(current_target, True)
+                                    time.sleep(0.025)
+                                    pan, tilt = self.closed_loop_informer.get_current_head_state()
+                                    # print pan, tilt
+                                    if time.time() - tick >= self.closed_loop_timeout:
+                                        print c.WARNING + ">>> WARN: %s" % self.mw.inscope
+                                        print c.WARNING + ">>> Target [%.2f | %.2f] NOT reached in %.2f sec --> Current pos. [%.2f | %.2f] " \
+                                                          % (current_target.pan, current_target.tilt, self.closed_loop_timeout, pan, tilt) + c.ENDC
+                                        break
                     except Exception, e:
                         print ">>> ERROR (set_gaze): %s" % str(e)
                     loop_count += 1
