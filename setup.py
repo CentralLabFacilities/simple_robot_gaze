@@ -1,6 +1,6 @@
 """
 
-Copyright(c) <Florian Lier, Simon Schulz>
+Copyright(c) <Florian Lier>
 http://opensource.cit-ec.de/fsmt
 
 This file may be licensed under the terms of the

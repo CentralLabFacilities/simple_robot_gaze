@@ -2,8 +2,8 @@
 
 This file is part of FINITE STATE MACHINE BASED TESTING.
 
-Copyright(c) <Florian Lier, Simon Schulz>
-http://opensource.cit-ec.de/fsmt
+Copyright(c) <Florian Lier>
+
 
 This file may be licensed under the terms of the
 GNU Lesser General Public License Version 3 (the ``LGPL''),
