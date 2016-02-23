@@ -38,6 +38,7 @@ import rospy
 import roslib
 from std_msgs.msg import Header
 from std_msgs.msg import Bool
+from std_msgs.msg import String
 from people_msgs.msg import Person
 from people_msgs.msg import People
 from geometry_msgs.msg import PointStamped
@@ -77,6 +78,18 @@ class ROSPauseConnector(threading.Thread):
             self.lock.release()
             self.rate.sleep()
         print ">>> Deactivating ROS Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
+
+
+class ROSStatusConnector():
+
+    def __init__(self, _prefix):
+        self.prefix     = "/"+str(_prefix.lower().strip())
+        self.run_toggle = True
+        self.pub_status = rospy.Publisher(self.prefix+"/robotgaze/status", String, queue_size=1)
+        print ">>> Initializing ROS Status Publisher to: %s" % self.prefix+"/robotgaze/status"
+
+    def publish_status_info(self, _status):
+        self.pub_status.publish(str(_status))
 
 
 class ROSSetDirectGazeConnector(threading.Thread):

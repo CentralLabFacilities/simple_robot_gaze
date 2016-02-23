@@ -80,6 +80,7 @@ class Arbitration(threading.Thread):
         self.rd                   = None
         self.allow_peak_override  = None
         self.rsb_control_enable   = None
+        self.status_publisher     = None
         self.prefix               = ""
 
     def boot_robot_driver(self, _mw):
@@ -120,6 +121,7 @@ class Arbitration(threading.Thread):
         self.pause_info_ros.start()
         self.direct_gaze_ros = r.ROSSetDirectGazeConnector(self.prefix, self.rd)
         self.direct_gaze_ros.start()
+        self.status_publisher = r.ROSStatusConnector(self.prefix)
 
         # Is RSB remote control enabled?
         self.rsb_control_enable = int(self.config["enable_rsb_remote_control"][0])
@@ -252,9 +254,8 @@ class Arbitration(threading.Thread):
                 return
             for stamp_override in _updates:
                 p += 1
-                # TODO: Reimplement this using a metric and RSB support.
+                # TODO: Re-implement this using a metric and RSB support.
                 if stamp_override is not None:
-
                     if _current_gaze_values[p].datatype.lower() == "people":
                         if self.override_modes[p] == ">":
                             if _current_gaze_values[p].nearest_person_z >= self.overrides[p] and now - stamp_override <= _stimulus_timeouts[p] + self.boring:
@@ -309,6 +310,7 @@ class Arbitration(threading.Thread):
                 gz.acquire_prio = True
                 now = time.time()
                 self.winner = winner
+                self.status_publisher.publish_status_info(self.input_sources[winner].inscope)
             else:
                 gz.acquire_prio = False
             if now - self.last_info >= 1.0:
