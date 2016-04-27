@@ -41,7 +41,6 @@ from srg.control import gaze as g
 from srg.utils.pause import Paused
 from srg.utils import transform as t
 from srg.middleware import ros_conn as r
-from srg.middleware import rsb_conn as s
 from srg.utils.classloader import get_class
 
 # ROS
@@ -126,6 +125,7 @@ class Arbitration(threading.Thread):
         # Is RSB remote control enabled?
         self.rsb_control_enable = int(self.config["enable_rsb_remote_control"][0])
         if self.rsb_control_enable is 1:
+            from srg.middleware import rsb_conn as s
             self.arbitrate_toggle_rsb = s.RSBControlConnector(self.prefix, self.paused_instance, self.pause_lock)
             self.arbitrate_toggle_rsb.start()
             self.pause_info_rsb = s.RSBPauseConnector(self.prefix, self.paused_instance, self.pause_lock)
