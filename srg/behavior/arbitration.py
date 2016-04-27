@@ -176,8 +176,7 @@ class Arbitration(threading.Thread):
             if datatypes[0].lower() == "ros":
                 mw = r.ROSDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             elif datatypes[0].lower() == "rsb":
-                from srg.middleware import rsb_conn as s1
-                mw = s1.RSBDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
+                mw = s.RSBDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             else:
                 print ">>> Unknown middleware or type %s" % datatypes[0]
                 self.request_stop()
@@ -350,5 +349,4 @@ class Arbitration(threading.Thread):
                 time.sleep(hz)
 
             loop_count += 1
-            s
         print ">>> Stopping Arbitration"
