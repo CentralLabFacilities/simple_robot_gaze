@@ -264,14 +264,12 @@ class ROSDataConnector(threading.Thread):
         self.lock.acquire(1)
 
         if len(ros_data.markers) > 0:
-
             send_time = ros_data.markers[0].header.stamp
-
             p = ros_data.markers[0].pose
 
-            self.point_x = p.point.x
-            self.point_z = p.point.y
-            self.point_z = p.point.z
+            self.point_x = p.position.x
+            self.point_z = p.position.y
+            self.point_z = p.position.z
 
             vector_z = (0.0, 0.0, self.point_z)
             vector_x = (self.point_x, 0.0, 0.0)
