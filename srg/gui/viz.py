@@ -129,7 +129,7 @@ class Viz(QtGui.QWidget):
         self.maxima = {}
         self.last_values = {}
 
-        for gc in self.gaze_controller:
+        for gc in self.gaze_controller.reverse():
             name = gc.mw.inscope
             self.maxima[name] = gc.mw.trans.fov
             self.last_values[name] = [0.0, 0.0]
@@ -145,7 +145,7 @@ class Viz(QtGui.QWidget):
             self.current_activity[name].setFormat('Activity')
             self.current_activity[name].setFont(self.font_smaller_c)
 
-        for label in self.info_labels:
+        for label in self.info_labels.reverse():
             self.layout.addWidget(self.loop_labels[label])
             self.layout.addWidget(self.info_labels[label])
             self.layout.addWidget(self.current_activity[label])
@@ -156,7 +156,7 @@ class Viz(QtGui.QWidget):
         if self.arbitration.winner is not None:
             self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
 
-            for gc in self.gaze_controller:
+            for gc in self.gaze_controller.reverse():
                 if gc.mw.current_robot_gaze is not None:
                     self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
                     self.loop_labels[name].setText("'Set Gaze' Main Loop for: " + name + " @ " + str(gc.loop_speed) + " Hz")
