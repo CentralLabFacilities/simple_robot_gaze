@@ -30,7 +30,12 @@ Authors: Florian Lier, Simon Schulz
 
 """
 
+#STD
 import sys
+import math
+
+# NUMPY
+import numpy as np
 
 
 class AffineTransform:
@@ -197,3 +202,13 @@ class AffineTransform:
             return result
         else:
             return None
+
+    def unit_vector(self, vector):
+        """ Returns the unit vector of the vector.  """
+        return vector / np.linalg.norm(vector)
+
+    def angle_between(self, v1, v2):
+        """ Returns the angle in degree  between vectors 'v1' and 'v2' """
+        v1_u = self.unit_vector(v1)
+        v2_u = self.unit_vector(v2)
+        return math.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))

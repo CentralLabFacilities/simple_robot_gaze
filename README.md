@@ -7,8 +7,6 @@ then derives the corresponding robot joint angle configuration using the HLRC [3
 This is accomplished by mapping from the region of interest (faces, ittikoch...) to the camera's
 field of view, robot joint angles respectively.
 
-This file must reside in ~/.config/simplerobotgaze.yaml
-
 This client features various remote control functions, these are usually available
 under /$scope_topic_prefix/robotgaze/$something . The default is /robot/robotgaze/$something
 
@@ -47,20 +45,22 @@ If you are unsure leave this value "open"
         - srgplugins.mekarobot
 
 What kind of data are you sending via your input stream, corresponds to priorities. Currently implemented:
-ROS: ros:People, ros:PointStamped
+ROS: ros:People, ros:PointStamped, ros:MarkerArray
 RSB: rsb:Faces, rsb:SphericalDirectionFloat
 
     datatypes:
     - ros:People
     - rsb:SphericalDirectionFloat
 
-Resolution of the data source, corresponds to the priorities
+Resolution of the data source, corresponds to the priorities. NOTE: In case of an MarkerArray msg, just copy an
+existing value or simple write 1x1 since the marker position needs NO transformation.
 
     resolution:
         - 320x240
         - 320x240
 
-Robot's field of view horizontal and vertical (in degree), also corresponds to the priorities.
+Robot's field of view horizontal and vertical (in degree), also corresponds to the priorities. NOTE: In case of an 
+MarkerArray msg, just copy an existing value or simple write 1x1 since the marker position needs NO transformation.
 
     fov:
         - 66.0x40.0
@@ -94,8 +94,8 @@ See "peak_override"
 Peak override: Provide a value that is encoded in your stimulus input messages, e.g, size of face in pixels in order
 to override the base priotrity. This field is only evaluated if allow_peak_override is "1" (see above).
 Example: your first priority is facedetection. However, if there is massive motion detected in the second priority,
-override the first priority. Corresponds priorities.
+override the first priority. Corresponds priorities. ":> or :<" is to be interpreted as larger than or lower than number.
 
     peak_overrides:
-        - 100.0
-        - 10.0
+        - 100.0:>
+        - 10.0:<

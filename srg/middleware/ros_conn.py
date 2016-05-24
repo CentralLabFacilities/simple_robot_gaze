@@ -40,13 +40,14 @@ from std_msgs.msg import Header
 from std_msgs.msg import Bool
 from std_msgs.msg import String
 from people_msgs.msg import Person
+from geometry_msgs.msg import Pose
 from people_msgs.msg import People
 from geometry_msgs.msg import PointStamped
+from visualization_msgs.msg import Marker, MarkerArray
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
 from hlrc_client import RobotTimestamp
-
 
 class ROSPauseConnector(threading.Thread):
 
@@ -193,6 +194,9 @@ class ROSDataConnector(threading.Thread):
         self.point_x          = 0.0
         self.point_y          = 0.0
         self.point_z          = 0.0
+        self.pan              = 0.0
+        self.tilt             = 0.0
+        self.roll             = 0.0
         self.current_robot_gaze = None
         self.current_robot_gaze_timestamp = None
 
@@ -256,6 +260,40 @@ class ROSDataConnector(threading.Thread):
         self.lock.release()
         self.honor_stimulus_timeout()
 
+    def marker_callback(self, ros_data):
+        self.lock.acquire(1)
+        send_time = ros_data.header.stamp
+        if len(ros_data.markers) > 0:
+
+            p = ros_data.markers[0].pose
+
+            self.point_x = p.point.x
+            self.point_z = p.point.y
+            self.point_z = p.point.z
+
+            vector_z = (0.0, 0.0, self.point_z)
+            vector_x = (self.point_x, 0.0, 0.0)
+            vector_y = (0.0, self.point_y, 0.0)
+
+            self.pan = self.trans.angle_between(vector_z, vector_y)
+            self.tilt = self.trans.angle_between(vector_z, vector_x)
+            self.roll = 0.0
+
+            if self.pan is not None and self.tilt is not None:
+                g = RobotGaze()
+                if self.mode == 'absolute':
+                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+                else:
+                    g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+                self.current_robot_gaze_timestamp = send_time.to_sec()
+                g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
+                g.pan = self.pan
+                g.tilt = self.tilt
+                g.roll = self.roll
+                self.current_robot_gaze = g
+        self.lock.release()
+        self.honor_stimulus_timeout()
+
     def honor_stimulus_timeout(self):
         time.sleep(self.stimulus_timeout)
 
@@ -266,6 +304,8 @@ class ROSDataConnector(threading.Thread):
                 ros_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
             elif self.datatype == "pointstamped":
                 ros_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
+            elif self.datatype == "markerarray":
+                ros_subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=1)
             else:
                 print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
                 return
