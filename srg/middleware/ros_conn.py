@@ -264,6 +264,7 @@ class ROSDataConnector(threading.Thread):
         self.lock.acquire(1)
 
         if len(ros_data.markers) > 0:
+
             send_time = ros_data.markers[0].header.stamp
             p = ros_data.markers[0].pose
 
@@ -278,6 +279,8 @@ class ROSDataConnector(threading.Thread):
             self.pan = self.trans.angle_between(vector_z, vector_y)
             self.tilt = self.trans.angle_between(vector_z, vector_x)
             self.roll = 0.0
+
+            print self.pan, self.roll
 
             if self.pan is not None and self.tilt is not None:
                 g = RobotGaze()
