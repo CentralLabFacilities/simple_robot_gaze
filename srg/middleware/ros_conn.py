@@ -49,6 +49,9 @@ from visualization_msgs.msg import Marker, MarkerArray
 from hlrc_client import RobotGaze
 from hlrc_client import RobotTimestamp
 
+# NUMPY
+import numpy as np
+
 class ROSPauseConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _lock):
@@ -272,9 +275,12 @@ class ROSDataConnector(threading.Thread):
             self.point_z = p.position.y
             self.point_z = p.position.z
 
-            vector_z = [0.0, 0.0, self.point_z]
-            vector_x = [self.point_x, 0.0, 0.0]
-            vector_y = [0.0, self.point_y, 0.0]
+            # FIXME NAN
+            print self.point_x, self.point_y, self.point_z
+
+            vector_z = np.array([0.0, 0.0, self.point_z])
+            vector_x = np.array([self.point_x, 0.0, 0.0])
+            vector_y = np.array([0.0, self.point_y, 0.0])
 
             self.pan = self.trans.angle_between(vector_z, vector_y)
             self.tilt = self.trans.angle_between(vector_z, vector_x)
