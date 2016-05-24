@@ -262,8 +262,10 @@ class ROSDataConnector(threading.Thread):
 
     def marker_callback(self, ros_data):
         self.lock.acquire(1)
-        send_time = ros_data.header.stamp
+
         if len(ros_data.markers) > 0:
+
+            send_time = ros_data.header.stamp
 
             p = ros_data.markers[0].pose
 
