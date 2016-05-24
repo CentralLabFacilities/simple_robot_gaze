@@ -30,6 +30,7 @@ Authors: Florian Lier, Simon Schulz
 
 # STD IMPORTS
 import time
+import math
 import operator
 import threading
 
@@ -265,31 +266,19 @@ class ROSDataConnector(threading.Thread):
 
     def marker_callback(self, ros_data):
         self.lock.acquire(1)
-
         if len(ros_data.markers) > 0:
-
             send_time = ros_data.markers[0].header.stamp
             p = ros_data.markers[0].pose
-
             self.point_x = p.position.x
             self.point_z = p.position.y
             self.point_z = p.position.z
-
-            # FIXME NAN
-            print self.point_x, self.point_y, self.point_z
-
             vector_z = np.array([0.0, 0.0, self.point_z])
-            vector_x = np.array([self.point_x, 0.0, 0.0])
-            vector_y = np.array([0.0, self.point_y, 0.0])
-
+            vector_x = np.array([self.point_x, 0.0, self.point_z])
+            vector_y = np.array([0.0, self.point_y, self.point_z])
             self.pan = self.trans.angle_between(vector_z, vector_y)
             self.tilt = self.trans.angle_between(vector_z, vector_x)
             self.roll = 0.0
-
-            # FIXME NAN
-            print self.pan, self.roll
-
-            if self.pan is not None and self.tilt is not None:
+            if not math.isnan(self.pan) and not math.isnan(self.tilt):
                 g = RobotGaze()
                 if self.mode == 'absolute':
                     g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE

@@ -35,6 +35,7 @@ import threading
 # SELF
 from srg.utils.colors import BColors as c
 
+
 class GazeController(threading.Thread):
     """
     The GazeController receives person messages (ROS) and derives
