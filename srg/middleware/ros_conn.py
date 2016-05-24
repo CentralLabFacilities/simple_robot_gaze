@@ -280,6 +280,7 @@ class ROSDataConnector(threading.Thread):
             self.tilt = self.trans.angle_between(vector_z, vector_x)
             self.roll = 0.0
 
+            # FIXME NAN
             print self.pan, self.roll
 
             if self.pan is not None and self.tilt is not None:
