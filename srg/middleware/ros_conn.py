@@ -272,9 +272,9 @@ class ROSDataConnector(threading.Thread):
             self.point_z = p.position.y
             self.point_z = p.position.z
 
-            vector_z = (0.0, 0.0, self.point_z)
-            vector_x = (self.point_x, 0.0, 0.0)
-            vector_y = (0.0, self.point_y, 0.0)
+            vector_z = [0.0, 0.0, self.point_z]
+            vector_x = [self.point_x, 0.0, 0.0]
+            vector_y = [0.0, self.point_y, 0.0]
 
             self.pan = self.trans.angle_between(vector_z, vector_y)
             self.tilt = self.trans.angle_between(vector_z, vector_x)
