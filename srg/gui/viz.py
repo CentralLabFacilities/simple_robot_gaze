@@ -66,7 +66,7 @@ class BarsThread(QThread):
         while True:
             fake = "fake"
             self.emit(SIGNAL('set_bar_values(QString)'), str(fake))
-            self.msleep(500)
+            self.msleep(40)
 
 
 class Viz(QtGui.QWidget):
@@ -114,7 +114,7 @@ class Viz(QtGui.QWidget):
 
         self.override_button = QtGui.QRadioButton("")
         self.override_button.setChecked(False)
-        self.override_button.setText("Override: Negative!")
+        self.override_button.setText("Override: Disabled")
         self.override_button.setFont(self.font_smaller_c)
         self.layout.addWidget(self.override_button)
 
@@ -159,7 +159,7 @@ class Viz(QtGui.QWidget):
             for gc in self.gaze_controller:
                 if gc.mw.current_robot_gaze is not None:
                     self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
-                    self.loop_labels[name].setText("'Set Gaze' Loop for: " + name + " @ " + str(gc.loop_speed) + " Hz")
+                    self.loop_labels[name].setText("'Set Gaze' Main Loop for: " + name + " @ " + str(gc.loop_speed) + " Hz")
                 else:
                     self.current_targets[gc.mw.inscope] = [ -1, -1 ]
 
@@ -171,7 +171,7 @@ class Viz(QtGui.QWidget):
                 self.override_button.setChecked(True)
             else:
                 self.override_button.setChecked(False)
-                self.override_button.setText("Override: Negative!")
+                self.override_button.setText("Override: Disabled")
 
         self.pause_button = QPushButton('Toggle Pause Mode', self)
         self.pause_button.clicked.connect(self.pause)
@@ -211,7 +211,7 @@ class Viz(QtGui.QWidget):
                     try:
                         percent = self.derive_activity(self.current_targets[label], label)
                         self.current_activity[label].setValue(percent)
-                        self.current_activity[label].setFormat(str(percent)+"%  Activity (@ 2 Hz) ")
+                        self.current_activity[label].setFormat(str(percent)+"%  Activity (@ 25 Hz) ")
                     except Exception, e:
                         pass
 
@@ -235,19 +235,19 @@ class Viz(QtGui.QWidget):
                     self.override_button.setChecked(True)
                 else:
                     self.override_button.setChecked(False)
-                    self.override_button.setText("Override: Negative!")
+                    self.override_button.setText("Override: Disabled")
 
     def pause(self):
             if self.is_paused.get_paused() is False:
                 self.tc.pause()
-                self.pause_button.setText("Set Gaze Status Pause: " + str(self.is_paused.get_paused()))
+                self.pause_button.setText("Paused:  " + str(self.is_paused.get_paused()))
             else:
                 self.tc.resume()
-                self.pause_button.setText("Set Gaze Status Pause: " + str(self.is_paused.get_paused()))
+                self.pause_button.setText("Paused: " + str(self.is_paused.get_paused()))
 
     def exit_srg(self):
         self.arbitration.request_stop()
 
     def init_ui(self):
         self.setGeometry(100, 100, 640, 200)
-        self.setWindowTitle(":: Florian's Simple Robot Gaze :: [GUI Update Rate 25 Hz]")
+        self.setWindowTitle(":: Florian's Simple Robot Gaze ::")
