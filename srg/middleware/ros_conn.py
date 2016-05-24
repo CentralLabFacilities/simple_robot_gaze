@@ -265,7 +265,7 @@ class ROSDataConnector(threading.Thread):
 
         if len(ros_data.markers) > 0:
 
-            send_time = ros_data.header.stamp
+            send_time = ros_data.markers[0].header.stamp
 
             p = ros_data.markers[0].pose
 
