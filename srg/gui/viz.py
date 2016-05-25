@@ -166,13 +166,13 @@ class Viz(QtGui.QWidget):
                     self.current_targets[gc.mw.inscope] = [int(gc.mw.current_robot_gaze.pan),
                                                            int(gc.mw.current_robot_gaze.tilt)]
                     self.loop_labels[name].setText(
-                        "'Set Gaze' Main Loop for: " + name + " @ " + str(gc.loop_speed) + " Hz")
+                        "'Set Gaze' Main Loop: " + name + " @ " + str(gc.loop_speed) + " Hz")
                 else:
                     self.current_targets[gc.mw.inscope] = [-1, -1]
 
             for name in self.current_targets.keys():
                 self.info_labels[name].setText(
-                    "Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
+                    "Calculated Gaze Targets: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
 
             if self.arbitration.is_override:
                 self.override_button.setText("Override: " + self.arbitration.override_type)
@@ -219,7 +219,7 @@ class Viz(QtGui.QWidget):
                 try:
                     delta = self.derive_activity(self.current_targets[label], label)
                     self.current_activity[label].setValue(delta)
-                    self.current_activity[label].setFormat(self.delta_t + " sum " + str(delta) + " degree")
+                    self.current_activity[label].setFormat(self.delta_t + " Sum(x,y) " + str(delta) + " Degrees")
                 except Exception, e:
                     pass
 
@@ -230,7 +230,7 @@ class Viz(QtGui.QWidget):
             for gc in self.gaze_controller:
                 try:
                     self.loop_labels[gc.mw.inscope].setText(
-                        "'Set Gaze' Loop for: " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
+                        "'Set Gaze' Loop: " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
                     self.current_targets[gc.mw.inscope] = [int(gc.mw.current_robot_gaze.pan),
                                                            int(gc.mw.current_robot_gaze.tilt)]
                 except Exception, e:
@@ -238,7 +238,7 @@ class Viz(QtGui.QWidget):
             for name in self.current_targets.keys():
                 try:
                     self.info_labels[name].setText(
-                        "Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
+                        "Calculated Gaze Targets: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
                 except Exception, e:
                     pass
             if self.arbitration.is_override:
