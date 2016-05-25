@@ -85,20 +85,19 @@ class Viz(QtGui.QWidget):
         self.run_toggle = True
 
         self.font = QtGui.QFont()
-        self.font.setPointSize(12)
-        self.font.setBold(True)
-        self.font.setWeight(75)
+        self.font.setPointSize(14)
+        self.font.setBold(False)
+        self.font.setWeight(65)
 
         self.font_smaller = QtGui.QFont()
-        self.font_smaller.setPointSize(10)
-        self.font_smaller.setBold(True)
-        self.font_smaller.setWeight(55)
+        self.font_smaller.setPointSize(12)
+        self.font_smaller.setBold(False)
+        self.font_smaller.setWeight(45)
 
         self.font_smaller_c = QtGui.QFont()
-        self.font_smaller_c.setPointSize(9)
-        self.font_smaller_c.setBold(True)
-        self.font_smaller_c.setWeight(65)
-        # self.font_smaller_c.setFamily("Mono")
+        self.font_smaller_c.setPointSize(10)
+        self.font_smaller_c.setBold(False)
+        self.font_smaller_c.setWeight(55)
 
         self.layout = QtGui.QVBoxLayout(self)
 
@@ -108,7 +107,7 @@ class Viz(QtGui.QWidget):
 
         self.ccs_label = QtGui.QLabel("Current Control Input << ")
         self.ccs_label.setFont(self.font)
-        self.ccs_label.setStyleSheet('color: darkblue')
+        self.ccs_label.setStyleSheet('color: rgb(28, 134, 238)')
         self.layout.addWidget(self.ccs_label)
 
         self.loop_label = QtGui.QLabel("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
@@ -161,18 +160,20 @@ class Viz(QtGui.QWidget):
         if self.arbitration.winner is not None:
             self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
 
+            c = 1
             for gc in self.gaze_controller:
                 if gc.mw.current_robot_gaze is not None:
                     self.current_targets[gc.mw.inscope] = [int(gc.mw.current_robot_gaze.pan),
                                                            int(gc.mw.current_robot_gaze.tilt)]
                     self.loop_labels[name].setText(
-                        "'Set Gaze' Main Loop: " + name + " @ " + str(gc.loop_speed) + " Hz")
+                        "# " + str(c) + " << " + name + " @ " + str(gc.loop_speed) + " Hz")
                 else:
                     self.current_targets[gc.mw.inscope] = [-1, -1]
+                c += 1
 
             for name in self.current_targets.keys():
                 self.info_labels[name].setText(
-                    "Calculated Gaze Targets: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
+                    "Gaze Target: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
 
             if self.arbitration.is_override:
                 self.override_button.setText("Override: " + self.arbitration.override_type)
@@ -219,7 +220,7 @@ class Viz(QtGui.QWidget):
                 try:
                     delta = self.derive_activity(self.current_targets[label], label)
                     self.current_activity[label].setValue(delta)
-                    self.current_activity[label].setFormat(self.delta_t + " Sum(x,y) " + str(delta) + " Degrees")
+                    self.current_activity[label].setFormat(self.delta_t + " Sum(x,y)")
                 except Exception, e:
                     pass
 
@@ -227,18 +228,22 @@ class Viz(QtGui.QWidget):
         if self.arbitration.winner is not None:
             self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
             self.loop_label.setText("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
+
+            c = 1
             for gc in self.gaze_controller:
                 try:
                     self.loop_labels[gc.mw.inscope].setText(
-                        "'Set Gaze' Loop: " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
+                        "# " + str(c) + " << " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
                     self.current_targets[gc.mw.inscope] = [int(gc.mw.current_robot_gaze.pan),
                                                            int(gc.mw.current_robot_gaze.tilt)]
                 except Exception, e:
                     pass
+                c += 1
+
             for name in self.current_targets.keys():
                 try:
                     self.info_labels[name].setText(
-                        "Calculated Gaze Targets: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
+                        "Gaze Target: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
                 except Exception, e:
                     pass
             if self.arbitration.is_override:
@@ -260,5 +265,5 @@ class Viz(QtGui.QWidget):
         self.arbitration.request_stop()
 
     def init_ui(self):
-        self.setGeometry(100, 100, 640, 200)
+        self.setGeometry(100, 100, 640, 150)
         self.setWindowTitle(":: Florian's Simple Robot Gaze ::")
