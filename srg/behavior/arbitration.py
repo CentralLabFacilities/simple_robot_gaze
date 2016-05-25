@@ -29,7 +29,6 @@ Authors: Florian Lier, Simon Schulz
 """
 
 # STD IMPORTS
-import os
 import sys
 import time
 import yaml
@@ -287,6 +286,7 @@ class Arbitration(threading.Thread):
                                 self.is_override = True
                                 self.override_type = self.input_sources[p].inscope
                                 break
+
                     if _current_gaze_values[p].datatype.lower() == "markerarray":
                         if self.override_modes[p] == ">":
                             if _current_gaze_values[p].point_z >= self.overrides[p] and now - stamp_override <= \
