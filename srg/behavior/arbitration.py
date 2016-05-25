@@ -65,7 +65,7 @@ class Arbitration(threading.Thread):
         self.override_modes   = []
         self.run_toggle       = True
         self.is_override          = False
-        self.loop_speed           = 1.0
+        self.loop_speed           = 0.0
         self.direct_gaze_ros      = None
         self.direct_gaze_rsb      = None
         self.pause_info_ros       = None

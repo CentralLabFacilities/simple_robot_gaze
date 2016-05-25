@@ -77,7 +77,8 @@ class Viz(QtGui.QWidget):
         self.input_sources = _input_source
         self.gaze_controller = _gaze_controller
 
-        self.tc = r.ROSPauseConnector(self.arbitration.prefix, self.arbitration.paused_instance, self.arbitration.pause_lock)
+        self.tc = r.ROSPauseConnector(self.arbitration.prefix, self.arbitration.paused_instance,
+                                      self.arbitration.pause_lock)
         self.is_paused = self.arbitration.paused_instance
         self.run_toggle = True
 
@@ -114,7 +115,7 @@ class Viz(QtGui.QWidget):
 
         self.override_button = QtGui.QRadioButton("")
         self.override_button.setChecked(False)
-        self.override_button.setText("Override: Disabled")
+        self.override_button.setText("Override")
         self.override_button.setFont(self.font_smaller_c)
         self.layout.addWidget(self.override_button)
 
@@ -129,7 +130,7 @@ class Viz(QtGui.QWidget):
         self.maxima = {}
         self.last_values = {}
 
-        for gc in self.gaze_controller.reverse():
+        for gc in self.gaze_controller:
             name = gc.mw.inscope
             self.maxima[name] = gc.mw.trans.fov
             self.last_values[name] = [0.0, 0.0]
@@ -139,13 +140,13 @@ class Viz(QtGui.QWidget):
             self.loop_labels[name].setFont(self.font_smaller_c)
 
             self.current_activity[name] = QtGui.QProgressBar()
-            self.current_activity[name].setMaximum(abs((gc.mw.trans.fov[0]/2)+(gc.mw.trans.fov[1]/2)))
+            self.current_activity[name].setMaximum(abs((gc.mw.trans.fov[0] / 2) + (gc.mw.trans.fov[1] / 2)))
             self.current_activity[name].setMinimum(0)
             self.current_activity[name].setAlignment(Qt.AlignCenter)
             self.current_activity[name].setFormat('Activity')
             self.current_activity[name].setFont(self.font_smaller_c)
 
-        for label in self.info_labels.reverse():
+        for label in self.info_labels:
             self.layout.addWidget(self.loop_labels[label])
             self.layout.addWidget(self.info_labels[label])
             self.layout.addWidget(self.current_activity[label])
@@ -156,22 +157,25 @@ class Viz(QtGui.QWidget):
         if self.arbitration.winner is not None:
             self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
 
-            for gc in self.gaze_controller.reverse():
+            for gc in self.gaze_controller:
                 if gc.mw.current_robot_gaze is not None:
-                    self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
-                    self.loop_labels[name].setText("'Set Gaze' Main Loop for: " + name + " @ " + str(gc.loop_speed) + " Hz")
+                    self.current_targets[gc.mw.inscope] = [int(gc.mw.current_robot_gaze.pan),
+                                                           int(gc.mw.current_robot_gaze.tilt)]
+                    self.loop_labels[name].setText(
+                        "'Set Gaze' Main Loop for: " + name + " @ " + str(gc.loop_speed) + " Hz")
                 else:
-                    self.current_targets[gc.mw.inscope] = [ -1, -1 ]
+                    self.current_targets[gc.mw.inscope] = [-1, -1]
 
             for name in self.current_targets.keys():
-                self.info_labels[name].setText("Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees " )
+                self.info_labels[name].setText(
+                    "Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
 
             if self.arbitration.is_override:
                 self.override_button.setText("Override: " + self.arbitration.override_type)
                 self.override_button.setChecked(True)
             else:
                 self.override_button.setChecked(False)
-                self.override_button.setText("Override: Disabled")
+                self.override_button.setText("Override")
 
         self.pause_button = QPushButton('Toggle Pause Mode', self)
         self.pause_button.clicked.connect(self.pause)
@@ -193,57 +197,60 @@ class Viz(QtGui.QWidget):
 
     @staticmethod
     def percentage(part, whole):
-        return 100 * float(part)/float(whole)
+        return 100 * float(part) / float(whole)
 
     def derive_activity(self, _values, _label):
-        last_x  = self.last_values[_label][0]
-        last_y  = self.last_values[_label][1]
-        now_x   = _values[0]
-        now_y   = _values[1]
+        last_x = self.last_values[_label][0]
+        last_y = self.last_values[_label][1]
+        now_x = _values[0]
+        now_y = _values[1]
         delta_x = abs(last_x - now_x)
         delta_y = abs(last_y - now_y)
         self.last_values[_label] = _values
-        return delta_x+delta_y
+        return delta_x + delta_y
 
     def set_bar_values(self, _values):
-            for label in self.info_labels:
-                if label in self.current_targets.keys() and label in self.current_activity.keys():
-                    try:
-                        percent = self.derive_activity(self.current_targets[label], label)
-                        self.current_activity[label].setValue(percent)
-                        self.current_activity[label].setFormat(str(percent)+"%  Activity (@ 25 Hz) ")
-                    except Exception, e:
-                        pass
+        for label in self.info_labels:
+            if label in self.current_targets.keys() and label in self.current_activity.keys():
+                try:
+                    percent = self.derive_activity(self.current_targets[label], label)
+                    self.current_activity[label].setValue(percent)
+                    self.current_activity[label].setFormat(str(percent) + "%  Activity (25 Hz) ")
+                except Exception, e:
+                    pass
 
     def set_control_data(self, _values):
-            if self.arbitration.winner is not None:
-                self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
-                self.loop_label.setText("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
-                for gc in self.gaze_controller:
-                    try:
-                        self.loop_labels[gc.mw.inscope].setText("'Set Gaze' Loop for: " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
-                        self.current_targets[gc.mw.inscope] = [ int(gc.mw.current_robot_gaze.pan), int(gc.mw.current_robot_gaze.tilt) ]
-                    except Exception, e:
-                        pass
-                for name in self.current_targets.keys():
-                    try:
-                        self.info_labels[name].setText("Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees " )
-                    except Exception, e:
-                        pass
-                if self.arbitration.is_override:
-                    self.override_button.setText("Override: " + self.arbitration.override_type)
-                    self.override_button.setChecked(True)
-                else:
-                    self.override_button.setChecked(False)
-                    self.override_button.setText("Override: Disabled")
+        if self.arbitration.winner is not None:
+            self.ccs_label.setText("Current Control Input << " + self.input_sources[self.arbitration.winner].inscope)
+            self.loop_label.setText("SRG Main Loop @ " + str(self.arbitration.loop_speed) + " Hz")
+            for gc in self.gaze_controller:
+                try:
+                    self.loop_labels[gc.mw.inscope].setText(
+                        "'Set Gaze' Loop for: " + gc.mw.inscope + " @ " + str(gc.loop_speed) + " Hz")
+                    self.current_targets[gc.mw.inscope] = [int(gc.mw.current_robot_gaze.pan),
+                                                           int(gc.mw.current_robot_gaze.tilt)]
+                except Exception, e:
+                    pass
+            for name in self.current_targets.keys():
+                try:
+                    self.info_labels[name].setText(
+                        "Calculated Gaze Targets for: " + name + " " + str(self.current_targets[name]) + " @ Degrees ")
+                except Exception, e:
+                    pass
+            if self.arbitration.is_override:
+                self.override_button.setText("Override: " + self.arbitration.override_type)
+                self.override_button.setChecked(True)
+            else:
+                self.override_button.setChecked(False)
+                self.override_button.setText("Override")
 
     def pause(self):
-            if self.is_paused.get_paused() is False:
-                self.tc.pause()
-                self.pause_button.setText("Paused:  " + str(self.is_paused.get_paused()))
-            else:
-                self.tc.resume()
-                self.pause_button.setText("Paused: " + str(self.is_paused.get_paused()))
+        if self.is_paused.get_paused() is False:
+            self.tc.pause()
+            self.pause_button.setText("Paused")
+        else:
+            self.tc.resume()
+            self.pause_button.setText("Running")
 
     def exit_srg(self):
         self.arbitration.request_stop()

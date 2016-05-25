@@ -54,7 +54,7 @@ class GazeController(threading.Thread):
         self.closed_loop_informer  = _closed_loop
         self.closed_loop_timeout   = 2.0
         self.target_tolerance = 5.0
-        self.loop_speed   = 1.0
+        self.loop_speed   = 0.0
 
     def run(self):
         print ">>> Initializing Gaze Controller for: %s --> %s" % (self.mw.inscope.strip(), self.rc.outscope.strip())
