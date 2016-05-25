@@ -275,8 +275,9 @@ class ROSDataConnector(threading.Thread):
             vector_z = np.array([0.0, 0.0, self.point_z])
             vector_x = np.array([self.point_x, 0.0, self.point_z])
             vector_y = np.array([0.0, self.point_y, self.point_z])
-            self.pan = self.trans.angle_between(vector_z, vector_y)
-            self.tilt = self.trans.angle_between(vector_z, vector_x)
+            # NOTE: Bart Convention
+            self.pan = self.trans.angle_between(vector_z, vector_x)
+            self.tilt = self.trans.angle_between(vector_z, vector_y)
             self.roll = 0.0
             if not math.isnan(self.pan) and not math.isnan(self.tilt):
                 g = RobotGaze()

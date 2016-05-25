@@ -287,6 +287,27 @@ class Arbitration(threading.Thread):
                                 self.is_override = True
                                 self.override_type = self.input_sources[p].inscope
                                 break
+                    if _current_gaze_values[p].datatype.lower() == "markerarray":
+                        if self.override_modes[p] == ">":
+                            if _current_gaze_values[p].point_z >= self.overrides[p] and now - stamp_override <= \
+                                            _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s (%.2f >= %.2f)" % (
+                                _current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z,
+                                self.overrides[p])
+                                winner = p
+                                self.is_override = True
+                                self.override_type = self.input_sources[p].inscope
+                                break
+                        else:
+                            if _current_gaze_values[p].point_z <= self.overrides[p] and now - stamp_override <= \
+                                            _stimulus_timeouts[p] + self.boring:
+                                print ">>> Override %s (%.2f <= %.2f)" % (
+                                _current_gaze_values[p].inscope.lower(), _current_gaze_values[p].point_z,
+                                self.overrides[p])
+                                winner = p
+                                self.is_override = True
+                                self.override_type = self.input_sources[p].inscope
+                                break
         if self.is_override is False:
             for stamp in _updates:
                 n += 1
