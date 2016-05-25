@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 
 Copyright(c) <Florian Lier>
@@ -130,6 +132,8 @@ class Viz(QtGui.QWidget):
         self.maxima = {}
         self.last_values = {}
 
+        self.delta_t = "△ ".decode("utf-8")
+
         for gc in self.gaze_controller:
             name = gc.mw.inscope
             self.maxima[name] = gc.mw.trans.fov
@@ -143,7 +147,7 @@ class Viz(QtGui.QWidget):
             self.current_activity[name].setMaximum(abs((gc.mw.trans.fov[0] / 2) + (gc.mw.trans.fov[1] / 2)))
             self.current_activity[name].setMinimum(0)
             self.current_activity[name].setAlignment(Qt.AlignCenter)
-            self.current_activity[name].setFormat('Activity')
+            self.current_activity[name].setFormat('Delta')
             self.current_activity[name].setFont(self.font_smaller_c)
 
         for label in self.info_labels:
@@ -213,9 +217,9 @@ class Viz(QtGui.QWidget):
         for label in self.info_labels:
             if label in self.current_targets.keys() and label in self.current_activity.keys():
                 try:
-                    percent = self.derive_activity(self.current_targets[label], label)
-                    self.current_activity[label].setValue(percent)
-                    self.current_activity[label].setFormat(str(percent) + "%  Activity (25 Hz) ")
+                    delta = self.derive_activity(self.current_targets[label], label)
+                    self.current_activity[label].setValue(delta)
+                    self.current_activity[label].setFormat(self.delta_t + " sum " + str(delta) + " degree")
                 except Exception, e:
                     pass
 
