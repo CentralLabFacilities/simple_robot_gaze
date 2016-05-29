@@ -296,8 +296,8 @@ class ROSDataConnector(threading.Thread):
         self.honor_stimulus_timeout()
 
     def interactive_marker_callback(self, ros_data):
-        self.lock.acquire(1)
         print "got imarker data"
+        self.lock.acquire(1)
         send_time = ros_data.header.stamp
         p = ros_data.pose
         self.point_x = p.position.x
