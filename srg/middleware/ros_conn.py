@@ -44,7 +44,7 @@ from people_msgs.msg import Person
 from geometry_msgs.msg import Pose
 from people_msgs.msg import People
 from geometry_msgs.msg import PointStamped
-from visualization_msgs.msg import Marker, MarkerArray, InteractiveMarker
+from visualization_msgs.msg import Marker, MarkerArray, InteractiveMarkerPose
 
 # HLRC IMPORTS
 from hlrc_client import RobotGaze
@@ -296,7 +296,6 @@ class ROSDataConnector(threading.Thread):
         self.honor_stimulus_timeout()
 
     def interactive_marker_callback(self, ros_data):
-        print "got imarker data"
         self.lock.acquire(1)
         send_time = ros_data.header.stamp
         p = ros_data.pose
@@ -333,8 +332,8 @@ class ROSDataConnector(threading.Thread):
                 ros_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
             elif self.datatype == "markerarray":
                 ros_subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=1)
-            elif self.datatype == "interactivemarker":
-                ros_subscriber = rospy.Subscriber(self.inscope, InteractiveMarker, self.interactive_marker_callback, queue_size=1)
+            elif self.datatype == "interactivemarkerpose":
+                ros_subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose, self.interactive_marker_callback, queue_size=1)
             else:
                 print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
                 return
