@@ -334,7 +334,6 @@ class ROSDataConnector(threading.Thread):
             elif self.datatype == "markerarray":
                 ros_subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=1)
             elif self.datatype == "interactivemarker":
-                print "Subscribed interactive marker"
                 ros_subscriber = rospy.Subscriber(self.inscope, InteractiveMarker, self.interactive_marker_callback, queue_size=1)
             else:
                 print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
