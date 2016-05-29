@@ -297,6 +297,7 @@ class ROSDataConnector(threading.Thread):
 
     def interactive_marker_callback(self, ros_data):
         self.lock.acquire(1)
+        print "got imarker data"
         send_time = ros_data.header.stamp
         p = ros_data.pose
         self.point_x = p.position.x
