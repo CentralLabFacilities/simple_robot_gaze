@@ -41,7 +41,7 @@ scope_topic_prefix:
   - robot
 
 # What kind of data are you sending in your input stream, corresponds to priorities. Currently implemented:
-# ROS: ros:People, ros:PointStamped
+# ROS: ros:People, ros:PointStamped, ros:MarkerArray, ros:InteractiveMarker
 # RSB: rsb:faces, rsb:SphericalDirectionFloat
 
 datatypes:

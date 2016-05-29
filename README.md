@@ -45,7 +45,7 @@ If you are unsure leave this value "open"
         - srgplugins.mekarobot
 
 What kind of data are you sending via your input stream, corresponds to priorities. Currently implemented:
-ROS: ros:People, ros:PointStamped, ros:MarkerArray
+ROS: ros:People, ros:PointStamped, ros:MarkerArray, ros:InteractiveMarker
 RSB: rsb:Faces, rsb:SphericalDirectionFloat
 
     datatypes:
