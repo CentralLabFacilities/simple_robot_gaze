@@ -207,8 +207,15 @@ class AffineTransform:
         """ Returns the unit vector of the vector.  """
         return vector / np.linalg.norm(vector)
 
-    def angle_between(self, v1, v2):
+    def angle_between(self, v1, v2, axis):
         """ Returns the angle in degree  between vectors 'v1' and 'v2' """
         v1_u = self.unit_vector(v1)
         v2_u = self.unit_vector(v2)
-        return math.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
+        angle = math.degrees(np.arccos(np.clip(np.dot(v1_u, v2_u), -1.0, 1.0)))
+        direction_tilt = v1_u[0]*v2_u[1] - v1_u[1]*v2_u[0]
+        direction_pan = v1_u[0]*v2_u[0] - v1_u[1]*v2_u[1]
+        if axis == "pan" and math.atan2(direction_pan, -0.0) < 0:
+            angle *= -1
+        if axis == "tilt" and math.atan2(direction_tilt, -0.0) < 0:
+            angle *= -1
+        return angle
