@@ -36,7 +36,6 @@ import threading
 
 # ROS IMPORTS
 import rospy
-import roslib
 from std_msgs.msg import Header
 from std_msgs.msg import Bool
 from std_msgs.msg import String
@@ -67,7 +66,7 @@ class ROSPauseConnector(threading.Thread):
         self.pub_getpause = rospy.Publisher(self.prefix+"/robotgaze/get/pause", Bool, queue_size=1)
         self.p = True
         self.r = False
-        self.rate = rospy.Rate(50)
+        self.rate = rospy.Rate(20)
 
     def pause(self):
         self.pub_setpause.publish(self.p)
