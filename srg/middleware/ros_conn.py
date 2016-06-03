@@ -85,7 +85,7 @@ class ROSPauseConnector(threading.Thread):
         print ">>> Deactivating ROS Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
 
 
-class ROSStatusConnector():
+class ROSStatusConnector:
 
     def __init__(self, _prefix):
         self.prefix     = "/"+str(_prefix.lower().strip())
