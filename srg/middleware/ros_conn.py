@@ -174,28 +174,6 @@ class ROSSetDirectGazeConnector(threading.Thread):
         print ">>> Deactivating ROS Direct Gaze Subscriber to: %s" % self.inscope.strip()
 
 
-class ROSToggleConnector(threading.Thread):
-
-    def __init__(self, _prefix, _inscope ,_subscriber):
-        threading.Thread.__init__(self)
-
-        self.run_toggle = True
-        self.toggle     = False
-        self.inscope    = _inscope
-        self.subscriber = _subscriber
-        self.scope      = "/"+str(_prefix.lower().strip())+"/robotgaze/"+str(_inscope.lower().strip())+"/toggle"
-
-
-
-    def run(self):
-        print ">>> Initializing ROS Toggle Subscriber to: %s" % self.scope
-        toggle_subscriber = rospy.Subscriber(self.inscope, Bool, self.toggle_callback, queue_size=10)
-        while self.run_toggle is True:
-            time.sleep(0.05)
-        toggle_subscriber.unregister()
-        print ">>> Deactivating ROS Pause Subscriber to: %s" % self.scope
-
-
 class ROSDataConnector(threading.Thread):
     """
     The GazeController receives person messages (ROS) and derives
