@@ -57,16 +57,18 @@ class ROSPauseConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
-        self.prefix     = "/"+str(_prefix.lower().strip())
-        self.paused      = _paused
-        self.is_paused  = False
-        self.lock       = _lock
-        self.run_toggle = True
+
+        self.prefix       = "/"+str(_prefix.lower().strip())
+        self.paused       = _paused
+        self.is_paused    = False
+        self.lock         = _lock
+        self.run_toggle   = True
+        self.rate         = rospy.Rate(20)
         self.pub_setpause = rospy.Publisher(self.prefix+"/robotgaze/set/pause", Bool, queue_size=1)
         self.pub_getpause = rospy.Publisher(self.prefix+"/robotgaze/get/pause", Bool, queue_size=1)
+
         self.p = True
         self.r = False
-        self.rate = rospy.Rate(20)
 
     def pause(self):
         self.pub_setpause.publish(self.p)
@@ -101,19 +103,20 @@ class ROSSetDirectGazeConnector(threading.Thread):
 
     def __init__(self, _prefix, _rd):
         threading.Thread.__init__(self)
-        self.run_toggle = True
-        self.robot_driver = _rd
-        self.point_x          = 0.0
-        self.point_y          = 0.0
-        self.point_z          = 0.0
-        self.ready = False
+
+        self.run_toggle      = True
+        self.ready           = False
+        self.robot_driver    = _rd
+        self.point_x         = 0.0
+        self.point_y         = 0.0
+        self.point_z         = 0.0
         self.last_robot_gaze = None
         self.last_time_stamp = time.time()
-        self.prefix = "/"+str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgaze/set/gaze"
+        self.prefix          = "/"+str(_prefix.lower().strip())
+        self.inscope         = self.prefix+"/robotgaze/set/gaze"
 
     def direct_gaze_callback(self, ros_data):
-        send_time = ros_data.header.stamp
+        send_time    = ros_data.header.stamp
         self.point_x = ros_data.point.x
         self.point_y = ros_data.point.y
         self.point_z = ros_data.point.z
@@ -122,7 +125,7 @@ class ROSSetDirectGazeConnector(threading.Thread):
             g = RobotGaze()
             g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             g.gaze_timestamp = RobotTimestamp(send_time.to_sec())
-            g.pan = point[0]
+            g.pan  = point[0]
             g.tilt = point[1]
             g.roll = 0.0
             self.last_robot_gaze = g
@@ -144,12 +147,12 @@ class ROSControlConnector(threading.Thread):
 
     def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
+
         self.run_toggle = True
-        self.ready = False
-        self.lock = _lock
-        self.paused = _paused
-        self.prefix = "/"+str(_prefix.lower().strip())
-        self.inscope = self.prefix+"/robotgaze/set/pause"
+        self.lock       = _lock
+        self.paused     = _paused
+        self.prefix     = "/"+str(_prefix.lower().strip())
+        self.inscope    = self.prefix+"/robotgaze/set/pause"
 
     def control_callback(self, ros_data):
         if ros_data.data is True:
@@ -166,11 +169,38 @@ class ROSControlConnector(threading.Thread):
     def run(self):
         print ">>> Initializing ROS Pause Subscriber to: %s" % self.inscope.strip()
         toggle_subscriber = rospy.Subscriber(self.inscope, Bool, self.control_callback, queue_size=1)
-        self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
         toggle_subscriber.unregister()
         print ">>> Deactivating ROS Pause Subscriber to: %s" % self.inscope.strip()
+
+
+class ROSToggleConnector(threading.Thread):
+
+    def __init__(self, _prefix, _inscope ,_subscriber):
+        threading.Thread.__init__(self)
+
+        self.run_toggle = True
+        self.toggle     = False
+        self.inscope    = _inscope
+        self.subscriber = _subscriber
+        self.scope      = "/"+str(_prefix.lower().strip())+"/robotgaze/"+str(_inscope.lower().strip())+"/toggle"
+
+    def control_callback(self, ros_data):
+        if ros_data.data is True:
+            self.subscriber.unregister()
+            print ">>> Subscriber (ROS) for %s unsubscribed" % self.inscope
+        else:
+
+            print ">>> Subscriber (ROS) for %s re-subscribed" % self.inscope
+
+    def run(self):
+        print ">>> Initializing ROS Toggle Subscriber to: %s" % self.scope
+        toggle_subscriber = rospy.Subscriber(self.inscope, Bool, self.control_callback, queue_size=1)
+        while self.run_toggle is True:
+            time.sleep(0.05)
+        toggle_subscriber.unregister()
+        print ">>> Deactivating ROS Pause Subscriber to: %s" % self.scope
 
 
 class ROSDataConnector(threading.Thread):
@@ -182,14 +212,19 @@ class ROSDataConnector(threading.Thread):
     """
     def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
         threading.Thread.__init__(self)
-        self.lock       = _lock
         self.run_toggle = True
-        self.ready    = False
-        self.trans    = _transform
-        self.inscope  = str(_inscope).lower().strip()
-        self.datatype = str(_datatype).lower().strip()
-        self.mode     = str(_mode).lower().strip()
+        self.ready      = False
+        self.lock       = _lock
+        self.trans      = _transform
+        self.subscriber = None
+        self.mode       = str(_mode).lower().strip()
+        self.inscope    = str(_inscope).lower().strip()
+        self.datatype   = str(_datatype).lower().strip()
+
+        self.current_robot_gaze = None
         self.stimulus_timeout = float(_stimulus_timeout)
+        self.current_robot_gaze_timestamp = None
+
         self.nearest_person_x = 0.0
         self.nearest_person_y = 0.0
         self.nearest_person_z = 0.0
@@ -201,8 +236,6 @@ class ROSDataConnector(threading.Thread):
         self.pan              = 0.0
         self.tilt             = 0.0
         self.roll             = 0.0
-        self.current_robot_gaze = None
-        self.current_robot_gaze_timestamp = None
 
     def people_callback(self, ros_data):
         self.lock.acquire(1)
@@ -212,16 +245,10 @@ class ROSDataConnector(threading.Thread):
         for person in ros_data.people:
             idx += 1
             max_distance[str(idx)] = person.position.z
-        # print ">> Persons found {idx, distance}: ", max_distance
         sort = sorted(max_distance.items(), key=operator.itemgetter(1), reverse=True)
-        # print ">> Nearest Face: ", sort
-        # print ">> Index: ", sort[0][0]
-        # print ">> Distance in pixels: ", sort[0][1]
         self.nearest_person_x = ros_data.people[int(sort[0][0])].position.x
         self.nearest_person_y = ros_data.people[int(sort[0][0])].position.y
         self.nearest_person_z = ros_data.people[int(sort[0][0])].position.z
-        # print ">> Position in pixels x:", self.nearest_person_x
-        # print ">> Position in pixels y:", self.nearest_person_y
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
         angles = self.trans.derive_mapping_coords(point)
@@ -233,16 +260,16 @@ class ROSDataConnector(threading.Thread):
                 g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             self.current_robot_gaze_timestamp = send_time.to_sec()
             g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
-            g.pan = angles[0]
+            g.pan  = angles[0]
             g.tilt = angles[1]
-            g.roll = 0.0
+            g.roll = self.roll
             self.current_robot_gaze = g
         self.lock.release()
         self.honor_stimulus_timeout()
 
     def point_callback(self, ros_data):
         self.lock.acquire(1)
-        send_time = ros_data.header.stamp
+        send_time    = ros_data.header.stamp
         self.point_x = ros_data.point.x
         self.point_y = ros_data.point.y
         self.point_z = ros_data.point.z
@@ -257,9 +284,9 @@ class ROSDataConnector(threading.Thread):
                 g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
             self.current_robot_gaze_timestamp = send_time.to_sec()
             g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
-            g.pan = angles[0]
+            g.pan  = angles[0]
             g.tilt = angles[1]
-            g.roll = 0.0
+            g.roll = self.roll
             self.current_robot_gaze = g
         self.lock.release()
         self.honor_stimulus_timeout()
@@ -278,7 +305,6 @@ class ROSDataConnector(threading.Thread):
             # NOTE: Bart Convention
             self.pan = self.trans.angle_between(vector_z, vector_x, "pan")
             self.tilt = self.trans.angle_between(vector_z, vector_y, "tilt")
-            self.roll = 0.0
             if not math.isnan(self.pan) and not math.isnan(self.tilt):
                 g = RobotGaze()
                 if self.mode == 'absolute':
@@ -314,7 +340,7 @@ class ROSDataConnector(threading.Thread):
             g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
             g.pan = angles[0]
             g.tilt = angles[1]
-            g.roll = 0.0
+            g.roll = self.roll
             self.current_robot_gaze = g
         self.lock.release()
         self.honor_stimulus_timeout()
@@ -326,13 +352,13 @@ class ROSDataConnector(threading.Thread):
         print ">>> Initializing ROS Data Subscriber to: %s" % self.inscope.strip()
         try:
             if self.datatype == "people":
-                ros_subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
+                self.subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=10)
             elif self.datatype == "pointstamped":
-                ros_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
+                self.subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=10)
             elif self.datatype == "markerarray":
-                ros_subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=1)
+                self.subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=10)
             elif self.datatype == "interactivemarkerpose":
-                ros_subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose, self.interactive_marker_callback, queue_size=1)
+                self.subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose, self.interactive_marker_callback, queue_size=10)
             else:
                 print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
                 return
@@ -342,5 +368,5 @@ class ROSDataConnector(threading.Thread):
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
-        ros_subscriber.unregister()
+        self.subscriber.unregister()
         print ">>> Deactivating ROS Data Subscriber to: %s" % self.inscope.strip()
