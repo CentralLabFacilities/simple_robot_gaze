@@ -54,7 +54,9 @@ import numpy as np
 
 
 class ROSPausePublisher(threading.Thread):
-
+    """
+    TODO
+    """
     def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
 
@@ -88,7 +90,9 @@ class ROSPausePublisher(threading.Thread):
 
 
 class ROSPauseControlConnector(threading.Thread):
-
+    """
+    TODO
+    """
     def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
 
@@ -131,7 +135,9 @@ class ROSStatusConnector:
 
 
 class ROSSetDirectGazeConnector(threading.Thread):
-
+    """
+    TODO
+    """
     def __init__(self, _prefix, _rd):
         threading.Thread.__init__(self)
 
@@ -176,10 +182,7 @@ class ROSSetDirectGazeConnector(threading.Thread):
 
 class ROSDataConnector(threading.Thread):
     """
-    The GazeController receives person messages (ROS) and derives
-    the nearest person identified. Based on this, the robot's
-    joint angle target's are derived using the transformation
-    class below
+    TODO
     """
     def __init__(self, _prefix, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
         threading.Thread.__init__(self)
