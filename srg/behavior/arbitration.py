@@ -50,19 +50,19 @@ class Arbitration(threading.Thread):
 
     def __init__(self, _configfile, _outscope):
         threading.Thread.__init__(self)
-        self.lock             = threading.RLock()
-        self.pause_lock       = threading.RLock()
-        self.paused_instance  = Paused()
-        self.cfgfile          = _configfile.strip()
-        self.outscope         = _outscope
-        self.last_info        = time.time()
-        self.transforms       = []
-        self.input_sources    = []
-        self.plugins          = []
-        self.gaze_controller  = []
-        self.overrides        = []
-        self.override_modes   = []
-        self.run_toggle       = True
+        self.lock                 = threading.RLock()
+        self.pause_lock           = threading.RLock()
+        self.paused_instance      = Paused()
+        self.cfgfile              = _configfile.strip()
+        self.outscope             = _outscope
+        self.last_info            = time.time()
+        self.transforms           = []
+        self.input_sources        = []
+        self.plugins              = []
+        self.gaze_controller      = []
+        self.overrides            = []
+        self.override_modes       = []
+        self.run_toggle           = True
         self.is_override          = False
         self.loop_speed           = 0.0
         self.direct_gaze_ros      = None
@@ -113,9 +113,9 @@ class Arbitration(threading.Thread):
         # Start the external control MW Thread
         self.prefix = self.config["scope_topic_prefix"][0]
 
-        self.arbitrate_toggle_ros = r.ROSControlConnector(self.prefix, self.paused_instance, self.pause_lock)
+        self.arbitrate_toggle_ros = r.ROSPauseControlConnector(self.prefix, self.paused_instance, self.pause_lock)
         self.arbitrate_toggle_ros.start()
-        self.pause_info_ros = r.ROSPauseConnector(self.prefix, self.paused_instance, self.pause_lock)
+        self.pause_info_ros = r.ROSPausePublisher(self.prefix, self.paused_instance, self.pause_lock)
         self.pause_info_ros.start()
         self.direct_gaze_ros = r.ROSSetDirectGazeConnector(self.prefix, self.rd)
         self.direct_gaze_ros.start()
@@ -123,6 +123,7 @@ class Arbitration(threading.Thread):
 
         # Is RSB remote control enabled?
         self.rsb_control_enable = int(self.config["enable_rsb_remote_control"][0])
+
         if self.rsb_control_enable is 1:
             from srg.middleware import rsb_conn as s
             self.arbitrate_toggle_rsb = s.RSBControlConnector(self.prefix, self.paused_instance, self.pause_lock)
@@ -147,6 +148,7 @@ class Arbitration(threading.Thread):
             modes      = self.config["modes"][idx]
             stimulus_timeout = self.config["stimulus_timeout"][idx]
             plugin = self.config["control_loop"][idx]
+
             try:
                 if str(plugin).lower() == "open":
                     self.plugins.append(None)
@@ -158,6 +160,7 @@ class Arbitration(threading.Thread):
                 print ">>> Plugin could not be loaded %s" % str(e)
                 self.request_stop()
                 sys.exit(1)
+
             # Check if peak_override is "ON" (1)
             if peak_override is 1:
                 self.allow_peak_override = peak_override
@@ -173,7 +176,7 @@ class Arbitration(threading.Thread):
 
             # Configure Middleware Adapters
             if datatypes[0].lower() == "ros":
-                mw = r.ROSDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
+                mw = r.ROSDataConnector(str(self.prefix), str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             elif datatypes[0].lower() == "rsb":
                 mw = s.RSBDataConnector(str(item), at, datatypes[1], modes, stimulus_timeout, self.lock)
             else:
@@ -364,6 +367,7 @@ class Arbitration(threading.Thread):
     def run(self):
         loop_count = 0
         init_time = time.time()
+
         while self.run_toggle:
             tick = time.time()
             then = time.time()
@@ -392,4 +396,5 @@ class Arbitration(threading.Thread):
                 time.sleep(hz)
 
             loop_count += 1
+
         print ">>> Stopping Arbitration"

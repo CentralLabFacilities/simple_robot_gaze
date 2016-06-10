@@ -53,7 +53,7 @@ from hlrc_client import RobotTimestamp
 import numpy as np
 
 
-class ROSPauseConnector(threading.Thread):
+class ROSPausePublisher(threading.Thread):
 
     def __init__(self, _prefix, _paused, _lock):
         threading.Thread.__init__(self)
@@ -64,8 +64,8 @@ class ROSPauseConnector(threading.Thread):
         self.lock         = _lock
         self.run_toggle   = True
         self.rate         = rospy.Rate(20)
-        self.pub_setpause = rospy.Publisher(self.prefix+"/robotgaze/set/pause", Bool, queue_size=1)
-        self.pub_getpause = rospy.Publisher(self.prefix+"/robotgaze/get/pause", Bool, queue_size=1)
+        self.pub_setpause = rospy.Publisher(self.prefix+"/robotgaze/set/pause", Bool, queue_size=10)
+        self.pub_getpause = rospy.Publisher(self.prefix+"/robotgaze/get/pause", Bool, queue_size=10)
 
         self.p = True
         self.r = False
@@ -87,12 +87,44 @@ class ROSPauseConnector(threading.Thread):
         print ">>> Deactivating ROS Pause Publisher to: %s" % self.prefix+"/robotgaze/get/pause"
 
 
+class ROSPauseControlConnector(threading.Thread):
+
+    def __init__(self, _prefix, _paused, _lock):
+        threading.Thread.__init__(self)
+
+        self.run_toggle = True
+        self.lock       = _lock
+        self.paused     = _paused
+        self.prefix     = "/"+str(_prefix.lower().strip())
+        self.inscope    = self.prefix+"/robotgaze/set/pause"
+
+    def control_callback(self, ros_data):
+        if ros_data.data is True:
+            self.lock.acquire(1)
+            self.paused.set_pause()
+            self.lock.release()
+            print ">>> Auto Arbitrate is PAUSED (ROS)"
+        else:
+            self.lock.acquire(1)
+            self.paused.set_resume()
+            self.lock.release()
+            print ">>> Auto Arbitrate is RESUMED (ROS)"
+
+    def run(self):
+        print ">>> Initializing ROS Pause Subscriber to: %s" % self.inscope.strip()
+        pause_subscriber = rospy.Subscriber(self.inscope, Bool, self.control_callback, queue_size=10)
+        while self.run_toggle is True:
+            time.sleep(0.05)
+        pause_subscriber.unregister()
+        print ">>> Deactivating ROS Pause Subscriber to: %s" % self.inscope.strip()
+
+
 class ROSStatusConnector:
 
     def __init__(self, _prefix):
         self.prefix     = "/"+str(_prefix.lower().strip())
         self.run_toggle = True
-        self.pub_status = rospy.Publisher(self.prefix+"/robotgaze/status", String, queue_size=1)
+        self.pub_status = rospy.Publisher(self.prefix+"/robotgaze/status", String, queue_size=10)
         print ">>> Initializing ROS Status Publisher to: %s" % self.prefix+"/robotgaze/status"
 
     def publish_status_info(self, _status):
@@ -135,44 +167,12 @@ class ROSSetDirectGazeConnector(threading.Thread):
 
     def run(self):
         print ">>> Initializing ROS Direct Gaze Subscriber to: %s" % self.inscope.strip()
-        toggle_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.direct_gaze_callback, queue_size=1)
+        toggle_subscriber = rospy.Subscriber(self.inscope, PointStamped, self.direct_gaze_callback, queue_size=10)
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
         toggle_subscriber.unregister()
         print ">>> Deactivating ROS Direct Gaze Subscriber to: %s" % self.inscope.strip()
-
-
-class ROSControlConnector(threading.Thread):
-
-    def __init__(self, _prefix, _paused, _lock):
-        threading.Thread.__init__(self)
-
-        self.run_toggle = True
-        self.lock       = _lock
-        self.paused     = _paused
-        self.prefix     = "/"+str(_prefix.lower().strip())
-        self.inscope    = self.prefix+"/robotgaze/set/pause"
-
-    def control_callback(self, ros_data):
-        if ros_data.data is True:
-            self.lock.acquire(1)
-            self.paused.set_pause()
-            self.lock.release()
-            print ">>> Auto Arbitrate is PAUSED (ROS)"
-        else:
-            self.lock.acquire(1)
-            self.paused.set_resume()
-            self.lock.release()
-            print ">>> Auto Arbitrate is RESUMED (ROS)"
-
-    def run(self):
-        print ">>> Initializing ROS Pause Subscriber to: %s" % self.inscope.strip()
-        toggle_subscriber = rospy.Subscriber(self.inscope, Bool, self.control_callback, queue_size=1)
-        while self.run_toggle is True:
-            time.sleep(0.05)
-        toggle_subscriber.unregister()
-        print ">>> Deactivating ROS Pause Subscriber to: %s" % self.inscope.strip()
 
 
 class ROSToggleConnector(threading.Thread):
@@ -186,17 +186,17 @@ class ROSToggleConnector(threading.Thread):
         self.subscriber = _subscriber
         self.scope      = "/"+str(_prefix.lower().strip())+"/robotgaze/"+str(_inscope.lower().strip())+"/toggle"
 
-    def control_callback(self, ros_data):
+    def toggle_callback(self, ros_data):
         if ros_data.data is True:
             self.subscriber.unregister()
             print ">>> Subscriber (ROS) for %s unsubscribed" % self.inscope
         else:
-
-            print ">>> Subscriber (ROS) for %s re-subscribed" % self.inscope
+            print ">>> Not implemented" % self.inscope
+            # print ">>> Subscriber (ROS) for %s re-subscribed" % self.inscope
 
     def run(self):
         print ">>> Initializing ROS Toggle Subscriber to: %s" % self.scope
-        toggle_subscriber = rospy.Subscriber(self.inscope, Bool, self.control_callback, queue_size=1)
+        toggle_subscriber = rospy.Subscriber(self.inscope, Bool, self.toggle_callback, queue_size=10)
         while self.run_toggle is True:
             time.sleep(0.05)
         toggle_subscriber.unregister()
@@ -210,19 +210,20 @@ class ROSDataConnector(threading.Thread):
     joint angle target's are derived using the transformation
     class below
     """
-    def __init__(self, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
+    def __init__(self, _prefix, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
         threading.Thread.__init__(self)
         self.run_toggle = True
         self.ready      = False
         self.lock       = _lock
         self.trans      = _transform
         self.subscriber = None
+        self.prefix     = str(_prefix).lower().strip()
         self.mode       = str(_mode).lower().strip()
         self.inscope    = str(_inscope).lower().strip()
         self.datatype   = str(_datatype).lower().strip()
 
         self.current_robot_gaze = None
-        self.stimulus_timeout = float(_stimulus_timeout)
+        self.stimulus_timeout   = float(_stimulus_timeout)
         self.current_robot_gaze_timestamp = None
 
         self.nearest_person_x = 0.0

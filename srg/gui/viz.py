@@ -79,7 +79,7 @@ class Viz(QtGui.QWidget):
         self.input_sources = _input_source
         self.gaze_controller = _gaze_controller
 
-        self.tc = r.ROSPauseConnector(self.arbitration.prefix, self.arbitration.paused_instance,
+        self.tc = r.ROSPausePublisher(self.arbitration.prefix, self.arbitration.paused_instance,
                                       self.arbitration.pause_lock)
         self.is_paused = self.arbitration.paused_instance
         self.run_toggle = True
