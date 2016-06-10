@@ -196,7 +196,7 @@ class ROSDataConnector(threading.Thread):
         self.mode          = str(_mode).lower().strip()
         self.inscope       = str(_inscope).lower().strip()
         self.datatype      = str(_datatype).lower().strip()
-        self.respwanscope  = "/" + str(_prefix.lower().strip()) + "/robotgaze/" + str(_inscope.lower().strip()) + "/toggle"
+        self.respwanscope  = "/" + str(_prefix.lower().strip()) + "/robotgaze" + str(_inscope.lower().strip()) + "/toggle"
 
         self.current_robot_gaze = None
         self.stimulus_timeout   = float(_stimulus_timeout)
