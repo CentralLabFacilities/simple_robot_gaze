@@ -123,7 +123,6 @@ class ROSStatusConnector:
 
     def __init__(self, _prefix):
         self.prefix     = "/"+str(_prefix.lower().strip())
-        self.run_toggle = True
         self.pub_status = rospy.Publisher(self.prefix+"/robotgaze/status", String, queue_size=10)
         print ">>> Initializing ROS Status Publisher to: %s" % self.prefix+"/robotgaze/status"
 
@@ -186,13 +185,7 @@ class ROSToggleConnector(threading.Thread):
         self.subscriber = _subscriber
         self.scope      = "/"+str(_prefix.lower().strip())+"/robotgaze/"+str(_inscope.lower().strip())+"/toggle"
 
-    def toggle_callback(self, ros_data):
-        if ros_data.data is True:
-            self.subscriber.unregister()
-            print ">>> Subscriber (ROS) for %s unsubscribed" % self.inscope
-        else:
-            print ">>> Not implemented" % self.inscope
-            # print ">>> Subscriber (ROS) for %s re-subscribed" % self.inscope
+
 
     def run(self):
         print ">>> Initializing ROS Toggle Subscriber to: %s" % self.scope
@@ -212,15 +205,17 @@ class ROSDataConnector(threading.Thread):
     """
     def __init__(self, _prefix, _inscope, _transform, _datatype, _mode, _stimulus_timeout, _lock):
         threading.Thread.__init__(self)
-        self.run_toggle = True
-        self.ready      = False
-        self.lock       = _lock
-        self.trans      = _transform
-        self.subscriber = None
-        self.prefix     = str(_prefix).lower().strip()
-        self.mode       = str(_mode).lower().strip()
-        self.inscope    = str(_inscope).lower().strip()
-        self.datatype   = str(_datatype).lower().strip()
+        self.run_toggle    = True
+        self.ready         = False
+        self.lock          = _lock
+        self.trans         = _transform
+        self.subscriber    = None
+        self.re_subscriber = None
+        self.prefix        = str(_prefix).lower().strip()
+        self.mode          = str(_mode).lower().strip()
+        self.inscope       = str(_inscope).lower().strip()
+        self.datatype      = str(_datatype).lower().strip()
+        self.respwanscope  = "/" + str(_prefix.lower().strip()) + "/robotgaze/" + str(_inscope.lower().strip()) + "/toggle"
 
         self.current_robot_gaze = None
         self.stimulus_timeout   = float(_stimulus_timeout)
@@ -237,6 +232,35 @@ class ROSDataConnector(threading.Thread):
         self.pan              = 0.0
         self.tilt             = 0.0
         self.roll             = 0.0
+
+    def respawn(self):
+        print ">>> Re-Initializing ROS Data Subscriber to: %s" % self.inscope.strip()
+        try:
+            if self.datatype == "people":
+                self.subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=10)
+            elif self.datatype == "pointstamped":
+                self.subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=10)
+            elif self.datatype == "markerarray":
+                self.subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=10)
+            elif self.datatype == "interactivemarkerpose":
+                self.subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose,
+                                                   self.interactive_marker_callback, queue_size=10)
+            else:
+                print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
+                self.run_toggle = False
+                return
+        except Exception, e:
+            print ">>> ERROR %s" % str(e)
+            self.run_toggle = False
+            return
+
+    def toggle_callback(self, ros_data):
+        if ros_data.data is True:
+            self.subscriber.unregister()
+            print ">>> Subscriber (ROS) for %s unsubscribed" % self.inscope
+        else:
+            print ">>> Re-Subscribing (ROS) to %s " % self.inscope
+            self.respawn()
 
     def people_callback(self, ros_data):
         self.lock.acquire(1)
@@ -366,8 +390,15 @@ class ROSDataConnector(threading.Thread):
         except Exception, e:
             print ">>> ERROR %s" % str(e)
             return
+
+        print ">>> Initializing ROS Respawn Subscriber to: %s" % self.inscope.strip()
+        self.re_subscriber = rospy.Subscriber(self.respwanscope, Bool, self.toggle_callback, queue_size=10)
+
         self.ready = True
         while self.run_toggle is True:
             time.sleep(0.05)
-        self.subscriber.unregister()
         print ">>> Deactivating ROS Data Subscriber to: %s" % self.inscope.strip()
+        print ">>> Deactivating ROS Respawn Subscriber to: %s" % self.inscope.strip()
+        self.subscriber.unregister()
+        self.re_subscriber.unregister()
+
