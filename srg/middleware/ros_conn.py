@@ -255,6 +255,7 @@ class ROSDataConnector(threading.Thread):
         idx = -1
         max_distance = {}
         if len(ros_data.people) <= 0:
+            self.lock.release()
             return
         for person in ros_data.people:
             idx += 1
