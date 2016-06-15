@@ -254,6 +254,8 @@ class ROSDataConnector(threading.Thread):
         send_time = ros_data.header.stamp
         idx = -1
         max_distance = {}
+        if len(ros_data.people) <= 0:
+            return
         for person in ros_data.people:
             idx += 1
             max_distance[str(idx)] = person.position.z
