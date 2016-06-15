@@ -215,7 +215,6 @@ class ROSDataConnector(threading.Thread):
         self.roll             = 0.0
 
     def respawn(self):
-        print ">>> Re-Initializing ROS Data Subscriber to: %s" % self.inscope.strip()
         try:
             if self.datatype == "people":
                 self.subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=10)
@@ -234,10 +233,12 @@ class ROSDataConnector(threading.Thread):
             print ">>> ERROR %s" % str(e)
             self.run_toggle = False
             return
+        print ">>> Re-Initializing ROS Data Subscriber to: %s" % self.inscope.strip()
 
     def toggle_callback(self, ros_data):
         if ros_data.data is True:
             self.subscriber.unregister()
+            self.subscriber = None
             print ">>> Subscriber (ROS) for %s unsubscribed" % self.inscope
         else:
             print ">>> Re-Subscribing (ROS) to %s " % self.inscope
