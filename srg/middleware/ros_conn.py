@@ -238,7 +238,6 @@ class ROSDataConnector(threading.Thread):
     def toggle_callback(self, ros_data):
         if ros_data.data is True:
             self.subscriber.unregister()
-            self.subscriber = None
             print ">>> Subscriber (ROS) for %s unsubscribed" % self.inscope
         else:
             print ">>> Re-Subscribing (ROS) to %s " % self.inscope
