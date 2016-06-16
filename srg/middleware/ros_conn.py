@@ -196,7 +196,7 @@ class ROSDataConnector(threading.Thread):
         self.mode          = str(_mode).lower().strip()
         self.inscope       = str(_inscope).lower().strip()
         self.datatype      = str(_datatype).lower().strip()
-        self.respwanscope  = "/" + str(_prefix.lower().strip()) + "/robotgaze" + str(_inscope.lower().strip()) + "/toggle"
+        self.respwanscope  = "/" + str(_prefix.lower().strip()) + "/robotgaze" + str(_inscope.lower().strip()) + "/subscribe"
 
         self.current_robot_gaze = None
         self.stimulus_timeout   = float(_stimulus_timeout)
@@ -238,7 +238,7 @@ class ROSDataConnector(threading.Thread):
         print ">>> Re-Initializing (ROS) Data Subscriber to: %s" % self.inscope.strip()
 
     def toggle_callback(self, ros_data):
-        if ros_data.data is True:
+        if ros_data.data is False:
             if self.subscriber_count > 0:
                 self.subscriber.unregister()
                 self.subscriber_count -= 1
