@@ -219,11 +219,11 @@ class ROSDataConnector(threading.Thread):
     def respawn(self):
         try:
             if self.datatype == "people":
-                self.subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=10)
+                self.subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
             elif self.datatype == "pointstamped":
-                self.subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=10)
+                self.subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
             elif self.datatype == "markerarray":
-                self.subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=10)
+                self.subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=1)
             elif self.datatype == "interactivemarkerpose":
                 self.subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose,
                                                    self.interactive_marker_callback, queue_size=10)
@@ -367,13 +367,13 @@ class ROSDataConnector(threading.Thread):
         print ">>> Initializing ROS Data Subscriber to: %s" % self.inscope.strip()
         try:
             if self.datatype == "people":
-                self.subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=10)
+                self.subscriber = rospy.Subscriber(self.inscope, People, self.people_callback, queue_size=1)
             elif self.datatype == "pointstamped":
-                self.subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=10)
+                self.subscriber = rospy.Subscriber(self.inscope, PointStamped, self.point_callback, queue_size=1)
             elif self.datatype == "markerarray":
-                self.subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=10)
+                self.subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=1)
             elif self.datatype == "interactivemarkerpose":
-                self.subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose, self.interactive_marker_callback, queue_size=10)
+                self.subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose, self.interactive_marker_callback, queue_size=1)
             else:
                 print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
                 return
