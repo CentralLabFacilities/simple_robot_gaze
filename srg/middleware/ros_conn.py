@@ -226,7 +226,7 @@ class ROSDataConnector(threading.Thread):
                 self.subscriber = rospy.Subscriber(self.inscope, MarkerArray, self.marker_callback, queue_size=1)
             elif self.datatype == "interactivemarkerpose":
                 self.subscriber = rospy.Subscriber(self.inscope, InteractiveMarkerPose,
-                                                   self.interactive_marker_callback, queue_size=10)
+                                                   self.interactive_marker_callback, queue_size=1)
             else:
                 print ">>> ROS Data Subscriber DataType not supported %s" % self.datatype.strip()
                 self.run_toggle = False
@@ -382,7 +382,7 @@ class ROSDataConnector(threading.Thread):
             return
 
         print ">>> Initializing ROS Respawn Subscriber to: %s" % self.inscope.strip()
-        self.re_subscriber = rospy.Subscriber(self.respwanscope, Bool, self.toggle_callback, queue_size=10)
+        self.re_subscriber = rospy.Subscriber(self.respwanscope, Bool, self.toggle_callback, queue_size=5)
 
         self.ready = True
         self.subscriber_count += 1
