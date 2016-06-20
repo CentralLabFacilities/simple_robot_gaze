@@ -284,9 +284,9 @@ class ROSDataConnector(threading.Thread):
                 g.tilt = angles[1]
                 g.roll = self.roll
                 self.current_robot_gaze = g
-        self.last_nearest_person_x = ros_data.people[int(sort[0][0])].position.x
-        self.last_nearest_person_y = ros_data.people[int(sort[0][0])].position.y
-        self.last_nearest_person_z = ros_data.people[int(sort[0][0])].position.z
+        self.last_nearest_person_x = self.nearest_person_x
+        self.last_nearest_person_y = self.nearest_person_y
+        self.last_nearest_person_z = self.nearest_person_z
         self.lock.release()
         self.honor_stimulus_timeout()
 
