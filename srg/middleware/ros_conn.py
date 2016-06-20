@@ -279,9 +279,9 @@ class ROSDataConnector(threading.Thread):
                 g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
             self.current_robot_gaze_timestamp = send_time.to_sec()
             g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
-            g.pan  = angles[0]/4
-            g.tilt = angles[1]/4
-            g.roll = self.roll/4
+            g.pan  = angles[0]
+            g.tilt = angles[1]
+            g.roll = self.roll
             self.current_robot_gaze = g
         self.last_nearest_person_x = self.nearest_person_x
         self.last_nearest_person_y = self.nearest_person_y
