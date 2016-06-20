@@ -270,20 +270,19 @@ class ROSDataConnector(threading.Thread):
         self.nearest_person_z = ros_data.people[int(sort[0][0])].position.z
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
-        if abs(self.nearest_person_x - self.last_nearest_person_x) >= 100 and self.nearest_person_z <= 13000:
-            angles = self.trans.derive_mapping_coords(point)
-            if angles is not None:
-                g = RobotGaze()
-                if self.mode == 'relative':
-                    g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
-                else:
-                    g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
-                self.current_robot_gaze_timestamp = send_time.to_sec()
-                g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
-                g.pan  = angles[0]
-                g.tilt = angles[1]
-                g.roll = self.roll
-                self.current_robot_gaze = g
+        angles = self.trans.derive_mapping_coords(point)
+        if angles is not None:
+            g = RobotGaze()
+            if self.mode == 'relative':
+                g.gaze_type = RobotGaze.GAZETARGET_RELATIVE
+            else:
+                g.gaze_type = RobotGaze.GAZETARGET_ABSOLUTE
+            self.current_robot_gaze_timestamp = send_time.to_sec()
+            g.gaze_timestamp = RobotTimestamp(self.current_robot_gaze_timestamp)
+            g.pan  = angles[0]
+            g.tilt = angles[1]
+            g.roll = self.roll
+            self.current_robot_gaze = g
         self.last_nearest_person_x = self.nearest_person_x
         self.last_nearest_person_y = self.nearest_person_y
         self.last_nearest_person_z = self.nearest_person_z
