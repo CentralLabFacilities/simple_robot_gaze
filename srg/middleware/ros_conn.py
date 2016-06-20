@@ -270,7 +270,7 @@ class ROSDataConnector(threading.Thread):
         self.nearest_person_z = ros_data.people[int(sort[0][0])].position.z
         point = [self.nearest_person_x, self.nearest_person_y]
         # Derive coordinate mapping
-        if abs(self.nearest_person_x - self.last_nearest_person_x) >= 50 and self.nearest_person_z <= 13000:
+        if abs(self.nearest_person_x - self.last_nearest_person_x) >= 100 and self.nearest_person_z <= 13000:
             angles = self.trans.derive_mapping_coords(point)
             if angles is not None:
                 g = RobotGaze()
