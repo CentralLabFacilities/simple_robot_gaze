@@ -35,7 +35,9 @@ import threading
 
 # RSB Specifics
 import rsb
-from rstsandbox.geometry.SphericalDirectionFloat_pb2 import SphericalDirectionFloat
+import rst
+import rstsandbox
+from rst.geometry.SphericalDirectionFloat_pb2 import SphericalDirectionFloat
 from rst.vision.Face_pb2 import Face
 from rst.vision.Faces_pb2 import Faces
 from rst.geometry.BoundingBox_pb2 import BoundingBox
